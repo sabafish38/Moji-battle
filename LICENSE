@@ -1,17 +1,27 @@
-# PolyForm Noncommercial License 1.0.0
+# PolyForm Noncommercial License 1.0.0 (with Streaming Exception)
 
 https://polyformproject.org/licenses/noncommercial/1.0.0
 
 Copyright (c) 2026 keita
 
-## 概要（Japanese Summary）
-本ソフトウェアは非営利目的（個人でのプレイ、学習、研究、非営利の共有など）に限り、誰でも自由に利用・改変・再配布できます。
-販売、有料サービスへの組み込み、広告収益化を目的とした利用など、商用目的での利用は一切禁止されています。
+---
+
+## 日本語概要および特記事項 (Summary & Special Permissions)
+
+### 1. ゲーム実況・動画配信に関する特例許可（Commercial Streaming Permitted）
+本ゲームを用いたYouTube、Twitch、ニコニコ動画等での**プレイ動画投稿、ライブ配信、およびそれに伴う広告収益化・投げ銭（スーパーチャット等）の受け取りは、個人・法人を問わず全面的に許可・歓迎します。** 事前連絡や許諾申請も不要です。
+
+### 2. ソフトウェア本体の取り扱い（Software Restrictions）
+本ゲームのプログラム、ソースコード、アセットの利用は**非営利目的**（個人プレイ、学習、研究、非営利のフォークや共有）に限られます。
+- **禁止事項**: ソフトウェア本体の販売、有料アプリ化、有料サービスへの組み込み、有料パッケージとしての再配布などの商業目的での利用。
 
 ---
 
 ## Purpose
 This license allows you to use, modify, and distribute this software, but only for noncommercial purposes.
+
+## Special Grant for Video Streaming and Content Creation
+Notwithstanding the Noncommercial restriction below, you are explicitly granted permission to broadcast, livestream, create gameplay videos, and publish content featuring gameplay of this software on platforms such as YouTube, Twitch, etc., and to monetize such broadcasts or videos through partner programs, advertising, or viewer donations (tips/superchats).
 
 ## Agreement
 In order to receive this license, you have to agree to its rules. Those rules are conditions of your license. If you do not do what the rules require, you do not receive this license.
@@ -20,7 +30,7 @@ In order to receive this license, you have to agree to its rules. Those rules ar
 You must ensure that everyone who gets a copy of any part of this software from you, with or without changes, also gets the text of this license or a link to https://polyformproject.org/licenses/noncommercial/1.0.0, as well as the copyright notice above.
 
 ## Noncommercial Purposes
-Any noncommercial purpose is permitted. Noncommercial purposes are purposes that are not primarily intended for or directed towards commercial advantage or monetary compensation.
+Any noncommercial purpose is permitted. Noncommercial purposes are purposes that are not primarily intended for or directed towards commercial advantage or monetary compensation, except as expressly permitted under the "Special Grant for Video Streaming and Content Creation".
 
 ## Fair Use
 You may have rights under the law, including fair use, that are not affected by this license. This license does not affect those rights.
