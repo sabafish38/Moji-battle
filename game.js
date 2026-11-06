@@ -3102,6 +3102,27 @@ document.getElementById('buildFromWordBtn')?.addEventListener('click', () => {
   buildMachineFromWord(word);
 });
 
+// Top-Right Quick Add Character Flow
+function triggerAddGlyphFlow() {
+  if (currentBuild.glyphs.length >= MAX_GLYPHS) {
+    showBattleToast('最大5文字のため満杯です（選択中の文字を置換するか削除してください）');
+    return;
+  }
+  activeCraftSubTab = 'input';
+  sfx.playClick();
+  updateCraftUI();
+  setTimeout(() => {
+    const inputEl = document.getElementById('glyphKeyboardInput');
+    if (inputEl) {
+      inputEl.focus();
+      inputEl.select();
+    }
+  }, 50);
+}
+
+document.getElementById('wbAddGlyphBtn')?.addEventListener('click', triggerAddGlyphFlow);
+document.getElementById('boardAddGlyphBtn')?.addEventListener('click', triggerAddGlyphFlow);
+
 // Workbench Toolbar Buttons
 document.getElementById('wbModeEditBtn')?.addEventListener('click', () => {
   workbenchMode = 'edit';
@@ -3109,6 +3130,7 @@ document.getElementById('wbModeEditBtn')?.addEventListener('click', () => {
   document.getElementById('wbModeTestBtn').classList.remove('active');
   document.getElementById('workbenchHint').classList.remove('hidden');
   document.getElementById('testRangeControls').classList.add('hidden');
+  document.getElementById('boardAddGlyphBtn')?.classList.remove('hidden');
   sfx.playClick();
 });
 
@@ -3118,6 +3140,7 @@ document.getElementById('wbModeTestBtn')?.addEventListener('click', () => {
   document.getElementById('wbModeEditBtn').classList.remove('active');
   document.getElementById('workbenchHint').classList.add('hidden');
   document.getElementById('testRangeControls').classList.remove('hidden');
+  document.getElementById('boardAddGlyphBtn')?.classList.add('hidden');
   initTestRange();
   sfx.playClick();
 });
@@ -4617,6 +4640,20 @@ document.getElementById('skillActionBtn')?.addEventListener('click', () => {
 });
 
 window.addEventListener('keydown', evt => {
+  // Backspace or Delete key to delete the selected glyph during crafting
+  if ((evt.key === 'Backspace' || evt.key === 'Delete') && activeView === 'craft') {
+    const activeEl = document.activeElement;
+    const isEditingText = activeEl && (
+      ['INPUT', 'TEXTAREA', 'SELECT'].includes(activeEl.tagName) ||
+      activeEl.isContentEditable
+    );
+    if (!isEditingText && selectedGlyphId !== null) {
+      evt.preventDefault();
+      document.getElementById('deleteGlyphBtn')?.click();
+      return;
+    }
+  }
+
   if (evt.code === 'Space') {
     if (activeView === 'battle' && battleState.phase === 'moving') {
       evt.preventDefault();

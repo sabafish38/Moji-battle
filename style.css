@@ -2644,3 +2644,58 @@ button:active {
     grid-template-columns: 240px minmax(0, 1fr) 210px !important;
   }
 }
+
+
+/* Pinned Top-Right Add Character Button on Craft Board */
+.board-add-glyph-btn {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  z-index: 20;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: var(--apex-red);
+  border: 1.5px solid #ff7b86;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transform: skewX(-8deg);
+  box-shadow: 0 0 16px var(--apex-red-glow), 0 4px 14px rgba(0, 0, 0, 0.7);
+  transition: all 0.12s ease;
+}
+
+.board-add-glyph-btn:hover {
+  background: var(--apex-red-hover);
+  box-shadow: 0 0 24px rgba(235, 45, 58, 0.75), 0 4px 16px rgba(0, 0, 0, 0.8);
+  border-color: #ffffff;
+}
+
+.board-add-glyph-btn:active {
+  transform: skewX(-8deg) translateY(2px) !important;
+}
+
+.board-add-glyph-btn .btn-icon {
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.board-add-glyph-btn.hidden {
+  display: none !important;
+}
+
+.wb-small-btn.accent-add-btn {
+  background: var(--apex-red);
+  border: 1px solid #ff7b86;
+  color: #ffffff;
+  font-weight: 900;
+  box-shadow: 0 0 10px var(--apex-red-glow);
+}
+
+.wb-small-btn.accent-add-btn:hover {
+  background: var(--apex-red-hover);
+  box-shadow: 0 0 16px var(--apex-red-glow);
+}
