@@ -17,10 +17,10 @@
 
       <nav class="main-tabs">
         <button class="nav-tab active" id="tabCraftBtn">
-          CRAFT LAB // 設計室
+          機体設計室
         </button>
         <button class="nav-tab battle-tab-btn" id="tabBattleBtn">
-          DEPLOY // 実戦出撃
+          バトル出撃
         </button>
       </nav>
 
@@ -41,17 +41,17 @@
           <div class="sidebar-tabs glyph-slot-tabs-bar" id="glyphSlotTabsBar">
             <div class="glyph-slot-tabs" id="glyphSlotTabs"></div>
             <button class="sub-tab add-slot-tab-btn" id="tabAddGlyphBtn" title="新しい文字を追加 (最大5文字)">＋</button>
-            <button class="sub-tab config-slot-tab-btn" id="tabConfigBtn" title="機体プリセット・設定">PRESET</button>
+            <button class="sub-tab config-slot-tab-btn" id="tabConfigBtn" title="機体プリセット・設定">完成機体</button>
           </div>
 
           <!-- Sub-Panel 1: Transform, Fine-Tuning & Appearance (PRIMARY DEFAULT VIEW) -->
           <div class="craft-tab-content active no-scrollbar" id="panel-tune">
             <div class="panel-group" id="selectedGlyphHeaderBox">
               <div class="group-header-row">
-                <h3 id="selectedGlyphTitle">INSPECTOR // 選択文字</h3>
+                <h3 id="selectedGlyphTitle">選択中の文字</h3>
                 <div class="header-mini-actions">
                   <button class="mini-action-btn" id="duplicateGlyphBtn" title="選択文字を複製 (5文字まで)">複製</button>
-                  <button class="mini-action-btn" id="mirrorCopyGlyphBtn" title="反対側へ左右対称コピー (5文字まで)">対称</button>
+                  <button class="mini-action-btn" id="mirrorCopyGlyphBtn" title="反対側へ左右対称コピー (5文字まで)">反転複製</button>
                   <button class="text-danger-btn" id="deleteGlyphBtn" title="選択文字を削除">削除</button>
                 </div>
               </div>
@@ -66,7 +66,7 @@
             </div>
 
             <div class="panel-group fine-tune-box" id="fineTuneBox">
-              <h3>TRANSFORM // 変形調整</h3>
+              <h3>サイズ・回転・位置の調整</h3>
               <div class="slider-row">
                 <label>サイズ</label>
                 <input type="range" id="tuneScale" min="50" max="200" value="105" />
@@ -103,8 +103,8 @@
 
             <div class="panel-group">
               <div class="group-header-row">
-                <h3>APPEARANCE // 材質・書体・カラー</h3>
-                <span class="count-pill">TUNING</span>
+                <h3>材質・書体・カラー設定</h3>
+                <span class="count-pill">調整中</span>
               </div>
               
               <!-- Font Style Selector for Selected Character -->
@@ -132,11 +132,11 @@
                 <button class="mat-pill" data-mat="rubber">消しゴム</button>
               </div>
               <div class="color-picker-row">
-                <label>表面メタル色</label>
+                <label>表面の色</label>
                 <input type="color" id="selectedColorInput" value="#38bdf8" />
               </div>
               <div class="color-picker-row">
-                <label>立体側面(厚み)色</label>
+                <label>厚み(側面)の色</label>
                 <input type="color" id="selectedDepthColorInput" value="#0f172a" />
               </div>
             </div>
@@ -146,7 +146,7 @@
           <div class="craft-tab-content no-scrollbar" id="panel-input">
             <div class="panel-group highlight-group">
               <div class="group-header-row">
-                <h3>GLYPH INPUT // キーボード入力</h3>
+                <h3>文字の追加・入力</h3>
                 <span class="count-pill" id="inputPanelCountBadge">5 / 5 文字</span>
               </div>
               <p class="panel-hint">最大5文字まで、すべての文字が互いに接するように合体します</p>
@@ -187,12 +187,12 @@
 
             <!-- Quick Tactical Character Palette -->
             <div class="panel-group">
-              <h3>QUICK PALETTE // クイック文字パレット</h3>
+              <h3>おすすめ文字パレット</h3>
               <div class="palette-category-tabs" id="paletteCategoryTabs">
-                <button class="mini-pill active" data-palcat="attack">BLADE // 鋭角刃</button>
-                <button class="mini-pill" data-palcat="armor">ARMOR // 重装甲</button>
-                <button class="mini-pill" data-palcat="speed">WING // 推進翼</button>
-                <button class="mini-pill" data-palcat="special">FORCE // 属性角</button>
+                <button class="mini-pill active" data-palcat="attack">鋭角・刃物</button>
+                <button class="mini-pill" data-palcat="armor">重装甲・盾</button>
+                <button class="mini-pill" data-palcat="speed">高速・翼</button>
+                <button class="mini-pill" data-palcat="special">特効・属性</button>
               </div>
               <div class="glyph-palette-grid" id="glyphPaletteGrid"></div>
             </div>
@@ -200,8 +200,8 @@
             <!-- Quick Material & Font Selection for New Characters -->
             <div class="panel-group">
               <div class="group-header-row">
-                <h3>MATERIAL // 材質・外装色</h3>
-                <span class="count-pill">REAL METAL</span>
+                <h3>初期の材質・カラー</h3>
+                <span class="count-pill">全9種</span>
               </div>
               
               <!-- Font Style Selector -->
@@ -248,7 +248,7 @@
           <div class="craft-tab-content no-scrollbar" id="panel-config">
             <div class="panel-group">
               <div class="group-header-row">
-                <h3>CHASSIS // 機体識別名</h3>
+                <h3>機体の名前</h3>
                 <button class="mini-action-btn" id="autoCenterAllBtn" title="機体全体の重心を中央に整列">重心整列</button>
               </div>
               <input type="text" id="customEraserNameInput" class="text-input" maxlength="16" value="文字覇王・剣龍号" />
@@ -261,7 +261,7 @@
             </div>
 
             <div class="panel-group">
-              <h3>AUTO FORM // 文字列から自動合体</h3>
+              <h3>好きな言葉から自動合体</h3>
               <p class="panel-hint">好きな言葉（1〜5文字）を入れると、すべての文字が接するフォーメーションに自動合体します！</p>
               <div class="char-input-row">
                 <input type="text" id="wordFormationInput" class="glyph-text-input" maxlength="5" value="超電磁龍神" placeholder="最大5文字" />
@@ -271,8 +271,8 @@
 
             <div class="panel-group">
               <div class="group-header-row">
-                <h3>PRESET UNITS // 定番完成機体</h3>
-                <span class="count-pill">5 PRESETS</span>
+                <h3>おすすめ完成機体</h3>
+                <span class="count-pill">全5機</span>
               </div>
               <div class="item-list" id="presetMachinesList"></div>
             </div>
@@ -289,10 +289,10 @@
           <div class="workbench-toolbar">
             <div class="workbench-mode-switch">
               <button class="wb-mode-btn active" id="wbModeEditBtn">
-                EDITOR // 文字配置エディタ
+                文字の配置・変形
               </button>
               <button class="wb-mode-btn" id="wbModeTestBtn">
-                TEST RANGE // 射撃テスト
+                試し撃ち (テスト)
               </button>
             </div>
 
@@ -314,20 +314,20 @@
 
             <!-- Helper Overlay Instructions -->
             <div class="workbench-overlay-hint" id="workbenchHint">
-              PHYSICS ENGINE: 文字の実際の画数・突起・くぼみに即した精密判定。自由な配置・連結が可能
+              文字の突起やくぼみ・質量を精密判定。ドラッグで自由に連結・配置できます
             </div>
 
             <!-- Test Range Reset Button (only visible in Test Shoot mode) -->
             <div class="test-range-controls hidden" id="testRangeControls">
-              <span>TEST RUN: マウスドラッグで射出方向と威力をテストできます</span>
+              <span>ドラッグして引っ張ると試し撃ちができます（障害物あり）</span>
               <button class="wb-small-btn" id="resetTestDummyBtn">リセット</button>
-              <button class="wb-small-btn accent" id="testFireSkillBtn">[Space] スキル試射</button>
+              <button class="wb-small-btn accent" id="testFireSkillBtn">[Space] 必殺技テスト</button>
             </div>
           </div>
 
           <!-- Saved Custom Slots Bar (Bottom of Workbench) -->
           <div class="saved-builds-bar">
-            <span class="saved-label">SLOT:</span>
+            <span class="saved-label">保存枠:</span>
             <div class="save-slots-group" id="saveSlotsGroup">
               <button class="save-slot-btn active" data-slot="0">1号機</button>
               <button class="save-slot-btn" data-slot="1">2号機</button>
@@ -342,7 +342,7 @@
         <aside class="craft-sidebar right-sidebar no-scrollbar">
           <div class="spec-card">
             <div class="spec-header">
-              <span class="spec-badge">GLYPH SPEC (MAX 5 CHARS)</span>
+              <span class="spec-badge">機体スペック (最大5文字)</span>
               <h2 id="specMachineName">文字覇王・剣龍号</h2>
               <div class="spec-weight-row">
                 <span>総重量: <strong id="specTotalWeight">24.5g</strong></span>
@@ -354,7 +354,7 @@
             <div class="stat-bars-list">
               <div class="stat-item">
                 <div class="stat-label-row">
-                  <span>ATK // 衝撃力</span>
+                  <span>攻撃力 (衝撃)</span>
                   <strong id="statAtkVal">65</strong>
                 </div>
                 <div class="stat-bar-track"><div class="stat-bar-fill atk" id="statAtkBar"></div></div>
@@ -362,7 +362,7 @@
 
               <div class="stat-item">
                 <div class="stat-label-row">
-                  <span>DEF // 耐久力</span>
+                  <span>防御力 (耐性)</span>
                   <strong id="statDefVal">60</strong>
                 </div>
                 <div class="stat-bar-track"><div class="stat-bar-fill def" id="statDefBar"></div></div>
@@ -370,7 +370,7 @@
 
               <div class="stat-item">
                 <div class="stat-label-row">
-                  <span>SPD // 巡航速</span>
+                  <span>スピード (速度)</span>
                   <strong id="statSpdVal">70</strong>
                 </div>
                 <div class="stat-bar-track"><div class="stat-bar-fill spd" id="statSpdBar"></div></div>
@@ -378,7 +378,7 @@
 
               <div class="stat-item">
                 <div class="stat-label-row">
-                  <span>GRIP // 制動力</span>
+                  <span>ブレーキ (摩擦)</span>
                   <strong id="statGripVal">65</strong>
                 </div>
                 <div class="stat-bar-track"><div class="stat-bar-fill grip" id="statGripBar"></div></div>
@@ -386,7 +386,7 @@
 
               <div class="stat-item">
                 <div class="stat-label-row">
-                  <span>SPIN // 旋回力</span>
+                  <span>スピン (旋回)</span>
                   <strong id="statSpinVal">50</strong>
                 </div>
                 <div class="stat-bar-track"><div class="stat-bar-fill spin" id="statSpinBar"></div></div>
@@ -395,18 +395,18 @@
 
             <!-- Equipped Parts Summary & Active Skill -->
             <div class="equipped-summary-box">
-              <h3>ACTIVE SKILL // 必殺アクション</h3>
+              <h3>必殺技</h3>
               <div class="active-skill-card" id="specActiveSkillCard">
                 <div class="skill-card-title" id="specSkillTitle">文字剣・一閃突破</div>
                 <div class="skill-card-desc" id="specSkillDesc">滑走中に鋭い文字ブレードで前方へ高速斬り込み突進を放つ！</div>
               </div>
 
-              <h3>STRUCTURE // 構成文字 (<span id="specCharCountText">5</span>/5・全文字接触OK)</h3>
+              <h3>構成文字パーツ (<span id="specCharCountText">5</span>/5・全文字接触OK)</h3>
               <ul class="equipped-parts-ul" id="equippedPartsSummaryList"></ul>
             </div>
 
             <button class="launch-battle-cta" id="goToBattleFromSpecBtn">
-              DEPLOY // この文字機体でバトル出撃
+              この機体でバトル出撃
             </button>
           </div>
         </aside>
@@ -422,7 +422,7 @@
       <div class="hud-header">
         <!-- Player 1 Card -->
         <div class="player-card p1-card" id="p1Card">
-          <div class="player-badge">1P // PILOT DECK</div>
+          <div class="player-badge">1P (あなた)</div>
           <div class="player-main">
             <div class="player-info">
               <div class="player-name-row">
@@ -471,7 +471,7 @@
 
         <!-- Player 2 / CPU Card -->
         <div class="player-card p2-card" id="p2Card">
-          <div class="player-badge" id="p2Badge">2P // RIVAL UNIT</div>
+          <div class="player-badge" id="p2Badge">2P / CPU</div>
           <div class="player-main">
             <div class="score-stars" id="p2Stars">
               <span class="star"></span><span class="star"></span>
@@ -516,30 +516,30 @@
       <!-- Bottom Battle Controls -->
       <footer class="hud-footer">
         <div class="spin-selector-group">
-          <span class="group-title">SPIN // 回転制御 [1/2/3]:</span>
+          <span class="group-title">スピン回転制御 [1/2/3]:</span>
           <button class="spin-btn" data-spin="top">
             <span class="spin-icon"></span>
-            <div class="spin-text"><strong>DRIVE</strong><small>前方推進・強</small></div>
+            <div class="spin-text"><strong>強前進 (DRIVE)</strong><small>直進推進・突進力UP</small></div>
           </button>
           <button class="spin-btn active" data-spin="normal">
             <span class="spin-icon"></span>
-            <div class="spin-text"><strong>NORMAL</strong><small>標準直進</small></div>
+            <div class="spin-text"><strong>標準 (NORMAL)</strong><small>バランス直進</small></div>
           </button>
           <button class="spin-btn" data-spin="back">
             <span class="spin-icon"></span>
-            <div class="spin-text"><strong>BACK</strong><small>衝突急制動</small></div>
+            <div class="spin-text"><strong>ブレーキ (BACK)</strong><small>衝突時急停止・自滅防止</small></div>
           </button>
         </div>
 
         <div class="utility-btn-group">
           <button class="action-btn" id="undoBattleTurnBtn" title="直前のプレイヤーの手番冒頭まで巻き戻します">
-            UNDO // 1手戻す
+            1手戻す (UNDO)
           </button>
           <button class="action-btn primary-btn" id="backToCraftBtn">
-            LAB // 改造室へ
+            設計室に戻る
           </button>
           <button class="action-btn" id="resetMatchBtn">
-            RESTART // 再戦
+            最初から再戦
           </button>
         </div>
       </footer>
@@ -548,10 +548,10 @@
     <div id="matchResultModal" class="match-result-modal hidden">
       <div class="result-backdrop"></div>
       <div class="result-card">
-        <div class="result-header-tag" id="resultHeaderTag">MATCH TERMINATED</div>
-        <div class="result-main-title" id="resultMainTitle">VICTORY // CHAMPION</div>
+        <div class="result-header-tag" id="resultHeaderTag">試合終了</div>
+        <div class="result-main-title" id="resultMainTitle">完全勝利！</div>
         <div class="result-winner-box">
-          <div class="winner-emblem-badge" id="winnerBadge">1P WINNER</div>
+          <div class="winner-emblem-badge" id="winnerBadge">1P 勝利</div>
           <div class="winner-machine-name" id="resultWinnerName">文字覇王・剣龍号</div>
           <div class="result-score-line" id="resultScoreLine">SCORE: 2 - 0</div>
         </div>
@@ -571,10 +571,10 @@
         </div>
         <div class="result-actions-row">
           <button class="result-btn primary-result-btn" id="resultRematchBtn">
-            REMATCH // もう一度再戦する
+            もう一度対戦する
           </button>
           <button class="result-btn secondary-result-btn" id="resultToCraftBtn">
-            LAB // 文字ラボに戻って改造
+            設計室に戻って改造
           </button>
         </div>
       </div>

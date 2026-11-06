@@ -2641,7 +2641,7 @@ function updateCraftUI(skipLists = false) {
 
   // Fine-Tune Controls for Selected Glyph
   if (sel) {
-    document.getElementById('selectedGlyphTitle').textContent = `INSPECTOR // 『${sel.char}』`;
+    document.getElementById('selectedGlyphTitle').textContent = `選択中: 『${sel.char}』の変形・調整`;
     const editCharInput = document.getElementById('editSelectedCharInput');
     if (document.activeElement !== editCharInput) {
       editCharInput.value = sel.char;
@@ -4533,7 +4533,7 @@ function updateBattleHUD() {
       turnSub.textContent = '相手の文字パーツの角に注意！';
     }
   } else if (battleState.phase === 'moving') {
-    turnInd.textContent = '激突滑走中 // [Space] 必殺技発動可能';
+    turnInd.textContent = '激突滑走中: [Space / 画面タップ] で必殺技発動！';
     turnInd.style.color = '#38bdf8';
   }
 
@@ -4541,13 +4541,13 @@ function updateBattleHUD() {
   const p1StockEl = document.getElementById('p1SkillStock');
   if (p1StockEl) {
     const s1 = u1.skillStock || 0;
-    p1StockEl.textContent = `SKILL ${s1}`;
+    p1StockEl.textContent = `技ストック ${s1}`;
     p1StockEl.classList.toggle('has-stock', s1 > 0);
   }
   const p2StockEl = document.getElementById('p2SkillStock');
   if (p2StockEl) {
     const s2 = u2.skillStock || 0;
-    p2StockEl.textContent = `SKILL ${s2}`;
+    p2StockEl.textContent = `技ストック ${s2}`;
     p2StockEl.classList.toggle('has-stock', s2 > 0);
   }
 
@@ -4555,7 +4555,7 @@ function updateBattleHUD() {
   const activeUnit = battleState.units[battleState.activePlayer - 1];
   const isHumanTurn = battleState.activePlayer === 1 || battleState.mode === 'pvp';
   if (battleState.phase === 'moving' && isHumanTurn && activeUnit && (activeUnit.skillStock || 0) > 0) {
-    document.getElementById('skillBtnTitle').textContent = `${activeUnit.spec.activeSkill.title} [STOCK: ${activeUnit.skillStock}]`;
+    document.getElementById('skillBtnTitle').textContent = `${activeUnit.spec.activeSkill.title} (残り ${activeUnit.skillStock} 回)`;
     skillBtn.classList.remove('hidden');
   } else {
     skillBtn.classList.add('hidden');
@@ -4770,17 +4770,17 @@ function showMatchResultModal(winner, u1, u2) {
 
   const tagEl = document.getElementById('resultHeaderTag');
   if (tagEl) {
-    tagEl.textContent = isP1Win ? 'MATCH COMPLETED // CHAMPION CROWNED' : 'MATCH TERMINATED // DEFEAT';
+    tagEl.textContent = isP1Win ? '決着 // 勝利者決定' : '決着 // 敗北';
   }
 
   const titleEl = document.getElementById('resultMainTitle');
   if (titleEl) {
-    titleEl.textContent = isP1Win ? 'VICTORY // CHAMPION' : 'DEFEAT // ELIMINATED';
+    titleEl.textContent = isP1Win ? '完全勝利 (VICTORY)' : '敗北 (DEFEAT)';
   }
 
   const badgeEl = document.getElementById('winnerBadge');
   if (badgeEl) {
-    badgeEl.textContent = isP1Win ? '1P PILOT VICTORY' : 'CPU RIVAL VICTORY';
+    badgeEl.textContent = isP1Win ? '1P プレイヤー勝利' : '相手機体の勝利';
     badgeEl.style.color = isP1Win ? 'var(--apex-gold)' : 'var(--apex-pink)';
   }
 
@@ -4791,7 +4791,7 @@ function showMatchResultModal(winner, u1, u2) {
 
   const scoreEl = document.getElementById('resultScoreLine');
   if (scoreEl) {
-    scoreEl.textContent = `FINAL SCORE: ${battleState.p1Score} - ${battleState.p2Score}`;
+    scoreEl.textContent = `最終スコア: ${battleState.p1Score} - ${battleState.p2Score}`;
   }
 
   const turnEl = document.getElementById('resultTurnCount');
