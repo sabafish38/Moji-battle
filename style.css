@@ -1,0 +1,2654 @@
+/* ==========================================================================
+   消しバトNeo - ULTRA-REALISTIC TACTICAL MECHA ARENA HUD
+   Reference: Apex Legends (Game UIDatabase ID: 177) Authentic In-Game Aesthetic
+   - Realistic Military Dark Mesh & Carbon-Glass Materials
+   - Iconic -9deg Aggressive Slanted Typography & Chamfer Geometry
+   - Segmented Telemetry Rung Bars & Shield Gauge Cells
+   - Precision 4-Corner L-Brackets & Tech Frame Targeting Reticles
+   - Tactile Hardware Switch States with Inset Metal Bevels
+   ========================================================================== */
+
+:root {
+  /* Apex Deep Tactical Color Palette */
+  --bg-deep: #06080d;             /* Abyss Black Background */
+  --bg-dark: #0a0e16;             /* Matte Carbon Base */
+  --bg-panel: rgba(12, 17, 26, 0.88); /* Frosted Glass HUD Panel */
+  --bg-card: rgba(18, 25, 38, 0.85); /* Tactical Module Base */
+  --bg-card-hover: rgba(28, 38, 56, 0.95);
+  --bg-card-active: rgba(235, 45, 58, 0.16);
+
+  /* Tactical Precision Borders */
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-tech: rgba(255, 255, 255, 0.16);
+  --border-light: rgba(255, 255, 255, 0.28);
+  --border-accent: #eb2d3a;
+  --border-cyan: #00e5ff;
+
+  /* Apex Tri-Color Accent System */
+  --apex-red: #eb2d3a;            /* Apex Vermilion Red (Primary Combat Accent) */
+  --apex-red-hover: #ff3b49;
+  --apex-red-glow: rgba(235, 45, 58, 0.45);
+
+  --apex-cyan: #00e5ff;           /* Tactical Cyan (Shields / Technology / Modifiers) */
+  --apex-cyan-glow: rgba(0, 229, 255, 0.4);
+
+  --apex-gold: #f59e0b;           /* Legendary Gold / Star Rating */
+  --apex-gold-glow: rgba(245, 158, 11, 0.45);
+
+  --apex-green: #10b981;          /* Tactical Safe / Systems Active */
+  --apex-pink: #f43f5e;           /* Hostile / Enemy Beacon */
+
+  /* High-Contrast Typographic Hierarchy */
+  --text-pure: #ffffff;
+  --text-main: #f1f5f9;
+  --text-body: #cbd5e1;
+  --text-muted: #6e7f94;
+  --text-dim: #3d4a5c;
+
+  --font-family-tech: "DIN Next LT Pro", "Segoe UI", -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", sans-serif;
+  --font-family-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+}
+
+/* ================= BASE ENVIRONMENT & CARBON TEXTURE ================= */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+body, html {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--bg-deep);
+  /* Tactical military micro-grid + subtle carbon fiber weave */
+  background-image: 
+    radial-gradient(ellipse at 50% 10%, rgba(0, 229, 255, 0.07) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 90%, rgba(235, 45, 58, 0.06) 0%, transparent 50%),
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 24px 24px, 24px 24px;
+  font-family: var(--font-family-tech);
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+button, input, select, canvas {
+  touch-action: manipulation;
+  font-family: inherit;
+}
+
+button {
+  transition: transform 0.08s ease, background 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+}
+
+button:active {
+  transform: translateY(2px) !important;
+}
+
+.skill-action-btn:active {
+  transform: translateX(-50%) translateY(2px) !important;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  height: 100vh;
+  max-width: 100vw;
+  max-height: 100vh;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Vignette Darkening Overlay */
+#app::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.7);
+  pointer-events: none;
+  z-index: 99;
+}
+
+/* ================= TOP NAVIGATION BAR (AUTHENTIC APEX SKEW TABS) ================= */
+.top-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 50px;
+  min-height: 50px;
+  padding: 0 18px;
+  background: rgba(8, 11, 18, 0.96);
+  border-bottom: 1.5px solid var(--border-tech);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+  z-index: 30;
+  position: relative;
+}
+
+/* Red Tactical Sweep Line */
+.top-nav::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 160px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--apex-red) 0%, rgba(235, 45, 58, 0.4) 80%, transparent 100%);
+  box-shadow: 0 0 8px var(--apex-red);
+}
+
+.brand-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+/* Apex Slanted Red Emblem */
+.logo-badge {
+  background: var(--apex-red);
+  color: #ffffff;
+  font-weight: 900;
+  font-size: 11px;
+  padding: 4px 10px;
+  letter-spacing: 0.14em;
+  transform: skewX(-12deg);
+  box-shadow: 0 0 14px var(--apex-red-glow), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  flex-shrink: 0;
+  border-left: 2px solid #ffffff;
+}
+
+.logo-badge span {
+  display: inline-block;
+  transform: skewX(12deg);
+}
+
+.brand-logo h1 {
+  font-size: 17px;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  color: #ffffff;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.brand-logo h1 small {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+/* Iconic Apex Navigation Tabs */
+.main-tabs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.nav-tab {
+  padding: 8px 22px;
+  background: rgba(18, 24, 35, 0.75);
+  border: 1px solid var(--border-tech);
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transform: skewX(-10deg);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  position: relative;
+}
+
+.nav-tab span, .nav-tab {
+  display: inline-flex;
+  align-items: center;
+}
+
+.nav-tab:hover {
+  background: rgba(30, 41, 60, 0.9);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.nav-tab.active {
+  background: rgba(0, 229, 255, 0.15);
+  border-color: var(--apex-cyan);
+  color: #ffffff;
+  box-shadow: 0 0 16px var(--apex-cyan-glow), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+/* Apex Active Underline Notch */
+.nav-tab.active::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 10%;
+  right: 10%;
+  height: 3px;
+  background: var(--apex-cyan);
+  box-shadow: 0 0 8px var(--apex-cyan);
+}
+
+/* Battle Launch Primary Call-To-Action */
+.battle-tab-btn {
+  background: var(--apex-red);
+  border: 1px solid #ff7b86;
+  color: #ffffff;
+  box-shadow: 0 0 16px var(--apex-red-glow), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.battle-tab-btn:hover {
+  background: var(--apex-red-hover);
+  box-shadow: 0 0 24px rgba(235, 45, 58, 0.7), inset 0 1px 0 #ffffff;
+}
+
+.battle-tab-btn.active {
+  background: #c51824;
+  border-color: #ffffff;
+}
+
+.battle-tab-btn.active::after {
+  background: #ffffff;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+#soundToggleBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: rgba(18, 24, 35, 0.8);
+  border: 1px solid var(--border-tech);
+  color: #cbd5e1;
+  cursor: pointer;
+  transform: skewX(-10deg);
+}
+
+#soundToggleBtn:hover {
+  color: #ffffff;
+  border-color: var(--apex-cyan);
+  box-shadow: 0 0 10px var(--apex-cyan-glow);
+}
+
+#soundToggleBtn svg {
+  transform: skewX(10deg);
+}
+
+/* ================= VIEW SECTIONS ================= */
+.view-section {
+  display: none;
+  flex: 1;
+  width: 100%;
+  height: calc(100vh - 50px);
+  max-height: calc(100vh - 50px);
+  overflow: hidden;
+}
+
+.view-section.active {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ================= CRAFT STUDIO 3-COLUMN LAYOUT ================= */
+.craft-layout {
+  display: grid;
+  grid-template-columns: 315px minmax(0, 1fr) 295px;
+  width: 100%;
+  max-width: 100vw;
+  height: 100%;
+  overflow: hidden;
+  gap: 1px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+@media (max-width: 1200px) {
+  .craft-layout {
+    grid-template-columns: 285px minmax(0, 1fr) 270px;
+  }
+}
+
+.craft-sidebar {
+  background: var(--bg-panel);
+  backdrop-filter: blur(14px);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.left-sidebar {
+  border-right: 1px solid var(--border-subtle);
+}
+
+.right-sidebar {
+  border-left: 1px solid var(--border-subtle);
+  padding: 10px;
+  overflow-y: auto;
+}
+
+/* Dynamic Glyph Slot Tabs Bar */
+.glyph-slot-tabs-bar {
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(8, 11, 17, 0.95);
+  padding: 4px 6px;
+  gap: 4px;
+  border-bottom: 1.5px solid var(--border-tech);
+  flex-shrink: 0;
+  min-height: 44px;
+}
+
+.glyph-slot-tabs {
+  display: flex;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+
+.glyph-slot-tab {
+  flex: 1;
+  min-width: 0;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  background: rgba(18, 25, 38, 0.85);
+  border: 1px solid var(--border-tech);
+  color: #94a3b8;
+  cursor: pointer;
+  transform: skewX(-8deg);
+  transition: all 0.12s ease;
+  position: relative;
+  padding: 0 4px;
+  overflow: hidden;
+}
+
+.glyph-slot-tab .slot-num {
+  font-family: var(--font-family-mono);
+  font-size: 8.5px;
+  font-weight: 800;
+  color: var(--text-muted);
+  transform: skewX(8deg);
+}
+
+.glyph-slot-tab .slot-char {
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  transform: skewX(8deg);
+  text-shadow: 0 0 6px currentColor;
+}
+
+.glyph-slot-tab:hover {
+  background: rgba(28, 38, 56, 0.95);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.glyph-slot-tab.active {
+  background: rgba(0, 229, 255, 0.14);
+  border-color: var(--apex-cyan);
+  border-bottom: 2.5px solid var(--apex-cyan);
+  box-shadow: 0 0 10px var(--apex-cyan-glow);
+}
+
+.glyph-slot-tab.active .slot-num {
+  color: var(--apex-cyan);
+}
+
+/* Add Button (+) */
+.add-slot-tab-btn {
+  width: 32px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--apex-red);
+  border: 1px solid #ff7b86;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 900;
+  cursor: pointer;
+  transform: skewX(-8deg);
+  box-shadow: 0 0 10px var(--apex-red-glow);
+  flex-shrink: 0;
+}
+
+.add-slot-tab-btn:hover {
+  background: var(--apex-red-hover);
+}
+
+.add-slot-tab-btn.disabled {
+  opacity: 0.3;
+  pointer-events: none;
+  background: #141b27;
+  border-color: var(--border-tech);
+  box-shadow: none;
+}
+
+.add-slot-tab-btn.active {
+  background: #b91c1c;
+  border-color: #ffffff;
+  box-shadow: 0 0 14px rgba(255, 255, 255, 0.5);
+}
+
+/* Config / Preset Button */
+.config-slot-tab-btn {
+  padding: 0 8px;
+  height: 34px;
+  background: #121824;
+  border: 1px solid var(--border-tech);
+  color: #cbd5e1;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transform: skewX(-8deg);
+  flex-shrink: 0;
+}
+
+.config-slot-tab-btn:hover {
+  background: #1c2638;
+  color: #ffffff;
+  border-color: var(--apex-cyan);
+}
+
+.config-slot-tab-btn.active {
+  background: rgba(245, 158, 11, 0.18);
+  border-color: var(--apex-gold);
+  border-bottom: 2.5px solid var(--apex-gold);
+  color: var(--apex-gold);
+  box-shadow: 0 0 10px var(--apex-gold-glow);
+}
+
+.craft-tab-content {
+  display: none;
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.craft-tab-content.active {
+  display: flex;
+}
+
+/* ================= ULTRA-REALISTIC TACTICAL BENTO PANELS ================= */
+.panel-group {
+  background: var(--bg-card);
+  border: 1px solid var(--border-tech);
+  padding: 10px 12px;
+  min-width: 0;
+  position: relative;
+  text-align: left;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+/* 4-Corner Precision Tech Targeting Brackets ┌ ┐ └ ┘ */
+.panel-group::before,
+.panel-group::after {
+  content: "";
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  pointer-events: none;
+}
+
+.panel-group::before {
+  top: -1px;
+  left: -1px;
+  border-top: 2px solid var(--apex-cyan);
+  border-left: 2px solid var(--apex-cyan);
+}
+
+.panel-group::after {
+  bottom: -1px;
+  right: -1px;
+  border-bottom: 2px solid var(--apex-cyan);
+  border-right: 2px solid var(--apex-cyan);
+}
+
+.highlight-group {
+  background: linear-gradient(180deg, rgba(235, 45, 58, 0.1) 0%, rgba(18, 25, 38, 0.92) 100%);
+  border-color: rgba(235, 45, 58, 0.4);
+}
+
+.highlight-group::before {
+  border-top-color: var(--apex-red);
+  border-left-color: var(--apex-red);
+}
+
+.highlight-group::after {
+  border-bottom-color: var(--apex-red);
+  border-right-color: var(--apex-red);
+}
+
+/* Apex Slanted Section Titles */
+.panel-group h3 {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.panel-group h3::before {
+  content: "";
+  display: inline-block;
+  width: 3px;
+  height: 10px;
+  background: var(--apex-cyan);
+  transform: skewX(-12deg);
+}
+
+.highlight-group h3 {
+  color: #ff8a93;
+}
+.highlight-group h3::before {
+  background: var(--apex-red);
+}
+
+.panel-hint {
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  line-height: 1.35;
+}
+
+.group-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.count-pill {
+  font-family: var(--font-family-mono);
+  font-size: 10px;
+  font-weight: 900;
+  color: var(--apex-gold);
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  padding: 2px 7px;
+  letter-spacing: 0.08em;
+  transform: skewX(-8deg);
+}
+
+/* ================= CONTROLS & INPUT FIELDS ================= */
+.char-input-row {
+  display: flex;
+  align-items: stretch;
+  gap: 5px;
+  width: 100%;
+}
+
+.glyph-text-input {
+  flex: 1;
+  min-width: 0;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--border-tech);
+  background: #090c13;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  outline: none;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6);
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.glyph-text-input:focus {
+  border-color: var(--apex-cyan);
+  box-shadow: 0 0 10px var(--apex-cyan-glow), inset 0 2px 4px rgba(0, 0, 0, 0.6);
+}
+
+.add-glyph-btn {
+  height: 36px;
+  padding: 0 14px;
+  background: var(--apex-red);
+  border: 1px solid #ff7b86;
+  color: #ffffff;
+  font-size: 11.5px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transform: skewX(-8deg);
+  box-shadow: 0 0 10px var(--apex-red-glow), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  white-space: nowrap;
+}
+
+.add-glyph-btn:hover {
+  background: var(--apex-red-hover);
+}
+
+.replace-glyph-btn {
+  height: 36px;
+  padding: 0 10px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-tech);
+  color: var(--text-body);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transform: skewX(-8deg);
+  white-space: nowrap;
+}
+
+.replace-glyph-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border-color: var(--apex-cyan);
+}
+
+.input-options-row {
+  display: flex;
+  align-items: center;
+  margin-top: 6px;
+}
+
+.checkbox-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #cbd5e1;
+  cursor: pointer;
+}
+
+/* ================= LIVE INSPECTOR PREVIEW CARD ================= */
+.char-live-preview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: rgba(10, 14, 22, 0.95);
+  border: 1px solid var(--border-tech);
+  border-left: 3px solid var(--apex-cyan);
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+  position: relative;
+}
+
+/* Precision Corner Reticle */
+.char-live-preview::after {
+  content: "TARGET LOCK";
+  position: absolute;
+  top: 4px;
+  right: 8px;
+  font-family: var(--font-family-mono);
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  color: var(--text-dim);
+}
+
+.preview-char-box {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  background: #141c2b;
+  border: 1px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 900;
+  color: #ffffff;
+  text-shadow: 0 0 10px var(--apex-cyan-glow);
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.6);
+}
+
+.preview-char-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.preview-char-title {
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  color: #ffffff;
+}
+
+.preview-char-stats {
+  font-family: var(--font-family-mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--apex-cyan);
+}
+
+.preview-char-skill {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--apex-gold);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ================= QUICK TACTICAL PALETTE ================= */
+.palette-category-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 3px;
+  margin-bottom: 6px;
+}
+
+.mini-pill {
+  padding: 6px 2px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  text-align: center;
+  white-space: nowrap;
+  transform: skewX(-6deg);
+}
+
+.mini-pill:hover {
+  background: rgba(255, 255, 255, 0.09);
+  color: #fff;
+}
+
+.mini-pill.active {
+  background: rgba(0, 229, 255, 0.16);
+  border-color: var(--apex-cyan);
+  color: #ffffff;
+  box-shadow: 0 0 8px var(--apex-cyan-glow);
+}
+
+.glyph-palette-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+  max-height: 180px;
+  overflow-y: auto;
+  padding: 3px;
+  background: rgba(8, 11, 16, 0.6);
+  border: 1px solid var(--border-subtle);
+}
+
+.glyph-chip-btn {
+  height: 34px;
+  background: #121824;
+  border: 1px solid var(--border-subtle);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 900;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.glyph-chip-btn:hover {
+  background: rgba(0, 229, 255, 0.25);
+  border-color: var(--apex-cyan);
+  box-shadow: 0 0 10px var(--apex-cyan-glow);
+}
+
+/* Tactical Font & Material Selection */
+.tactical-select-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+  background: rgba(8, 11, 17, 0.75);
+  padding: 5px 8px;
+  border: 1px solid var(--border-subtle);
+}
+
+.tactical-select-row label {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.tactical-select {
+  flex: 1;
+  min-width: 0;
+  background: #0d121c;
+  border: 1px solid var(--border-tech);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 6px;
+  cursor: pointer;
+  outline: none;
+  transform: skewX(-6deg);
+}
+
+.tactical-select:focus {
+  border-color: var(--apex-cyan);
+  box-shadow: 0 0 10px var(--apex-cyan-glow);
+}
+
+/* Material Selection (3-Column Grid for 9 Real Metals & Materials) */
+.material-selector-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.mat-pill {
+  padding: 6px 4px;
+  background: #111722;
+  border: 1px solid var(--border-tech);
+  color: #94a3b8;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  text-align: center;
+  transform: skewX(-6deg);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mat-pill:hover {
+  color: #fff;
+  border-color: var(--border-light);
+  background: #182130;
+}
+
+.mat-pill.active {
+  background: rgba(235, 45, 58, 0.22);
+  border-color: var(--apex-red);
+  color: #ffffff;
+  box-shadow: 0 0 12px var(--apex-red-glow), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.quick-color-swatches {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+}
+
+.color-swatch {
+  height: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  transform: skewX(-6deg);
+}
+
+.color-swatch.active {
+  border-color: #ffffff;
+  box-shadow: 0 0 10px #ffffff;
+  transform: scale(1.1);
+}
+
+/* ================= FINE TUNE & ACTIONS ================= */
+.header-mini-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.mini-action-btn {
+  background: #141b27;
+  border: 1px solid var(--border-tech);
+  color: #cbd5e1;
+  font-size: 10.5px;
+  font-weight: 800;
+  padding: 4px 8px;
+  cursor: pointer;
+  transform: skewX(-6deg);
+  white-space: nowrap;
+}
+
+.mini-action-btn:hover {
+  background: #202b3d;
+  color: #ffffff;
+  border-color: var(--apex-cyan);
+}
+
+.text-danger-btn {
+  background: rgba(235, 45, 58, 0.18);
+  border: 1px solid var(--apex-red);
+  color: #ff9da4;
+  font-size: 10.5px;
+  font-weight: 800;
+  padding: 4px 8px;
+  cursor: pointer;
+  transform: skewX(-6deg);
+  white-space: nowrap;
+}
+
+.text-danger-btn:hover {
+  background: var(--apex-red);
+  color: #ffffff;
+}
+
+.selected-char-edit-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: 11px;
+}
+
+.small-char-input {
+  width: 38px;
+  height: 28px;
+  text-align: center;
+  background: #090c13;
+  border: 1px solid var(--border-tech);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 900;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.slider-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 11px;
+  color: #cbd5e1;
+  margin: 5px 0;
+}
+
+.slider-row label {
+  width: 80px;
+  font-size: 10.5px;
+  font-weight: 800;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.slider-row input[type="range"] {
+  flex: 1;
+  accent-color: var(--apex-red);
+  cursor: pointer;
+}
+
+.slider-row span {
+  width: 44px;
+  text-align: right;
+  font-family: var(--font-family-mono);
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--apex-cyan);
+}
+
+.quick-angle-btns {
+  display: flex;
+  gap: 4px;
+  margin: 5px 0 8px 0;
+  flex-wrap: wrap;
+}
+
+.quick-angle-btns .mini-pill {
+  flex: 1;
+  font-size: 10px;
+  padding: 5px 4px;
+}
+
+/* Preset Cards (Apex Inventory Style) */
+.item-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.item-card {
+  display: flex;
+  flex-direction: column;
+  background: rgba(16, 22, 33, 0.9);
+  border: 1px solid var(--border-tech);
+  border-left: 3px solid var(--border-light);
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.item-card:hover {
+  background: #1c2638;
+  border-color: var(--border-light);
+  border-left-color: var(--apex-cyan);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+}
+
+.item-card.active {
+  background: rgba(0, 229, 255, 0.12);
+  border-color: var(--apex-cyan);
+  border-left: 4px solid var(--apex-cyan);
+  box-shadow: 0 0 14px var(--apex-cyan-glow);
+}
+
+.item-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 2px;
+}
+
+.item-name {
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  color: #ffffff;
+}
+
+.item-badge {
+  font-family: var(--font-family-mono);
+  font-size: 9.5px;
+  font-weight: 800;
+  color: var(--apex-gold);
+  background: rgba(245, 158, 11, 0.14);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  padding: 1px 6px;
+  letter-spacing: 0.06em;
+  transform: skewX(-6deg);
+}
+
+.item-desc {
+  font-size: 10px;
+  color: var(--text-muted);
+  line-height: 1.35;
+  margin-bottom: 4px;
+}
+
+.item-stats-mini {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  font-family: var(--font-family-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--apex-cyan);
+}
+
+.item-stats-mini span {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 1px 6px;
+}
+
+/* Layer Items in Left Sidebar Tab 3 */
+.glyph-layer-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(16, 22, 33, 0.9);
+  border: 1px solid var(--border-tech);
+  border-left: 3px solid var(--border-light);
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.glyph-layer-item:hover {
+  background: #1c2638;
+  border-left-color: var(--apex-cyan);
+}
+
+.glyph-layer-item.active {
+  background: rgba(0, 229, 255, 0.12);
+  border-color: var(--apex-cyan);
+  border-left-color: var(--apex-cyan);
+}
+
+.glyph-layer-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+}
+
+.glyph-layer-char {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  background: #0b0f17;
+  border: 1px solid var(--border-tech);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 900;
+  text-shadow: 0 0 8px currentColor;
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.6);
+}
+
+.glyph-layer-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.glyph-layer-meta strong {
+  font-size: 11px;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: 0.04em;
+}
+
+.glyph-layer-meta span {
+  font-family: var(--font-family-mono);
+  font-size: 9.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.text-input {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid var(--border-tech);
+  background: #090c13;
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 800;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.text-input:focus {
+  border-color: var(--apex-cyan);
+  box-shadow: 0 0 10px var(--apex-cyan-glow);
+}
+
+.color-picker-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 6px;
+  font-size: 11px;
+  color: #cbd5e1;
+}
+
+.color-picker-row input[type="color"] {
+  width: 48px;
+  height: 24px;
+  border: 1px solid var(--border-tech);
+  background: transparent;
+  cursor: pointer;
+}
+
+/* ================= CENTER WORKBENCH (REAL HOLOGRAM & BLUEPRINT DOCK) ================= */
+.craft-workbench-area {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-width: 0;
+  background: #06090f;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Toolbar */
+.workbench-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: rgba(10, 14, 23, 0.96);
+  border-bottom: 1.5px solid var(--border-tech);
+  flex-shrink: 0;
+  gap: 8px;
+  z-index: 10;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+}
+
+.workbench-mode-switch {
+  display: flex;
+  gap: 4px;
+}
+
+.wb-mode-btn {
+  padding: 7px 16px;
+  background: #111724;
+  border: 1px solid var(--border-tech);
+  color: #94a3b8;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transform: skewX(-8deg);
+  white-space: nowrap;
+}
+
+.wb-mode-btn:hover {
+  color: #fff;
+  background: #1b2436;
+}
+
+.wb-mode-btn.active {
+  background: var(--apex-red);
+  border-color: #ff7b86;
+  color: #ffffff;
+  box-shadow: 0 0 14px var(--apex-red-glow), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.workbench-quick-actions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.wb-small-btn {
+  padding: 5px 12px;
+  background: #121824;
+  border: 1px solid var(--border-tech);
+  color: #cbd5e1;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transform: skewX(-6deg);
+  white-space: nowrap;
+}
+
+.wb-small-btn:hover {
+  background: #1e283b;
+  color: #ffffff;
+  border-color: var(--apex-cyan);
+}
+
+.wb-small-btn.accent {
+  background: rgba(245, 158, 11, 0.16);
+  border-color: var(--apex-gold);
+  color: var(--apex-gold);
+}
+
+.workbench-canvas-wrap {
+  flex: 1;
+  position: relative;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  /* Authentic Precision Cutting Mat & Coordinate Grid */
+  background-color: #070a10;
+  background-image: 
+    radial-gradient(circle at center, rgba(0, 229, 255, 0.05) 0%, transparent 70%),
+    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 100% 100%, 32px 32px, 32px 32px;
+}
+
+#craftCanvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+}
+
+#craftCanvas:active {
+  cursor: grabbing;
+}
+
+/* Minimalist HUD Overlay Status Line */
+.workbench-overlay-hint {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 94%;
+  background: rgba(8, 12, 19, 0.94);
+  border: 1px solid var(--border-tech);
+  border-left: 3px solid var(--apex-cyan);
+  padding: 6px 16px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #cbd5e1;
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: 0.04em;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+}
+
+.test-range-controls {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 96%;
+  background: rgba(9, 13, 21, 0.96);
+  border: 1px solid var(--apex-green);
+  padding: 7px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #f1f5f9;
+  white-space: nowrap;
+  overflow: hidden;
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+}
+
+/* Saved Slots Bar (Bottom of Workbench) */
+.saved-builds-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(9, 12, 19, 0.98);
+  border-top: 1.5px solid var(--border-tech);
+  min-width: 0;
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.saved-label {
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.save-slots-group {
+  display: flex;
+  flex: 1;
+  gap: 6px;
+  min-width: 0;
+}
+
+.save-slot-btn {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 8px;
+  border: 1px solid var(--border-tech);
+  background: #111724;
+  color: #94a3b8;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transform: skewX(-8deg);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.save-slot-btn:hover {
+  color: #fff;
+  border-color: var(--text-body);
+}
+
+.save-slot-btn.active {
+  background: rgba(235, 45, 58, 0.18);
+  border-color: var(--apex-red);
+  color: #ffffff;
+  box-shadow: 0 0 12px var(--apex-red-glow), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+/* ================= RIGHT SIDEBAR: AUTHENTIC APEX SPEC ANALYZER ================= */
+.spec-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: 100%;
+  min-width: 0;
+}
+
+.spec-header {
+  background: var(--bg-card);
+  border: 1px solid var(--border-tech);
+  border-top: 3px solid var(--apex-red);
+  padding: 10px 14px;
+  flex-shrink: 0;
+  position: relative;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+/* Corner Reticle */
+.spec-header::after {
+  content: "SYS.VER 2.4";
+  position: absolute;
+  top: 6px;
+  right: 10px;
+  font-family: var(--font-family-mono);
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+}
+
+.spec-badge {
+  font-family: var(--font-family-mono);
+  font-size: 9.5px;
+  font-weight: 900;
+  color: var(--apex-cyan);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.spec-header h2 {
+  font-size: 19px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  margin: 2px 0 6px;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.spec-weight-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-muted);
+  gap: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.spec-weight-row strong {
+  color: var(--apex-gold);
+  font-family: var(--font-family-mono);
+  font-size: 12.5px;
+  font-weight: 900;
+}
+
+/* ================= SEGMENTED TICKER PERFORMANCE BARS ================= */
+.stat-bars-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-tech);
+  padding: 12px 14px;
+  flex-shrink: 0;
+  position: relative;
+}
+
+/* Precision Corner L-Brackets */
+.stat-bars-list::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  width: 6px;
+  height: 6px;
+  border-top: 2px solid var(--border-light);
+  border-left: 2px solid var(--border-light);
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.stat-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.stat-label-row span {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* Massive Jump Rate Telemetry Numerals */
+.stat-label-row strong {
+  font-family: var(--font-family-mono);
+  font-size: 15px;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: 0.04em;
+}
+
+/* Segmented Hardware Rung Track (Etched Rungs) */
+.stat-bar-track {
+  height: 7px;
+  background: #080b11;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+  position: relative;
+  /* Segmented Rung Dividers (10 Ticks) */
+  background-image: repeating-linear-gradient(90deg, transparent 0, transparent 9%, rgba(0, 0, 0, 0.7) 9%, rgba(0, 0, 0, 0.7) 10%);
+}
+
+.stat-bar-fill {
+  height: 100%;
+  transition: width 0.25s ease;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.stat-bar-fill.atk { background: linear-gradient(90deg, #ea580c, var(--apex-red)); }
+.stat-bar-fill.def { background: linear-gradient(90deg, #0284c7, var(--apex-cyan)); }
+.stat-bar-fill.spd { background: linear-gradient(90deg, #059669, var(--apex-green)); }
+.stat-bar-fill.grip { background: linear-gradient(90deg, #7c3aed, #c084fc); }
+.stat-bar-fill.spin { background: linear-gradient(90deg, #d97706, #fbbf24); }
+
+/* Equipped Summary Box */
+.equipped-summary-box {
+  flex: 1;
+  min-height: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-tech);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+}
+
+.equipped-summary-box h3 {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.equipped-summary-box h3::before {
+  content: "";
+  display: inline-block;
+  width: 3px;
+  height: 10px;
+  background: var(--apex-gold);
+  transform: skewX(-12deg);
+}
+
+.active-skill-card {
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-left: 3px solid var(--apex-gold);
+  padding: 8px 10px;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.skill-card-title {
+  font-size: 12px;
+  font-weight: 900;
+  color: var(--apex-gold);
+  letter-spacing: 0.05em;
+}
+
+.skill-card-desc {
+  font-size: 10px;
+  color: #cbd5e1;
+  margin-top: 3px;
+  line-height: 1.35;
+}
+
+.equipped-parts-ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.equipped-part-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #101622;
+  padding: 5px 8px;
+  border: 1px solid var(--border-subtle);
+}
+
+.slot-badge {
+  background: #1b2434;
+  border: 1px solid var(--border-tech);
+  color: var(--apex-cyan);
+  font-family: var(--font-family-mono);
+  font-size: 10.5px;
+  font-weight: 900;
+  padding: 1px 6px;
+  flex-shrink: 0;
+  transform: skewX(-6deg);
+}
+
+.part-title {
+  flex: 1;
+  margin-left: 8px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #f1f5f9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.part-weight {
+  font-family: var(--font-family-mono);
+  font-size: 10.5px;
+  font-weight: 800;
+  color: var(--apex-gold);
+  flex-shrink: 0;
+}
+
+/* Massive Launch Button */
+.launch-battle-cta {
+  padding: 13px 16px;
+  background: var(--apex-red);
+  border: 1px solid #ff7b86;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 4px 20px var(--apex-red-glow), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  transform: skewX(-10deg);
+  flex-shrink: 0;
+  text-align: center;
+  border-left: 4px solid #ffffff;
+}
+
+.launch-battle-cta:hover {
+  background: var(--apex-red-hover);
+  box-shadow: 0 0 28px rgba(235, 45, 58, 0.7), inset 0 1px 0 #ffffff;
+}
+
+/* ================= BATTLE VIEW HUD (AUTHENTIC SQUAD TELEMETRY) ================= */
+.hud-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 18px;
+  background: rgba(8, 11, 18, 0.98);
+  border-bottom: 1.5px solid var(--border-tech);
+  gap: 12px;
+  height: 70px;
+  flex-shrink: 0;
+  position: relative;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+}
+
+/* Player Telemetry Card */
+.player-card {
+  display: flex;
+  flex-direction: column;
+  background: rgba(16, 22, 33, 0.92);
+  border: 1px solid var(--border-tech);
+  padding: 6px 14px;
+  min-width: 270px;
+  max-width: 350px;
+  position: relative;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+}
+
+.p1-card {
+  border-left: 4px solid var(--apex-red);
+}
+
+.p2-card {
+  border-right: 4px solid var(--apex-pink);
+}
+
+.p1-card.active-turn {
+  border-color: var(--apex-red);
+  box-shadow: 0 0 20px var(--apex-red-glow);
+}
+
+.p2-card.active-turn {
+  border-color: var(--apex-pink);
+  box-shadow: 0 0 20px rgba(244, 63, 94, 0.45);
+}
+
+.player-badge {
+  font-size: 9.5px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.p2-card .player-badge {
+  text-align: right;
+}
+
+.player-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.player-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.player-info.right-align {
+  align-items: flex-end;
+}
+
+.player-name-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  max-width: 100%;
+}
+
+.player-name {
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.part-tag {
+  font-family: var(--font-family-mono);
+  font-size: 10.5px;
+  font-weight: 900;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--apex-gold);
+  padding: 1px 7px;
+  white-space: nowrap;
+  transform: skewX(-6deg);
+}
+
+.stability-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.bar-label {
+  font-size: 9.5px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* Segmented Shield/Stability Gauge */
+.stability-bar-bg {
+  flex: 1;
+  height: 8px;
+  background: #080a10;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  overflow: hidden;
+  position: relative;
+  background-image: repeating-linear-gradient(90deg, transparent 0, transparent 9%, rgba(0, 0, 0, 0.8) 9%, rgba(0, 0, 0, 0.8) 10%);
+}
+
+.stability-bar-fill {
+  height: 100%;
+  transition: width 0.25s;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.stability-bar-fill.p1-fill {
+  background: linear-gradient(90deg, #10b981, #f59e0b, var(--apex-red));
+}
+
+.stability-bar-fill.p2-fill {
+  background: linear-gradient(90deg, #10b981, #f59e0b, var(--apex-pink));
+}
+
+.damage-pct {
+  font-family: var(--font-family-mono);
+  font-size: 13px;
+  font-weight: 900;
+  color: var(--apex-gold);
+}
+
+/* Apex Round Win Indicators (Horizontal Segmented Blocks) */
+.score-stars {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.score-stars .star {
+  display: inline-block;
+  width: 16px;
+  height: 7px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  transform: skewX(-12deg);
+  transition: all 0.25s ease;
+}
+
+.score-stars .star.won {
+  background: var(--apex-gold);
+  border-color: #fde68a;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.9), inset 0 1px 0 #ffffff;
+}
+
+/* Center Tactical Status */
+.turn-status-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.battle-quick-settings {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 2px;
+}
+
+.HudSelect {
+  background: #111724;
+  border: 1px solid var(--border-tech);
+  color: #cbd5e1;
+  font-size: 10.5px;
+  font-weight: 800;
+  padding: 2px 8px;
+  cursor: pointer;
+  outline: none;
+  transform: skewX(-6deg);
+}
+
+.HudSelect:focus {
+  border-color: var(--apex-cyan);
+}
+
+.turn-indicator {
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #ffffff;
+  text-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
+}
+
+.turn-subhint {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+}
+
+/* ================= ARENA CONTAINER & CONTROLS ================= */
+.arena-container {
+  flex: 1;
+  position: relative;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #07090e;
+}
+
+#gameCanvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: crosshair;
+}
+
+/* Active Skill Floating Button */
+.skill-action-btn {
+  position: absolute;
+  bottom: 64px;
+  left: 50%;
+  transform: translateX(-50%) skewX(-8deg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 28px;
+  background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+  border: 1.5px solid #fed7aa;
+  color: #ffffff;
+  cursor: pointer;
+  box-shadow: 0 0 24px rgba(245, 158, 11, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  z-index: 20;
+}
+
+.skill-action-btn.disabled {
+  opacity: 0.35;
+  pointer-events: none;
+  filter: grayscale(1);
+}
+
+.skill-key-hint {
+  font-size: 9.5px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.skill-btn-title {
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  color: #ffffff;
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
+}
+
+/* Center Full-screen Banner (Apex Champion Banner Splash) */
+.center-banner {
+  position: absolute;
+  top: 45%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(90deg, transparent 0%, rgba(8, 11, 18, 0.98) 20%, rgba(8, 11, 18, 0.98) 80%, transparent 100%);
+  border-top: 3px solid var(--apex-red);
+  border-bottom: 3px solid var(--apex-red);
+  padding: 18px 60px;
+  z-index: 40;
+  pointer-events: none;
+  animation: bannerPop 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 0 40px rgba(235, 45, 58, 0.35);
+}
+
+@keyframes bannerPop {
+  0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+.banner-sub {
+  font-family: var(--font-family-mono);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--apex-cyan);
+  margin-bottom: 2px;
+}
+
+.banner-main {
+  font-size: 36px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #ffffff;
+  text-shadow: 0 0 24px var(--apex-red-glow);
+  transform: skewX(-6deg);
+}
+
+.banner-desc {
+  font-size: 11.5px;
+  font-weight: 800;
+  color: var(--text-body);
+  margin-top: 4px;
+  letter-spacing: 0.06em;
+}
+
+/* Battle Footer Bar */
+.hud-footer {
+  height: 50px;
+  min-height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 18px;
+  background: rgba(8, 11, 18, 0.98);
+  border-top: 1.5px solid var(--border-tech);
+  flex-shrink: 0;
+  z-index: 20;
+  box-shadow: 0 -4px 14px rgba(0, 0, 0, 0.5);
+}
+
+.group-title {
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.spin-selector-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.spin-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  background: #111724;
+  border: 1px solid var(--border-tech);
+  color: #94a3b8;
+  cursor: pointer;
+  transform: skewX(-8deg);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.spin-btn:hover {
+  background: #1c2538;
+  color: #ffffff;
+}
+
+.spin-btn.active {
+  background: rgba(0, 229, 255, 0.18);
+  border-color: var(--apex-cyan);
+  color: #ffffff;
+  box-shadow: 0 0 12px var(--apex-cyan-glow), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.spin-text {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  line-height: 1.1;
+}
+
+.spin-text strong {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
+.spin-text small {
+  font-size: 8.5px;
+  color: var(--text-muted);
+}
+
+.utility-btn-group {
+  display: flex;
+  gap: 6px;
+}
+
+.action-btn {
+  padding: 7px 14px;
+  background: #121824;
+  border: 1px solid var(--border-tech);
+  color: #cbd5e1;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transform: skewX(-8deg);
+  white-space: nowrap;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.action-btn:hover {
+  background: #1e283b;
+  color: #ffffff;
+  border-color: var(--apex-cyan);
+}
+
+.primary-btn {
+  background: var(--apex-red);
+  border-color: #ff7b86;
+  color: #ffffff;
+  box-shadow: 0 0 12px var(--apex-red-glow), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.primary-btn:hover {
+  background: var(--apex-red-hover);
+}
+
+/* Toast Notification */
+.battle-toast {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%) skewX(-6deg);
+  background: rgba(8, 12, 19, 0.96);
+  border: 1px solid var(--apex-red);
+  color: #ffffff;
+  padding: 9px 22px;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  pointer-events: none;
+  box-shadow: 0 0 24px var(--apex-red-glow);
+  z-index: 50;
+  transition: opacity 0.3s ease;
+}
+
+.battle-toast.hidden {
+  opacity: 0;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: rgba(18, 24, 35, 0.8);
+  border: 1px solid var(--border-tech);
+  color: #cbd5e1;
+  cursor: pointer;
+  transform: skewX(-10deg);
+}
+
+.part-slot-tag {
+  font-family: var(--font-family-mono);
+  font-size: 9.5px;
+  font-weight: 800;
+  color: var(--apex-cyan);
+  background: rgba(0, 229, 255, 0.1);
+  padding: 1px 5px;
+  border: 1px solid rgba(0, 229, 255, 0.2);
+}
+
+/* ==========================================================================
+   MATCH END RESULT MODAL (APEX LEGENDS CHAMPION OVERLAY AESTHETIC)
+   ========================================================================== */
+.match-result-modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 16px;
+}
+
+.result-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(4, 6, 10, 0.88);
+  backdrop-filter: blur(8px);
+}
+
+.result-card {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  background: rgba(12, 17, 26, 0.98);
+  border: 1.5px solid var(--border-tech);
+  border-top: 4px solid var(--apex-red);
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.8), 0 0 30px var(--apex-red-glow);
+  transform: skewX(-8deg);
+  animation: resultModalSlide 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes resultModalSlide {
+  0% { transform: translateY(40px) skewX(-8deg) scale(0.92); opacity: 0; }
+  100% { transform: translateY(0) skewX(-8deg) scale(1); opacity: 1; }
+}
+
+/* Precision Corner Reticle Brackets */
+.result-card::before,
+.result-card::after {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  pointer-events: none;
+}
+
+.result-card::before {
+  top: -2px;
+  left: -2px;
+  border-top: 2px solid #ffffff;
+  border-left: 2px solid #ffffff;
+}
+
+.result-card::after {
+  bottom: -2px;
+  right: -2px;
+  border-bottom: 2px solid var(--apex-cyan);
+  border-right: 2px solid var(--apex-cyan);
+}
+
+.result-header-tag {
+  font-family: var(--font-family-mono);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--apex-cyan);
+}
+
+.result-main-title {
+  font-size: 32px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #ffffff;
+  text-shadow: 0 0 20px var(--apex-red-glow);
+  line-height: 1.1;
+}
+
+.result-card.is-defeat {
+  border-top-color: var(--apex-pink);
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(244, 63, 94, 0.4);
+}
+.result-card.is-defeat .result-main-title {
+  color: #fda4af;
+  text-shadow: 0 0 20px rgba(244, 63, 94, 0.6);
+}
+
+.result-winner-box {
+  background: rgba(18, 25, 38, 0.95);
+  border: 1px solid var(--border-tech);
+  border-left: 4px solid var(--apex-gold);
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.winner-emblem-badge {
+  font-family: var(--font-family-mono);
+  font-size: 9.5px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  color: var(--apex-gold);
+  text-transform: uppercase;
+}
+
+.winner-machine-name {
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  color: #ffffff;
+}
+
+.result-score-line {
+  font-family: var(--font-family-mono);
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  color: var(--apex-cyan);
+}
+
+.result-telemetry-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.telemetry-item {
+  background: #090c13;
+  border: 1px solid var(--border-subtle);
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.telemetry-label {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.telemetry-item strong {
+  font-family: var(--font-family-mono);
+  font-size: 11px;
+  font-weight: 900;
+  color: #f1f5f9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.result-actions-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.result-btn {
+  flex: 1;
+  padding: 12px 14px;
+  font-size: 12.5px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  white-space: nowrap;
+  text-align: center;
+  transition: all 0.15s ease;
+}
+
+.primary-result-btn {
+  background: var(--apex-red);
+  border: 1px solid #ff7b86;
+  color: #ffffff;
+  box-shadow: 0 0 16px var(--apex-red-glow), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.primary-result-btn:hover {
+  background: var(--apex-red-hover);
+  box-shadow: 0 0 24px rgba(235, 45, 58, 0.7);
+}
+
+.secondary-result-btn {
+  background: #151b27;
+  border: 1px solid var(--border-tech);
+  color: #cbd5e1;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.secondary-result-btn:hover {
+  background: #202a3d;
+  color: #ffffff;
+  border-color: var(--apex-cyan);
+}
+
+/* Special Skill Stock Badge */
+.skill-stock-pill {
+  font-family: var(--font-apex);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  padding: 1px 7px;
+  border-radius: 2px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: var(--apex-subtext);
+  white-space: nowrap;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.skill-stock-pill.has-stock {
+  border-color: #f59e0b;
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.16);
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.32);
+}
+
+/* ==========================================================================
+   MOBILE & TABLET LANDSCAPE VIEWPORT ADAPTATION (スマホ横画面・最適化)
+   ========================================================================== */
+@media (orientation: landscape) and (max-height: 540px) {
+  /* Dynamic viewport height and safe-area insets */
+  #app {
+    height: 100vh;
+    height: 100dvh;
+    max-height: 100dvh;
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+
+  /* Compact Top Navigation Bar */
+  .top-nav {
+    height: 38px !important;
+    min-height: 38px !important;
+    padding: 0 12px !important;
+  }
+  .brand-logo h1 {
+    font-size: 13.5px !important;
+  }
+  .brand-logo h1 small {
+    display: none !important;
+  }
+  .logo-badge {
+    padding: 1px 6px !important;
+    font-size: 11px !important;
+  }
+  .nav-tab {
+    padding: 4px 12px !important;
+    font-size: 11px !important;
+    letter-spacing: 0.05em !important;
+  }
+
+  /* Compact Craft Studio Layout */
+  .craft-layout {
+    grid-template-columns: 275px minmax(0, 1fr) 245px !important;
+    height: calc(100vh - 38px) !important;
+    height: calc(100dvh - 38px) !important;
+  }
+  .workbench-toolbar {
+    height: 30px !important;
+    min-height: 30px !important;
+    padding: 2px 8px !important;
+  }
+  .wb-mode-btn {
+    padding: 3px 10px !important;
+    font-size: 10.5px !important;
+  }
+  .wb-small-btn {
+    padding: 2px 6px !important;
+    font-size: 9.5px !important;
+  }
+  .panel-group {
+    padding: 5px 8px !important;
+    gap: 4px !important;
+  }
+  .panel-group h3 {
+    font-size: 10px !important;
+  }
+  .stat-item {
+    gap: 2px !important;
+  }
+  .stat-bar-track {
+    height: 5px !important;
+  }
+
+  /* Ultra-Compact Battle Top HUD Bar */
+  .battle-top-hud {
+    height: 38px !important;
+    min-height: 38px !important;
+    padding: 0 10px !important;
+    gap: 6px !important;
+    background: rgba(7, 10, 16, 0.94) !important;
+  }
+  .player-card {
+    height: 32px !important;
+    padding: 0 6px !important;
+    gap: 4px !important;
+  }
+  .player-badge {
+    display: none !important;
+  }
+  .player-name {
+    font-size: 12px !important;
+  }
+  .part-tag {
+    font-size: 9px !important;
+    padding: 0 4px !important;
+  }
+  .stability-bar-wrap {
+    gap: 4px !important;
+  }
+  .bar-label {
+    display: none !important;
+  }
+  .stability-bar-bg {
+    height: 6px !important;
+    width: 55px !important;
+    flex: none !important;
+  }
+  .damage-pct {
+    font-size: 11px !important;
+  }
+  .skill-stock-pill {
+    font-size: 9.5px !important;
+    padding: 0 4px !important;
+  }
+  .score-stars .star {
+    width: 10px !important;
+    height: 5px !important;
+  }
+
+  /* Center Status & Stage Select */
+  .turn-status-box {
+    gap: 1px !important;
+  }
+  .battle-quick-settings {
+    gap: 3px !important;
+    margin-bottom: 0 !important;
+  }
+  .HudSelect {
+    font-size: 9px !important;
+    padding: 1px 4px !important;
+    max-width: 130px !important;
+    height: 18px !important;
+  }
+  .turn-indicator {
+    font-size: 11px !important;
+    letter-spacing: 0.04em !important;
+  }
+  .turn-subhint {
+    display: none !important;
+  }
+
+  /* Arena & Canvas */
+  .arena-container {
+    height: calc(100% - 74px) !important;
+  }
+  .skill-action-btn {
+    bottom: 42px !important;
+    padding: 5px 18px !important;
+  }
+  .skill-key-hint {
+    font-size: 8px !important;
+  }
+  .skill-btn-title {
+    font-size: 12.5px !important;
+  }
+  .battle-toast {
+    top: 8px !important;
+    font-size: 10px !important;
+    padding: 3px 10px !important;
+  }
+
+  /* Compact Battle Footer Bar */
+  .hud-footer {
+    height: 36px !important;
+    min-height: 36px !important;
+    padding: 0 10px !important;
+  }
+  .group-title {
+    display: none !important;
+  }
+  .spin-selector-group {
+    gap: 4px !important;
+  }
+  .spin-btn {
+    padding: 2px 7px !important;
+    font-size: 9.5px !important;
+  }
+  .spin-text strong {
+    font-size: 9.5px !important;
+  }
+  .spin-text small {
+    display: none !important;
+  }
+  .hud-action-btn {
+    padding: 3px 8px !important;
+    font-size: 9.5px !important;
+  }
+
+  /* Compact Result Modal */
+  .result-card {
+    max-height: 95vh !important;
+    padding: 12px 20px !important;
+  }
+  .result-main-title {
+    font-size: 22px !important;
+  }
+  .result-winner-name {
+    font-size: 18px !important;
+  }
+  .result-telemetry-grid {
+    padding: 5px 10px !important;
+    margin: 6px 0 !important;
+  }
+  .result-actions-row {
+    margin-top: 8px !important;
+    gap: 8px !important;
+  }
+  .primary-result-btn, .secondary-result-btn {
+    padding: 6px 14px !important;
+    font-size: 11px !important;
+  }
+}
+
+@media (orientation: landscape) and (max-width: 840px) and (max-height: 540px) {
+  .craft-layout {
+    grid-template-columns: 240px minmax(0, 1fr) 210px !important;
+  }
+}
