@@ -2699,3 +2699,23 @@ button:active {
   background: var(--apex-red-hover);
   box-shadow: 0 0 16px var(--apex-red-glow);
 }
+
+
+/* Disabled Deploy CTA when 0 glyphs */
+.launch-battle-cta.disabled {
+  opacity: 0.45 !important;
+  cursor: not-allowed !important;
+  filter: grayscale(0.8) !important;
+  box-shadow: none !important;
+  border-color: rgba(255, 255, 255, 0.18) !important;
+}
+
+.nav-tab.disabled-tab {
+  opacity: 0.45 !important;
+  cursor: not-allowed !important;
+}
+
+.panel-group.no-selection {
+  opacity: 0.52;
+  pointer-events: none;
+}

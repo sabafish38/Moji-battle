@@ -1103,11 +1103,13 @@ function loadStateFromStorage() {
     const parsed = JSON.parse(raw);
     if (Array.isArray(parsed.savedSlots) && parsed.savedSlots.length >= 3) {
       savedSlots = parsed.savedSlots.map((slot, idx) => {
-        if (!slot || !Array.isArray(slot.glyphs) || slot.glyphs.length === 0) {
+        if (!slot || !Array.isArray(slot.glyphs)) {
           return createBuildFromPreset(PRESET_MACHINES[idx % PRESET_MACHINES.length]);
         }
         const glyphs = cloneGlyphs(slot.glyphs);
-        enforceConnectedGlyphs(glyphs, null, false);
+        if (glyphs.length > 0) {
+          enforceConnectedGlyphs(glyphs, null, false);
+        }
         return {
           name: (slot.name || `文字機体 ${idx + 1}号機`).slice(0, 16),
           weldChassis: slot.weldChassis !== false,
@@ -1133,9 +1135,34 @@ loadStateFromStorage();
  * and active skill from the machine's constituent characters (1 to 5 glyphs).
  */
 function calculateMachineSpec(build) {
-  const rawGlyphs = (build && Array.isArray(build.glyphs) && build.glyphs.length > 0)
-    ? build.glyphs.slice(0, MAX_GLYPHS)
-    : PRESET_MACHINES[0].glyphs;
+  if (!build || !Array.isArray(build.glyphs) || build.glyphs.length === 0) {
+    return {
+      name: build?.name || '文字機体',
+      weight: 0,
+      boundingRadius: 16,
+      comX: 0,
+      comY: 0,
+      subBoxes: [],
+      atk: 0,
+      def: 0,
+      spd: 0,
+      grip: 0,
+      spin: 0,
+      restitution: 0.5,
+      friction: 0.90,
+      knockbackResist: 1.0,
+      maxLaunchSpeed: 10,
+      buildType: '文字未配置 (出撃不可)',
+      activeSkill: {
+        id: 'none',
+        title: '未装備',
+        desc: '文字を追加すると性能と必殺技が宿ります'
+      },
+      isEmpty: true
+    };
+  }
+
+  const rawGlyphs = build.glyphs.slice(0, MAX_GLYPHS);
 
   const n = rawGlyphs.length;
   let totalWeight = 6.5; // Base core frame mass
@@ -2183,6 +2210,18 @@ function updateAndDrawCraftWorkbench() {
       highlightGlyphId: selectedGlyphId,
       useRawOrigin: true
     });
+
+    if (currentBuild.glyphs.length === 0) {
+      craftCtx.save();
+      craftCtx.fillStyle = 'rgba(241, 245, 249, 0.85)';
+      craftCtx.font = '800 13px system-ui, sans-serif';
+      craftCtx.textAlign = 'center';
+      craftCtx.fillText('文字が配置されていません', cx, cy - 8);
+      craftCtx.font = '700 11.5px system-ui, sans-serif';
+      craftCtx.fillStyle = '#00e5ff';
+      craftCtx.fillText('右上の「＋ 文字追加」から文字を配置してください', cx, cy + 14);
+      craftCtx.restore();
+    }
   } else {
     // Test Shoot Mode on Workbench
     if (!testPlayerUnit) initTestRange();
@@ -2639,8 +2678,26 @@ function updateCraftUI(skipLists = false) {
   document.getElementById('specSkillTitle').textContent = spec.activeSkill.title;
   document.getElementById('specSkillDesc').textContent = spec.activeSkill.desc;
 
+  // Deploy CTA & Navigation state when 0 glyphs
+  const isEmpty = (count === 0);
+  const goToBattleBtn = document.getElementById('goToBattleFromSpecBtn');
+  if (goToBattleBtn) {
+    goToBattleBtn.classList.toggle('disabled', isEmpty);
+    goToBattleBtn.textContent = isEmpty ? '出撃不可 (文字0個)' : 'この機体でバトル出撃';
+    goToBattleBtn.title = isEmpty ? '文字が0個のため出撃できません' : 'この文字機体でバトル出撃';
+  }
+  const tabBattleBtn = document.getElementById('tabBattleBtn');
+  if (tabBattleBtn) {
+    tabBattleBtn.classList.toggle('disabled-tab', isEmpty);
+    tabBattleBtn.title = isEmpty ? '文字が0個のため出撃できません' : 'バトル出撃';
+  }
+
   // Fine-Tune Controls for Selected Glyph
+  const tuneBox = document.getElementById('fineTuneBox');
+  const headerBox = document.getElementById('selectedGlyphHeaderBox');
   if (sel) {
+    tuneBox?.classList.remove('no-selection');
+    headerBox?.classList.remove('no-selection');
     document.getElementById('selectedGlyphTitle').textContent = `選択中: 『${sel.char}』の変形・調整`;
     const editCharInput = document.getElementById('editSelectedCharInput');
     if (document.activeElement !== editCharInput) {
@@ -2665,6 +2722,10 @@ function updateCraftUI(skipLists = false) {
     document.querySelectorAll('#selectedMaterialGroup .mat-pill').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.mat === sel.mat);
     });
+  } else {
+    tuneBox?.classList.add('no-selection');
+    headerBox?.classList.add('no-selection');
+    document.getElementById('selectedGlyphTitle').textContent = '文字未配置 (右上の「＋」から追加)';
   }
 
   const nameInput = document.getElementById('customEraserNameInput');
@@ -2947,14 +3008,18 @@ document.getElementById('mirrorCopyGlyphBtn')?.addEventListener('click', () => {
 });
 
 document.getElementById('deleteGlyphBtn')?.addEventListener('click', () => {
-  if (currentBuild.glyphs.length <= 1) {
-    showBattleToast('最低1文字は必要です');
+  if (currentBuild.glyphs.length === 0) {
+    showBattleToast('削除する文字がありません');
     return;
   }
   pushCraftUndo();
   currentBuild.glyphs = currentBuild.glyphs.filter(g => g.id !== selectedGlyphId);
   selectedGlyphId = currentBuild.glyphs[0]?.id || null;
-  enforceConnectedGlyphs(currentBuild.glyphs, selectedGlyphId, true);
+  if (currentBuild.glyphs.length > 0) {
+    enforceConnectedGlyphs(currentBuild.glyphs, selectedGlyphId, true);
+  } else {
+    activeCraftSubTab = 'input';
+  }
   sfx.playClick();
   saveStateToStorage();
   updateCraftUI();
@@ -3135,6 +3200,10 @@ document.getElementById('wbModeEditBtn')?.addEventListener('click', () => {
 });
 
 document.getElementById('wbModeTestBtn')?.addEventListener('click', () => {
+  if (!currentBuild.glyphs || currentBuild.glyphs.length === 0) {
+    showBattleToast('文字が0個のため試し撃ちはできません。文字を追加してください');
+    return;
+  }
   workbenchMode = 'test';
   document.getElementById('wbModeTestBtn').classList.add('active');
   document.getElementById('wbModeEditBtn').classList.remove('active');
@@ -3184,26 +3253,20 @@ document.getElementById('randomBuildBtn')?.addEventListener('click', () => {
 
 document.getElementById('clearPartsBtn')?.addEventListener('click', () => {
   pushCraftUndo();
-  const baseChar = currentBuild.glyphs[0]?.char || '龍';
-  currentBuild.glyphs = [
-    {
-      id: makeGlyphId(),
-      char: baseChar,
-      x: 0,
-      y: 0,
-      angle: 0,
-      scale: 115,
-      mat: 'mecha',
-      color: '#38bdf8',
-      depthColor: '#0f172a',
-      flipX: false,
-      flipY: false
-    }
-  ];
-  selectedGlyphId = currentBuild.glyphs[0].id;
+  currentBuild.glyphs = [];
+  selectedGlyphId = null;
+  activeCraftSubTab = 'input';
   sfx.playClick();
   saveStateToStorage();
   updateCraftUI();
+  if (workbenchMode === 'test') {
+    workbenchMode = 'edit';
+    document.getElementById('wbModeEditBtn')?.classList.add('active');
+    document.getElementById('wbModeTestBtn')?.classList.remove('active');
+    document.getElementById('workbenchHint')?.classList.remove('hidden');
+    document.getElementById('testRangeControls')?.classList.add('hidden');
+    document.getElementById('boardAddGlyphBtn')?.classList.remove('hidden');
+  }
 });
 
 // Save Slots Switching
@@ -4720,6 +4783,13 @@ document.getElementById('battleModeSelect')?.addEventListener('change', initBatt
 document.getElementById('battleStageSelect')?.addEventListener('change', initBattleMatch);
 
 function switchMainView(targetView) {
+  if (targetView === 'battle') {
+    if (!currentBuild.glyphs || currentBuild.glyphs.length === 0) {
+      showBattleToast('文字が0個のため出撃できません。最低1文字以上配置してください');
+      return;
+    }
+  }
+
   activeView = targetView;
   const craftSec = document.getElementById('craftView');
   const battleSec = document.getElementById('battleView');
