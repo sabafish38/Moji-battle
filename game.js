@@ -3686,11 +3686,42 @@ function startBattleRound(roundNum) {
   const p1Spec = calculateMachineSpec(p1Build);
   const p2Spec = calculateMachineSpec(p2Build);
 
+  // Stage-Adaptive Fair Spawn Positions (guaranteeing generous edge margin & no 1-turn kill)
+  let p1StartX, p1StartY, p2StartX, p2StartY;
+  if (desk.isRound) {
+    const r = desk.radius * 0.46;
+    const angle = Math.PI * 0.25;
+    p1StartX = desk.cx - Math.cos(angle) * r;
+    p1StartY = desk.cy + Math.sin(angle) * r;
+    p2StartX = desk.cx + Math.cos(angle) * r;
+    p2StartY = desk.cy - Math.sin(angle) * r;
+  } else if (battleState.stage === 'bridge') {
+    p1StartX = desk.cx - 16;
+    p1StartY = desk.bottom - desk.height * 0.22;
+    p2StartX = desk.cx + 16;
+    p2StartY = desk.top + desk.height * 0.22;
+  } else if (battleState.stage === 'ice_glass') {
+    p1StartX = desk.cx - desk.width * 0.16;
+    p1StartY = desk.bottom - desk.height * 0.20;
+    p2StartX = desk.cx + desk.width * 0.16;
+    p2StartY = desk.top + desk.height * 0.20;
+  } else if (battleState.stage === 'gridlock') {
+    p1StartX = desk.cx - desk.width * 0.17;
+    p1StartY = desk.bottom - desk.height * 0.22;
+    p2StartX = desk.cx + desk.width * 0.17;
+    p2StartY = desk.top + desk.height * 0.22;
+  } else {
+    p1StartX = desk.cx - desk.width * 0.19;
+    p1StartY = desk.bottom - desk.height * 0.23;
+    p2StartX = desk.cx + desk.width * 0.19;
+    p2StartY = desk.top + desk.height * 0.23;
+  }
+
   battleState.units = [
     {
       id: 1,
-      x: desk.cx - desk.width * 0.22,
-      y: desk.bottom - desk.height * 0.24,
+      x: p1StartX,
+      y: p1StartY,
       vx: 0,
       vy: 0,
       angle: 0,
@@ -3708,8 +3739,8 @@ function startBattleRound(roundNum) {
     },
     {
       id: 2,
-      x: desk.cx + desk.width * 0.22,
-      y: desk.top + desk.height * 0.24,
+      x: p2StartX,
+      y: p2StartY,
       vx: 0,
       vy: 0,
       angle: Math.PI,
@@ -3873,7 +3904,7 @@ function activateUnitSkill(unit, targetUnits, particleArr) {
 }
 
 function launchUnit(unit, powerRatio, angle, spinType) {
-  const turnDamper = (battleState.turn === 1) ? 0.78 : 1.0;
+  const turnDamper = (battleState.turn === 1) ? 0.72 : 1.0;
   const launchSpd = Math.max(2.5, powerRatio * unit.spec.maxLaunchSpeed * turnDamper);
   unit.vx = Math.cos(angle) * launchSpd;
   unit.vy = Math.sin(angle) * launchSpd;
@@ -4350,10 +4381,37 @@ function updateBattlePhysicsAndRender() {
         }
       });
 
-      // Check Ring-Out (supporting both Round Colosseum and Rectangular Arena)
-      const isRingOut = desk.isRound
-        ? Math.hypot(u.x - desk.cx, u.y - desk.cy) > desk.radius
-        : (u.x < desk.left || u.x > desk.right || u.y < desk.top || u.y > desk.bottom);
+      // Check Ring-Out (With Turn 1 Opening Safety to eliminate 1-Turn-Kill)
+      let isRingOut = false;
+      if (desk.isRound) {
+        const distCenter = Math.hypot(u.x - desk.cx, u.y - desk.cy);
+        if (battleState.turn === 1 && u.id === 2 && distCenter > desk.radius - 12) {
+          // Turn 1 Opening Anchor: clamp P2 safely at perimeter
+          u.x = desk.cx + (u.x - desk.cx) / distCenter * (desk.radius - 16);
+          u.y = desk.cy + (u.y - desk.cy) / distCenter * (desk.radius - 16);
+          u.vx *= 0.10;
+          u.vy *= 0.10;
+          spawnParticles(battleState.particles, u.x, u.y, '#38bdf8', 10, 4);
+          showBattleToast('初手セーフティ発動！机端で踏みとどまった！');
+        } else if (distCenter > desk.radius) {
+          isRingOut = true;
+        }
+      } else {
+        if (battleState.turn === 1 && u.id === 2) {
+          const margin = 14;
+          let clamped = false;
+          if (u.x < desk.left + margin) { u.x = desk.left + margin; u.vx *= 0.10; clamped = true; }
+          else if (u.x > desk.right - margin) { u.x = desk.right - margin; u.vx *= 0.10; clamped = true; }
+          if (u.y < desk.top + margin) { u.y = desk.top + margin; u.vy *= 0.10; clamped = true; }
+          else if (u.y > desk.bottom - margin) { u.y = desk.bottom - margin; u.vy *= 0.10; clamped = true; }
+          if (clamped) {
+            spawnParticles(battleState.particles, u.x, u.y, '#38bdf8', 10, 4);
+            showBattleToast('初手セーフティ発動！机端で踏みとどまった！');
+          }
+        } else {
+          isRingOut = (u.x < desk.left || u.x > desk.right || u.y < desk.top || u.y > desk.bottom);
+        }
+      }
 
       if (isRingOut && !u.fallen) {
         u.fallen = true;
@@ -4382,19 +4440,30 @@ function updateBattlePhysicsAndRender() {
         const velNormal = rvx * hit.nx + rvy * hit.ny;
 
         if (velNormal < 0) {
-          const e = Math.min(1.08, (u1.spec.restitution + u2.spec.restitution) * 0.5);
-          const m1 = u1.spec.weight * u1.spec.knockbackResist;
-          const m2 = u2.spec.weight * u2.spec.knockbackResist;
+          const e = Math.min(1.05, (u1.spec.restitution + u2.spec.restitution) * 0.5);
+          const m1 = Math.max(14.0, Math.min(24.0, u1.spec.weight * 0.85));
+          const m2 = Math.max(14.0, Math.min(24.0, u2.spec.weight * 0.85));
 
           let jImp = -(1 + e) * velNormal;
           jImp /= (1 / m1 + 1 / m2);
           jImp *= 1 + hit.sharpnessSum * 0.12;
 
-          // First-turn protection so 1-Turn-Kill stays <= 5%
-          const turnCap = battleState.turn === 1 ? 0.78 : 1.0;
+          // First-turn protection to eliminate 1-Turn-Kill
+          const turnCap = battleState.turn === 1 ? 0.65 : 1.0;
 
-          const imp1Scale = (u2.damagePct / 100) * turnCap;
-          const imp2Scale = (u1.damagePct / 100) * turnCap;
+          const atkMod1 = 1.0 + (u1.spec.atk - 50) * 0.008;
+          const defMod1 = 1.0 - (u1.spec.def - 50) * 0.006;
+          const atkMod2 = 1.0 + (u2.spec.atk - 50) * 0.008;
+          const defMod2 = 1.0 - (u2.spec.def - 50) * 0.006;
+
+          let imp1Scale, imp2Scale;
+          if (battleState.activePlayer === 1) {
+            imp1Scale = (u1.damagePct / 100) * 0.70 * turnCap;
+            imp2Scale = (u2.damagePct / 100) * atkMod1 * defMod2 * turnCap;
+          } else {
+            imp1Scale = (u1.damagePct / 100) * atkMod2 * defMod1 * turnCap;
+            imp2Scale = (u2.damagePct / 100) * 0.70 * turnCap;
+          }
 
           const impX = jImp * hit.nx;
           const impY = jImp * hit.ny;
@@ -4414,8 +4483,13 @@ function updateBattlePhysicsAndRender() {
           }
 
           const impactMag = Math.min(18, Math.abs(velNormal));
-          addUnitDamage(u1, impactMag * 1.15);
-          addUnitDamage(u2, impactMag * 1.15);
+          if (battleState.activePlayer === 1) {
+            addUnitDamage(u1, impactMag * 0.5);
+            addUnitDamage(u2, impactMag * 1.25);
+          } else {
+            addUnitDamage(u1, impactMag * 1.25);
+            addUnitDamage(u2, impactMag * 0.5);
+          }
 
           // Physical torque from exact character stroke contact point
           const torque1 = ((hit.contactX - u1.x) * (-impY) - (hit.contactY - u1.y) * (-impX)) * 0.00042;
