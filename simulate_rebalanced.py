@@ -344,14 +344,14 @@ def run_single_match(stg_config, build_p1, build_p2):
                 if is_out:
                     u["fallen"] = True
 
-            if u1["fallen"] or u2["fallen"]:
-                break
-
+            # Wait until complete stop before breaking tick loop!
             if not any_moving:
                 break
 
         if u1["fallen"] and u2["fallen"]:
-            return {"winner": 0, "turn": turn, "collisions": total_collisions, "gimmick_triggers": total_gimmick_triggers, "cause": "double_ko"}
+            # Both fell: player whose turn it was loses (self-destruct)!
+            double_winner = 2 if active_player == 1 else 1
+            return {"winner": double_winner, "turn": turn, "collisions": total_collisions, "gimmick_triggers": total_gimmick_triggers, "cause": "double_ringout_suicide"}
         elif u1["fallen"]:
             cause = "unit_push" if last_hit_by_unit[1] else "gimmick_suicide"
             return {"winner": 2, "turn": turn, "collisions": total_collisions, "gimmick_triggers": total_gimmick_triggers, "cause": cause}

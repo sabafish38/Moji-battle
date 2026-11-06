@@ -4292,10 +4292,11 @@ function updateBattlePhysicsAndRender() {
         ? Math.hypot(u.x - desk.cx, u.y - desk.cy) > desk.radius
         : (u.x < desk.left || u.x > desk.right || u.y < desk.top || u.y > desk.bottom);
 
-      if (isRingOut) {
+      if (isRingOut && !u.fallen) {
         u.fallen = true;
         u.vx = 0;
         u.vy = 0;
+        u.angVel = 0;
         sfx.playFall();
         spawnParticles(battleState.particles, u.x, u.y, '#ef4444', 28, 8);
       }
@@ -4366,11 +4367,13 @@ function updateBattlePhysicsAndRender() {
       }
     }
 
-    // Check Round Resolution or Next Turn
-    if (u1.fallen || u2.fallen) {
-      resolveRoundEnd();
-    } else if (!anyMoving) {
-      advanceToNextTurn();
+    // Check Round Resolution or Next Turn (Wait until all movement completely stops!)
+    if (!anyMoving) {
+      if (u1.fallen || u2.fallen) {
+        resolveRoundEnd();
+      } else {
+        advanceToNextTurn();
+      }
     }
   }
 
@@ -4474,12 +4477,17 @@ function resolveRoundEnd() {
   const u2 = battleState.units[1];
 
   let winner = 1;
-  if (u1.fallen && !u2.fallen) {
+  const isDoubleRingOut = (u1.fallen && u2.fallen);
+
+  if (isDoubleRingOut) {
+    // Both units fell: the player whose turn it was loses (self-destruct)!
+    winner = (battleState.activePlayer === 1) ? 2 : 1;
+  } else if (u1.fallen && !u2.fallen) {
     winner = 2;
   } else if (!u1.fallen && u2.fallen) {
     winner = 1;
   } else {
-    winner = battleState.activePlayer;
+    winner = (u1.damagePct <= u2.damagePct) ? 1 : 2;
   }
 
   if (winner === 1) battleState.p1Score++;
@@ -4492,28 +4500,41 @@ function resolveRoundEnd() {
     sfx.playWin();
     const champName = winner === 1 ? u1.spec.name : u2.spec.name;
     
-    // First show quick banner, then open full-screen Champion Modal
+    const shooterLabel = (battleState.activePlayer === 1) ? '1P' : (battleState.mode === 'pvp' ? '2P' : 'CPU');
+    const winnerLabel = (winner === 1) ? '1P' : (battleState.mode === 'pvp' ? '2P' : 'CPU');
+
+    const championDesc = isDoubleRingOut
+      ? `両機落下（共倒れ）！ 手番側（${shooterLabel}）の自滅判定により ${winnerLabel} の完全制覇！`
+      : `${champName} 完全制覇！`;
+
     showCenterBanner(
       winner === 1 ? 'VICTORY // CHAMPION' : 'DEFEAT // RIVAL WIN',
-      `${champName} 完全制覇！`,
-      'リザルト画面を表示します...',
-      1200
+      `${champName} 優勝！`,
+      championDesc,
+      1500
     );
 
     setTimeout(() => {
       showMatchResultModal(winner, u1, u2);
-    }, 1300);
+    }, 1600);
   } else {
     const nextRound = battleState.p1Score + battleState.p2Score + 1;
+    const shooterLabel = (battleState.activePlayer === 1) ? '1P' : (battleState.mode === 'pvp' ? '2P' : 'CPU');
+    const winnerLabel = (winner === 1) ? '1P' : (battleState.mode === 'pvp' ? '2P' : 'CPU');
+
+    const roundDesc = isDoubleRingOut
+      ? `両機落下（共倒れ）！ 手番側（${shooterLabel}）の自滅判定で ${winnerLabel} にポイント！`
+      : '相手を机から弾き落とした！';
+
     showCenterBanner(
       winner === 1 ? '1P ROUND POINT!' : 'RIVAL ROUND POINT!',
       `ROUND ${nextRound} へ`,
-      '相手を机から弾き飛ばした！',
-      1700
+      roundDesc,
+      1800
     );
     setTimeout(() => {
       startBattleRound(nextRound);
-    }, 1850);
+    }, 1950);
   }
 }
 
