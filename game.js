@@ -3880,9 +3880,9 @@ function startBattleRound(roundNum) {
       vy: 0,
       angle: 0,
       angVel: 0,
-      damagePct: 100,
+      damagePct: 0,
       skillStock: 0,
-      lastSkillThreshold: 100,
+      lastSkillThreshold: 0,
       skillCooldown: 0,
       spinType: 'normal',
       fallen: false,
@@ -3899,9 +3899,9 @@ function startBattleRound(roundNum) {
       vy: 0,
       angle: Math.PI,
       angVel: 0,
-      damagePct: 100,
+      damagePct: 0,
       skillStock: 0,
-      lastSkillThreshold: 100,
+      lastSkillThreshold: 0,
       skillCooldown: 0,
       spinType: 'normal',
       fallen: false,
@@ -3939,7 +3939,7 @@ function saveBattleUndoSnapshot() {
       angle: u.angle,
       damagePct: u.damagePct,
       skillStock: u.skillStock || 0,
-      lastSkillThreshold: u.lastSkillThreshold || 100,
+      lastSkillThreshold: u.lastSkillThreshold || 0,
       fallen: false
     }))
   };
@@ -3974,7 +3974,7 @@ function undoBattleTurn() {
       u.angVel = 0;
       u.damagePct = su.damagePct;
       u.skillStock = su.skillStock || 0;
-      u.lastSkillThreshold = su.lastSkillThreshold || 100;
+      u.lastSkillThreshold = su.lastSkillThreshold || 0;
       u.fallen = false;
     }
   });
@@ -3990,7 +3990,7 @@ function addUnitDamage(unit, amount) {
   unit.damagePct = Math.min(260, Math.round(oldPct + amount));
 
   if (unit.lastSkillThreshold === undefined) {
-    unit.lastSkillThreshold = 100;
+    unit.lastSkillThreshold = 0;
   }
 
   let gained = 0;
@@ -4002,7 +4002,7 @@ function addUnitDamage(unit, amount) {
 
   if (gained > 0) {
     sfx.playSkill();
-    showBattleToast(`${unit.id === 1 ? '1P' : 'CPU'} 必殺技チャージ +${gained}！ 吹飛蓄積 ${unit.damagePct}% (ストック: ${unit.skillStock})`);
+    showBattleToast(`${unit.id === 1 ? '1P' : 'CPU'} 必殺技チャージ +${gained}！ 蓄積ダメージ ${unit.damagePct}% (ストック: ${unit.skillStock})`);
   }
   updateBattleHUD();
 }
@@ -4735,11 +4735,11 @@ function updateBattlePhysicsAndRender() {
 
           let imp1Scale, imp2Scale;
           if (battleState.activePlayer === 1) {
-            imp1Scale = (u1.damagePct / 100) * 0.70 * turnCap;
-            imp2Scale = (u2.damagePct / 100) * atkMod1 * defMod2 * turnCap;
+            imp1Scale = (1.0 + u1.damagePct / 100) * 0.70 * turnCap;
+            imp2Scale = (1.0 + u2.damagePct / 100) * atkMod1 * defMod2 * turnCap;
           } else {
-            imp1Scale = (u1.damagePct / 100) * atkMod2 * defMod1 * turnCap;
-            imp2Scale = (u2.damagePct / 100) * 0.70 * turnCap;
+            imp1Scale = (1.0 + u1.damagePct / 100) * atkMod2 * defMod1 * turnCap;
+            imp2Scale = (1.0 + u2.damagePct / 100) * 0.70 * turnCap;
           }
 
           const impX = jImp * hit.nx;
@@ -4974,7 +4974,10 @@ function updateBattleTelemetryPanels(u1, u2) {
   if (p1SpdEl) p1SpdEl.textContent = u1.spec.spd;
 
   const p1HpEl = document.getElementById('battleP1HpVal');
-  if (p1HpEl) p1HpEl.textContent = `${u1.damagePct}%`;
+  if (p1HpEl) {
+    p1HpEl.textContent = `${u1.damagePct}%`;
+    p1HpEl.style.color = u1.damagePct >= 100 ? 'var(--apex-red)' : u1.damagePct >= 50 ? 'var(--apex-gold)' : '#ffffff';
+  }
   const p1HpBar = document.getElementById('battleP1HpBar');
   if (p1HpBar) {
     p1HpBar.style.width = `${Math.min(100, Math.max(0, u1.damagePct))}%`;
@@ -5020,7 +5023,10 @@ function updateBattleTelemetryPanels(u1, u2) {
   if (p2SpdEl) p2SpdEl.textContent = u2.spec.spd;
 
   const p2HpEl = document.getElementById('battleP2HpVal');
-  if (p2HpEl) p2HpEl.textContent = `${u2.damagePct}%`;
+  if (p2HpEl) {
+    p2HpEl.textContent = `${u2.damagePct}%`;
+    p2HpEl.style.color = u2.damagePct >= 100 ? 'var(--apex-red)' : u2.damagePct >= 50 ? 'var(--apex-gold)' : '#ffffff';
+  }
   const p2HpBar = document.getElementById('battleP2HpBar');
   if (p2HpBar) {
     p2HpBar.style.width = `${Math.min(100, Math.max(0, u2.damagePct))}%`;
@@ -5085,13 +5091,17 @@ function updateBattleHUD() {
 
   document.getElementById('p1Name').textContent = u1.spec.name;
   document.getElementById('p1WeightTag').textContent = `${u1.spec.weight}g`;
-  document.getElementById('p1DamageText').textContent = `${u1.damagePct}%`;
-  document.getElementById('p1DamageBar').style.width = `${Math.min(100, (u1.damagePct - 100) * 0.8)}%`;
+  const p1DmgText = document.getElementById('p1DamageText');
+  p1DmgText.textContent = `${u1.damagePct}%`;
+  p1DmgText.style.color = u1.damagePct >= 100 ? 'var(--apex-red)' : u1.damagePct >= 50 ? 'var(--apex-gold)' : 'var(--apex-gold)';
+  document.getElementById('p1DamageBar').style.width = `${Math.min(100, Math.max(0, u1.damagePct))}%`;
 
   document.getElementById('p2Name').textContent = u2.spec.name;
   document.getElementById('p2WeightTag').textContent = `${u2.spec.weight}g`;
-  document.getElementById('p2DamageText').textContent = `${u2.damagePct}%`;
-  document.getElementById('p2DamageBar').style.width = `${Math.min(100, (u2.damagePct - 100) * 0.8)}%`;
+  const p2DmgText = document.getElementById('p2DamageText');
+  p2DmgText.textContent = `${u2.damagePct}%`;
+  p2DmgText.style.color = u2.damagePct >= 100 ? 'var(--apex-red)' : u2.damagePct >= 50 ? 'var(--apex-gold)' : 'var(--apex-gold)';
+  document.getElementById('p2DamageBar').style.width = `${Math.min(100, Math.max(0, u2.damagePct))}%`;
 
   const renderStars = (elId, score) => {
     const container = document.getElementById(elId);
