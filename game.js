@@ -249,190 +249,286 @@ const EDIT_VIEW_SCALE = 1.32;
 const GLYPH_FONTS = {
   heavy: {
     id: 'heavy',
-    name: '重装角ゴシック',
-    cssFamily: '"Impact", "Arial Black", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif',
+    name: '極太角ゴシック',
+    cssFamily: '"Dela Gothic One", "Impact", "Arial Black", "Hiragino Sans", "Yu Gothic", sans-serif',
     weight: '900',
-    desc: '極太の重装甲シルエット'
+    desc: '最大の重厚シルエット・圧倒的重装甲'
   },
   mecha: {
     id: 'mecha',
-    name: '鋭角メカ明朝',
-    cssFamily: '"Hiragino Mincho ProN", "Yu Mincho", "MS PMincho", serif',
-    weight: '900',
-    desc: '日本刀のような鋭利な刃先'
+    name: '鋭角ブレード明朝',
+    cssFamily: '"Kaisei Decol", "Hiragino Mincho ProN", "Yu Mincho", "MS PMincho", serif',
+    weight: '700',
+    desc: '刃物のような鋭利なウロコと鋭い払い'
   },
   stencil: {
     id: 'stencil',
-    name: 'ミリタリー極太',
-    cssFamily: '"Trebuchet MS", "Impact", "Arial Black", sans-serif',
-    weight: '900',
-    desc: 'インダストリアル兵器太字'
-  },
-  cyber: {
-    id: 'cyber',
-    name: 'サイバー等幅',
-    cssFamily: '"Consolas", "SFMono-Regular", "Liberation Mono", monospace',
-    weight: '900',
-    desc: '近未来デジタルSFコード'
+    name: '弾力丸ゴシック',
+    cssFamily: '"M PLUS Rounded 1c", "HGMaruGothicMPRO", "Hiragino Maru Gothic ProN", sans-serif',
+    weight: '800',
+    desc: '角が丸く弾力のある高反発シルエット'
   },
   brush: {
     id: 'brush',
-    name: '武神豪快筆',
-    cssFamily: '"HGS行書体", "HGP行書体", "HG行書体", "Hiragino Mincho ProN", serif',
+    name: '豪快武神毛筆',
+    cssFamily: '"Yuji Boku", "HGPGyoshotai", "HGGyoshotai", "Yu Mincho", serif',
     weight: '900',
-    desc: '武将・四天王のような威圧筆跡'
+    desc: '豪快な墨の勢い・躍動感ある武骨筆跡'
+  },
+  cyber: {
+    id: 'cyber',
+    name: 'サイバー等幅コード',
+    cssFamily: '"Consolas", "Courier New", "SFMono-Regular", "Liberation Mono", monospace',
+    weight: '700',
+    desc: '直線的で機械的な近未来テクノコード'
   }
 };
 
 let defaultSelectedFont = 'heavy';
 
 const GLYPH_MATERIALS = {
-  // --- Classic Materials (Preserved 100%) ---
-  mecha: {
-    id: 'mecha',
-    name: '重装メタル',
-    weightMul: 1.24,
-    atkMul: 1.05,
-    defMul: 1.32,
-    spdMul: 0.84,
-    gripMul: 1.12,
-    spinMul: 0.90,
-    restitution: 0.85,
-    defaultColor: '#38bdf8',
-    defaultDepth: '#0f172a',
-    strokeColor: '#e0f2fe',
-    metallic: true,
-    metalType: 'mecha'
+  // --- 1. 消しゴム (Eraser: 原点・超高摩擦・踏ん張り) ---
+  eraser: {
+    id: 'eraser',
+    name: '消しゴム',
+    weightMul: 1.00,
+    atkMul: 0.95,
+    defMul: 1.20,
+    spdMul: 0.90,
+    gripMul: 1.68,
+    spinMul: 0.85,
+    restitution: 0.68,
+    defaultColor: '#f8fafc',
+    defaultDepth: '#1e293b',
+    strokeColor: '#38bdf8',
+    metallic: false,
+    matType: 'eraser'
   },
+
+  // --- 2. 強化ゴム (Rubber: 超弾性・ボヨンと跳ね返す) ---
   rubber: {
     id: 'rubber',
-    name: '消しゴム',
-    weightMul: 1.06,
-    atkMul: 0.78,
-    defMul: 1.22,
-    spdMul: 0.82,
-    gripMul: 1.58,
-    spinMul: 0.75,
-    restitution: 0.76,
-    defaultColor: '#f8fafc',
-    defaultDepth: '#334155',
-    strokeColor: '#cbd5e1',
+    name: '強化ゴム',
+    weightMul: 1.05,
+    atkMul: 0.88,
+    defMul: 1.30,
+    spdMul: 0.88,
+    gripMul: 1.50,
+    spinMul: 0.80,
+    restitution: 1.08,
+    defaultColor: '#334155',
+    defaultDepth: '#0f172a',
+    strokeColor: '#64748b',
     metallic: false,
-    metalType: 'matte'
+    matType: 'rubber'
   },
+
+  // --- 3. 天然木材 (Wood: 超軽量・高回転・機敏) ---
+  wood: {
+    id: 'wood',
+    name: '天然木材',
+    weightMul: 0.68,
+    atkMul: 0.90,
+    defMul: 0.75,
+    spdMul: 1.45,
+    gripMul: 0.85,
+    spinMul: 1.40,
+    restitution: 0.82,
+    defaultColor: '#d97706',
+    defaultDepth: '#451a03',
+    strokeColor: '#fde68a',
+    metallic: false,
+    matType: 'wood'
+  },
+
+  // --- 4. 強化ガラス (Glass: 超低摩擦・超滑走・クリスタル) ---
+  glass: {
+    id: 'glass',
+    name: '強化ガラス',
+    weightMul: 1.08,
+    atkMul: 1.25,
+    defMul: 0.80,
+    spdMul: 1.38,
+    gripMul: 0.45,
+    spinMul: 1.30,
+    restitution: 1.05,
+    defaultColor: '#06b6d4',
+    defaultDepth: '#083344',
+    strokeColor: '#a5f3fc',
+    metallic: false,
+    matType: 'glass'
+  },
+
+  // --- 5. 花崗岩石 (Stone: 超超重量・不動の要塞・ノックバック激減) ---
+  stone: {
+    id: 'stone',
+    name: '花崗岩石',
+    weightMul: 1.58,
+    atkMul: 1.15,
+    defMul: 1.55,
+    spdMul: 0.62,
+    gripMul: 1.35,
+    spinMul: 0.70,
+    restitution: 0.65,
+    defaultColor: '#64748b',
+    defaultDepth: '#1e293b',
+    strokeColor: '#94a3b8',
+    metallic: false,
+    matType: 'stone'
+  },
+
+  // --- 6. 粘着ゲル (Slime: 衝撃吸収・相手の勢いを殺す) ---
+  slime: {
+    id: 'slime',
+    name: '粘着ゲル',
+    weightMul: 0.88,
+    atkMul: 0.80,
+    defMul: 1.40,
+    spdMul: 0.85,
+    gripMul: 1.75,
+    spinMul: 0.65,
+    restitution: 0.38,
+    defaultColor: '#10b981',
+    defaultDepth: '#064e3b',
+    strokeColor: '#6ee7b7',
+    metallic: false,
+    matType: 'slime'
+  },
+
+  // --- 7. チタン合金 (Titanium: 高剛性・バランス型メタル) ---
+  titanium: {
+    id: 'titanium',
+    name: 'チタン合金',
+    weightMul: 1.18,
+    atkMul: 1.18,
+    defMul: 1.25,
+    spdMul: 1.05,
+    gripMul: 0.95,
+    spinMul: 1.05,
+    restitution: 0.90,
+    defaultColor: '#94a3b8',
+    defaultDepth: '#1e293b',
+    strokeColor: '#f1f5f9',
+    metallic: true,
+    matType: 'titanium'
+  },
+
+  // --- 8. ブレード鋼 (Blade: 攻撃特化・鋭角突き刺し) ---
   blade: {
     id: 'blade',
-    name: '超硬ブレード',
-    weightMul: 1.04,
-    atkMul: 1.52,
-    defMul: 0.72,
-    spdMul: 1.12,
-    gripMul: 0.68,
-    spinMul: 1.26,
-    restitution: 0.95,
+    name: 'ブレード鋼',
+    weightMul: 1.06,
+    atkMul: 1.58,
+    defMul: 0.70,
+    spdMul: 1.15,
+    gripMul: 0.65,
+    spinMul: 1.25,
+    restitution: 0.96,
     defaultColor: '#ef4444',
     defaultDepth: '#450a0a',
     strokeColor: '#fecaca',
     metallic: true,
-    metalType: 'anodized'
+    matType: 'blade'
   },
-  neon: {
-    id: 'neon',
-    name: 'サイバー発光',
-    weightMul: 0.74,
-    atkMul: 0.94,
-    defMul: 0.66,
-    spdMul: 1.54,
-    gripMul: 0.72,
-    spinMul: 1.38,
-    restitution: 0.90,
-    defaultColor: '#10b981',
-    defaultDepth: '#064e3b',
-    strokeColor: '#a7f3d0',
-    metallic: true,
-    metalType: 'neon'
-  },
+
+  // --- 9. 純金ゴールド (Gold: 超高比重・絢爛豪華) ---
   gold: {
     id: 'gold',
-    name: '黄金合金',
-    weightMul: 1.46,
-    atkMul: 1.22,
-    defMul: 1.44,
-    spdMul: 0.64,
-    gripMul: 1.28,
+    name: '純金ゴールド',
+    weightMul: 1.50,
+    atkMul: 1.24,
+    defMul: 1.42,
+    spdMul: 0.65,
+    gripMul: 1.25,
     spinMul: 0.78,
     restitution: 0.88,
     defaultColor: '#f59e0b',
     defaultDepth: '#451a03',
     strokeColor: '#fef08a',
     metallic: true,
-    metalType: 'gold'
+    matType: 'gold'
   },
 
-  // --- New Ultra-Realistic Metal Materials ---
-  titanium: {
-    id: 'titanium',
+  // --- 後方互換性エイリアス (Legacy compatibility) ---
+  mecha: {
+    id: 'mecha',
     name: 'チタン合金',
     weightMul: 1.18,
-    atkMul: 1.25,
+    atkMul: 1.18,
     defMul: 1.25,
-    spdMul: 1.08,
+    spdMul: 1.05,
     gripMul: 0.95,
     spinMul: 1.05,
-    restitution: 0.92,
-    defaultColor: '#94a3b8',
-    defaultDepth: '#1e293b',
-    strokeColor: '#f1f5f9',
+    restitution: 0.90,
+    defaultColor: '#38bdf8',
+    defaultDepth: '#0f172a',
+    strokeColor: '#e0f2fe',
     metallic: true,
-    metalType: 'titanium'
+    matType: 'titanium'
+  },
+  neon: {
+    id: 'neon',
+    name: '強化ガラス',
+    weightMul: 1.08,
+    atkMul: 1.25,
+    defMul: 0.80,
+    spdMul: 1.38,
+    gripMul: 0.45,
+    spinMul: 1.30,
+    restitution: 1.05,
+    defaultColor: '#06b6d4',
+    defaultDepth: '#083344',
+    strokeColor: '#a5f3fc',
+    metallic: false,
+    matType: 'glass'
   },
   chrome: {
     id: 'chrome',
-    name: '鏡面クロム',
-    weightMul: 1.15,
-    atkMul: 1.30,
-    defMul: 1.10,
-    spdMul: 1.20,
-    gripMul: 0.80,
-    spinMul: 1.22,
-    restitution: 0.96,
-    defaultColor: '#e2e8f0',
-    defaultDepth: '#0f172a',
+    name: '強化ガラス',
+    weightMul: 1.08,
+    atkMul: 1.25,
+    defMul: 0.80,
+    spdMul: 1.38,
+    gripMul: 0.45,
+    spinMul: 1.30,
+    restitution: 1.05,
+    defaultColor: '#06b6d4',
+    defaultDepth: '#083344',
     strokeColor: '#ffffff',
-    metallic: true,
-    metalType: 'chrome'
+    metallic: false,
+    matType: 'glass'
   },
   damascus: {
     id: 'damascus',
-    name: '鍛造鋼鉄',
-    weightMul: 1.35,
-    atkMul: 1.45,
-    defMul: 1.35,
-    spdMul: 0.88,
-    gripMul: 1.05,
-    spinMul: 0.95,
-    restitution: 0.90,
-    defaultColor: '#1e2530',
-    defaultDepth: '#080c14',
-    strokeColor: '#cbd5e1',
+    name: 'ブレード鋼',
+    weightMul: 1.06,
+    atkMul: 1.58,
+    defMul: 0.70,
+    spdMul: 1.15,
+    gripMul: 0.65,
+    spinMul: 1.25,
+    restitution: 0.96,
+    defaultColor: '#ef4444',
+    defaultDepth: '#450a0a',
+    strokeColor: '#fecaca',
     metallic: true,
-    metalType: 'damascus'
+    matType: 'blade'
   },
   brass: {
     id: 'brass',
-    name: '真鍮ブロンズ',
-    weightMul: 1.40,
-    atkMul: 1.15,
-    defMul: 1.40,
-    spdMul: 0.72,
-    gripMul: 1.22,
-    spinMul: 0.82,
-    restitution: 0.82,
-    defaultColor: '#b48344',
-    defaultDepth: '#3b250e',
-    strokeColor: '#fde68a',
+    name: '純金ゴールド',
+    weightMul: 1.50,
+    atkMul: 1.24,
+    defMul: 1.42,
+    spdMul: 0.65,
+    gripMul: 1.25,
+    spinMul: 0.78,
+    restitution: 0.88,
+    defaultColor: '#f59e0b',
+    defaultDepth: '#451a03',
+    strokeColor: '#fef08a',
     metallic: true,
-    metalType: 'brass'
+    matType: 'gold'
   }
 };
 
@@ -1239,7 +1335,8 @@ function calculateMachineSpec(build) {
       flipX: Boolean(g.flipX),
       flipY: Boolean(g.flipY),
       sharpness: info.sharpness,
-      restitution: mat.restitution
+      restitution: mat.restitution,
+      fontStyle: g.fontStyle || 'heavy'
     });
   });
 
@@ -1478,77 +1575,72 @@ function drawEraserMachine(ctx, x, y, angle, build, options = {}) {
     ctx.lineWidth = Math.max(4.5, fontPx * 0.19);
     ctx.strokeText(sb.char, 0, 0);
 
-    // 3. Ultra-Realistic Multi-Stop Metal Shader Fill
+    // 3. Multi-Material Procedural Shader Fill (Diverse Materials)
     const grad = ctx.createLinearGradient(-fontPx * 0.35, -fontPx * 0.45, fontPx * 0.35, fontPx * 0.45);
-    
-    if (isMatChrome) {
-      // High-Gloss Mirror Chrome Sky & Earth Reflection
+    const mId = sb.matId || 'eraser';
+
+    if (mId === 'eraser') {
+      // 1. Pure Matte White Eraser with Blue Brand Sleeve Accent
       grad.addColorStop(0, '#ffffff');
-      grad.addColorStop(0.22, '#e2e8f0');
-      grad.addColorStop(0.46, '#94a3b8');
-      grad.addColorStop(0.50, '#334155');
-      grad.addColorStop(0.54, '#0f172a');
-      grad.addColorStop(0.72, '#64748b');
-      grad.addColorStop(0.88, '#cbd5e1');
+      grad.addColorStop(0.55, '#f1f5f9');
+      grad.addColorStop(0.75, '#e2e8f0');
+      grad.addColorStop(1, '#0284c7');
+    } else if (mId === 'wood') {
+      // 2. Natural Hinoki & Walnut Grain Wood
+      grad.addColorStop(0, '#fde68a');
+      grad.addColorStop(0.25, '#d97706');
+      grad.addColorStop(0.50, '#92400e');
+      grad.addColorStop(0.75, '#b45309');
+      grad.addColorStop(1, '#451a03');
+    } else if (mId === 'glass' || mId === 'chrome' || mId === 'neon') {
+      // 3. Crystal Toughened Glass (Translucent Cyan/Emerald Sheen)
+      grad.addColorStop(0, '#ffffff');
+      grad.addColorStop(0.20, '#a5f3fc');
+      grad.addColorStop(0.50, '#06b6d4');
+      grad.addColorStop(0.70, '#0891b2');
+      grad.addColorStop(0.85, '#67e8f9');
       grad.addColorStop(1, '#ffffff');
-    } else if (isMatTitanium) {
-      // Brushed Aerospace Titanium Alloy
-      grad.addColorStop(0, '#f8fafc');
-      grad.addColorStop(0.25, '#cbd5e1');
-      grad.addColorStop(0.48, '#64748b');
-      grad.addColorStop(0.55, '#475569');
-      grad.addColorStop(0.78, '#94a3b8');
-      grad.addColorStop(1, '#cbd5e1');
-    } else if (isMatDamascus) {
-      // Forged Damascus Carbon Steel
-      grad.addColorStop(0, '#475569');
-      grad.addColorStop(0.24, '#1e293b');
-      grad.addColorStop(0.48, '#0b0f17');
-      grad.addColorStop(0.52, '#334155');
-      grad.addColorStop(0.76, '#0f172a');
-      grad.addColorStop(1, '#1e293b');
-    } else if (isMatBrass) {
-      // Tactical Heavy Brass / Munition Bronze
-      grad.addColorStop(0, '#fef08a');
-      grad.addColorStop(0.25, '#f59e0b');
-      grad.addColorStop(0.50, '#78350f');
-      grad.addColorStop(0.55, '#451a03');
-      grad.addColorStop(0.78, '#b45309');
-      grad.addColorStop(1, '#fde047');
-    } else if (isMatGold) {
-      // Royal Alloy Solid Gold
+    } else if (mId === 'stone') {
+      // 4. Heavy Granite & Basalt Rock
+      grad.addColorStop(0, '#94a3b8');
+      grad.addColorStop(0.30, '#64748b');
+      grad.addColorStop(0.60, '#334155');
+      grad.addColorStop(0.80, '#1e293b');
+      grad.addColorStop(1, '#475569');
+    } else if (mId === 'slime') {
+      // 5. Viscous Neon Slime Gel
+      grad.addColorStop(0, '#a7f3d0');
+      grad.addColorStop(0.35, '#34d399');
+      grad.addColorStop(0.65, '#059669');
+      grad.addColorStop(1, '#10b981');
+    } else if (mId === 'rubber') {
+      // 6. Matte Elastomer Tire Rubber
+      grad.addColorStop(0, '#64748b');
+      grad.addColorStop(0.50, '#334155');
+      grad.addColorStop(1, '#0f172a');
+    } else if (mId === 'blade' || mId === 'damascus') {
+      // 7. Crimson Tempered Blade Steel
+      grad.addColorStop(0, '#fee2e2');
+      grad.addColorStop(0.28, '#ef4444');
+      grad.addColorStop(0.52, '#7f1d1d');
+      grad.addColorStop(0.78, '#b91c1c');
+      grad.addColorStop(1, '#f87171');
+    } else if (mId === 'gold' || mId === 'brass') {
+      // 8. Royal Solid Gold
       grad.addColorStop(0, '#fffbeb');
       grad.addColorStop(0.22, '#fef08a');
       grad.addColorStop(0.48, '#f59e0b');
       grad.addColorStop(0.54, '#78350f');
       grad.addColorStop(0.80, '#fbbf24');
       grad.addColorStop(1, '#fef08a');
-    } else if (isMatBlade) {
-      // Crimson Anodized Hardened Blade
-      grad.addColorStop(0, '#fee2e2');
-      grad.addColorStop(0.28, '#ef4444');
-      grad.addColorStop(0.52, '#7f1d1d');
-      grad.addColorStop(0.78, '#b91c1c');
-      grad.addColorStop(1, '#f87171');
-    } else if (isMatNeon) {
-      // Radiant Cyber Glow
-      grad.addColorStop(0, '#d1fae5');
-      grad.addColorStop(0.35, '#10b981');
-      grad.addColorStop(0.65, '#047857');
-      grad.addColorStop(1, '#34d399');
-    } else if (sb.matId === 'rubber') {
-      // Matte Elastomer Eraser
-      grad.addColorStop(0, lightenHex(sb.color, 18));
-      grad.addColorStop(0.55, sb.color);
-      grad.addColorStop(1, darkenHex(sb.color, 24));
     } else {
-      // Anodized Mecha Alloy (Custom user color with metallic sheen)
-      grad.addColorStop(0, lightenHex(sb.color, 38));
-      grad.addColorStop(0.28, lightenHex(sb.color, 14));
-      grad.addColorStop(0.50, darkenHex(sb.color, 22));
-      grad.addColorStop(0.54, darkenHex(sb.color, 42));
-      grad.addColorStop(0.78, sb.color);
-      grad.addColorStop(1, lightenHex(sb.color, 24));
+      // 9. Titanium Alloy (Default Metal)
+      grad.addColorStop(0, '#f8fafc');
+      grad.addColorStop(0.25, '#cbd5e1');
+      grad.addColorStop(0.48, '#64748b');
+      grad.addColorStop(0.55, '#475569');
+      grad.addColorStop(0.78, '#94a3b8');
+      grad.addColorStop(1, '#cbd5e1');
     }
 
     ctx.fillStyle = grad;

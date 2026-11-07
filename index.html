@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>消しバトNeo [PC Edition] - 文字合体クラフト＆物理バトル</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Kaisei+Decol:wght@700&family=M+PLUS+Rounded+1c:wght@800&family=Yuji+Boku&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
 </head>
 <body class="no-scrollbar">
@@ -113,25 +116,25 @@
               <div class="tactical-select-row">
                 <label>選択文字の書体:</label>
                 <select id="selectedFontSelect" class="tactical-select">
-                  <option value="heavy">重装角ゴシック (HEAVY GOTHIC)</option>
-                  <option value="mecha">鋭角メカ明朝 (BLADE MINCHO)</option>
-                  <option value="stencil">ミリタリー極太 (STENCIL TITAN)</option>
-                  <option value="cyber">サイバー等幅 (CYBER MONO)</option>
-                  <option value="brush">武神豪快筆 (WARRIOR BRUSH)</option>
+                  <option value="heavy">極太角ゴシック (HEAVY GOTHIC)</option>
+                  <option value="mecha">鋭角ブレード明朝 (BLADE MINCHO)</option>
+                  <option value="stencil">弾力丸ゴシック (ROUND SLUGGER)</option>
+                  <option value="brush">豪快武神毛筆 (WARRIOR BRUSH)</option>
+                  <option value="cyber">サイバー等幅コード (CYBER MONO)</option>
                 </select>
               </div>
 
               <!-- 9 Materials -->
               <div class="material-selector-grid" id="selectedMaterialGroup">
-                <button class="mat-pill" data-mat="mecha">重装メタル</button>
-                <button class="mat-pill" data-mat="titanium">チタン合金</button>
-                <button class="mat-pill" data-mat="chrome">鏡面クロム</button>
-                <button class="mat-pill" data-mat="damascus">鍛造鋼鉄</button>
-                <button class="mat-pill" data-mat="brass">真鍮ブロンズ</button>
-                <button class="mat-pill" data-mat="blade">超硬ブレード</button>
-                <button class="mat-pill" data-mat="gold">黄金合金</button>
-                <button class="mat-pill" data-mat="neon">サイバー発光</button>
-                <button class="mat-pill" data-mat="rubber">消しゴム</button>
+                <button class="mat-pill active" data-mat="eraser" title="消しゴム: 高摩擦・踏ん張り・標準バランサー">消しゴム</button>
+                <button class="mat-pill" data-mat="rubber" title="強化ゴム: 超弾性・高反発・ショック吸収">強化ゴム</button>
+                <button class="mat-pill" data-mat="wood" title="天然銘木: 超軽量・機敏・高回転スピン">天然木材</button>
+                <button class="mat-pill" data-mat="glass" title="強化ガラス: 超低摩擦・高速滑走・クリスタル">強化ガラス</button>
+                <button class="mat-pill" data-mat="stone" title="花崗岩石: 超重量・ノックバック激減・不動">花崗岩石</button>
+                <button class="mat-pill" data-mat="slime" title="粘着ゲル: 衝撃減衰・相手の速度低下">粘着ゲル</button>
+                <button class="mat-pill" data-mat="titanium" title="チタン合金: 高剛性・メタルバランス">チタン合金</button>
+                <button class="mat-pill" data-mat="blade" title="ブレード鋼: 鋭角攻撃・ノックバック大">ブレード鋼</button>
+                <button class="mat-pill" data-mat="gold" title="純金ゴールド: 超高比重・ヘビーウェイト">純金ゴールド</button>
               </div>
               <div class="color-picker-row">
                 <label>表面の色</label>
@@ -210,11 +213,11 @@
               <div class="tactical-select-row">
                 <label>フォント書体:</label>
                 <select id="defaultFontSelect" class="tactical-select">
-                  <option value="heavy" selected>重装角ゴシック (HEAVY GOTHIC)</option>
-                  <option value="mecha">鋭角メカ明朝 (BLADE MINCHO)</option>
-                  <option value="stencil">ミリタリー極太 (STENCIL TITAN)</option>
-                  <option value="cyber">サイバー等幅 (CYBER MONO)</option>
-                  <option value="brush">武神豪快筆 (WARRIOR BRUSH)</option>
+                  <option value="heavy">極太角ゴシック (HEAVY GOTHIC)</option>
+                  <option value="mecha">鋭角ブレード明朝 (BLADE MINCHO)</option>
+                  <option value="stencil">弾力丸ゴシック (ROUND SLUGGER)</option>
+                  <option value="brush">豪快武神毛筆 (WARRIOR BRUSH)</option>
+                  <option value="cyber">サイバー等幅コード (CYBER MONO)</option>
                 </select>
               </div>
 

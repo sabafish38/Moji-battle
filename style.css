@@ -896,20 +896,21 @@ button:active {
 }
 
 .mat-pill {
-  padding: 7px 4px;
+  padding: 9px 8px;
   background: #111722;
   border: 1px solid var(--border-tech);
-  color: #e2e8f0;
-  font-size: 11.5px;
+  color: #f1f5f9;
+  font-size: 13px;
   font-weight: 800;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.03em;
   cursor: pointer;
   text-align: center;
   transform: skewX(-6deg);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  transition: all 0.12s ease;
 }
 
 .mat-pill:hover {
