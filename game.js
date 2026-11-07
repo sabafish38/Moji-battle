@@ -4675,6 +4675,128 @@ function resolveRoundEnd() {
   }
 }
 
+function updateBattleTelemetryPanels(u1, u2) {
+  if (!u1 || !u2) return;
+
+  // --- 1P ALLY PANEL ---
+  const p1NameEl = document.getElementById('battleP1MachineName');
+  if (p1NameEl) p1NameEl.textContent = u1.spec.name;
+  const p1TypeEl = document.getElementById('battleP1TypeBadge');
+  if (p1TypeEl) p1TypeEl.textContent = u1.spec.buildType;
+  const p1WeightEl = document.getElementById('battleP1WeightVal');
+  if (p1WeightEl) p1WeightEl.textContent = `${u1.spec.weight}g`;
+  const p1AtkEl = document.getElementById('battleP1AtkVal');
+  if (p1AtkEl) p1AtkEl.textContent = u1.spec.atk;
+  const p1DefEl = document.getElementById('battleP1DefVal');
+  if (p1DefEl) p1DefEl.textContent = u1.spec.def;
+  const p1SpdEl = document.getElementById('battleP1SpdVal');
+  if (p1SpdEl) p1SpdEl.textContent = u1.spec.spd;
+
+  const p1HpEl = document.getElementById('battleP1HpVal');
+  if (p1HpEl) p1HpEl.textContent = `${u1.damagePct}%`;
+  const p1HpBar = document.getElementById('battleP1HpBar');
+  if (p1HpBar) {
+    p1HpBar.style.width = `${Math.min(100, Math.max(0, u1.damagePct))}%`;
+  }
+
+  // 1P Spin Badge
+  const p1SpinEl = document.getElementById('battleP1SpinBadge');
+  if (p1SpinEl) {
+    const spinLabels = {
+      top: '前進 [DRIVE] (突進・押し込み)',
+      normal: '標準 [NORMAL] (バランス直進)',
+      back: 'ブレーキ [BACK] (急停止・自滅防止)'
+    };
+    p1SpinEl.textContent = spinLabels[selectedSpinType] || '標準 [NORMAL]';
+  }
+
+  // 1P Glyphs Chips
+  const p1GlyphsContainer = document.getElementById('battleP1GlyphsList');
+  if (p1GlyphsContainer && (!p1GlyphsContainer._cachedCount || p1GlyphsContainer._cachedCount !== u1.build.glyphs.length)) {
+    p1GlyphsContainer._cachedCount = u1.build.glyphs.length;
+    p1GlyphsContainer.innerHTML = '';
+    u1.build.glyphs.forEach(g => {
+      const mat = GLYPH_MATERIALS[g.mat] || GLYPH_MATERIALS.mecha;
+      const chip = document.createElement('div');
+      chip.className = 'battle-glyph-chip';
+      chip.innerHTML = `<span class="chip-char">${g.char}</span><span class="chip-mat">${mat.name}</span>`;
+      p1GlyphsContainer.appendChild(chip);
+    });
+  }
+
+  // --- 2P / CPU ENEMY RIVAL PANEL ---
+  const p2NameEl = document.getElementById('battleP2MachineName');
+  if (p2NameEl) p2NameEl.textContent = u2.spec.name;
+  const p2TypeEl = document.getElementById('battleP2TypeBadge');
+  if (p2TypeEl) p2TypeEl.textContent = u2.spec.buildType;
+  const p2WeightEl = document.getElementById('battleP2WeightVal');
+  if (p2WeightEl) p2WeightEl.textContent = `${u2.spec.weight}g`;
+  const p2AtkEl = document.getElementById('battleP2AtkVal');
+  if (p2AtkEl) p2AtkEl.textContent = u2.spec.atk;
+  const p2DefEl = document.getElementById('battleP2DefVal');
+  if (p2DefEl) p2DefEl.textContent = u2.spec.def;
+  const p2SpdEl = document.getElementById('battleP2SpdVal');
+  if (p2SpdEl) p2SpdEl.textContent = u2.spec.spd;
+
+  const p2HpEl = document.getElementById('battleP2HpVal');
+  if (p2HpEl) p2HpEl.textContent = `${u2.damagePct}%`;
+  const p2HpBar = document.getElementById('battleP2HpBar');
+  if (p2HpBar) {
+    p2HpBar.style.width = `${Math.min(100, Math.max(0, u2.damagePct))}%`;
+  }
+
+  // 2P Glyphs Chips
+  const p2GlyphsContainer = document.getElementById('battleP2GlyphsList');
+  if (p2GlyphsContainer && (!p2GlyphsContainer._cachedName || p2GlyphsContainer._cachedName !== u2.spec.name)) {
+    p2GlyphsContainer._cachedName = u2.spec.name;
+    p2GlyphsContainer.innerHTML = '';
+    u2.build.glyphs.forEach(g => {
+      const mat = GLYPH_MATERIALS[g.mat] || GLYPH_MATERIALS.mecha;
+      const chip = document.createElement('div');
+      chip.className = 'battle-glyph-chip';
+      chip.innerHTML = `<span class="chip-char">${g.char}</span><span class="chip-mat">${mat.name}</span>`;
+      p2GlyphsContainer.appendChild(chip);
+    });
+  }
+
+  // Tactics Hint (Weakness analysis based on enemy specs and stage)
+  const tacticsEl = document.getElementById('battleP2TacticsHint');
+  if (tacticsEl) {
+    const hints = [];
+    const diffWeight = u2.spec.weight - u1.spec.weight;
+    if (diffWeight > 3.0) {
+      hints.push('超重量級機体。正面衝突は押し負けやすいため、外周への誘い込みや横突撃を狙いましょう。');
+    } else if (diffWeight < -3.0) {
+      hints.push('自機より軽量。強打を命中させれば大ノックバックで一気に場外落下を狙えます。');
+    }
+
+    if (u2.spec.atk >= 75) {
+      hints.push('高火力突進タイプ。相手の初動直撃を避け、ブレーキ(スピン3)でいなすのが有効です。');
+    } else if (u2.spec.def >= 75) {
+      hints.push('強固な装甲要塞。衝突ダメージでは削りにくいため、リングアウト勝利を優先しましょう。');
+    }
+
+    if (battleState.stage === 'ice_glass') {
+      hints.push('超低摩擦ガラス面。衝突後の滑走距離が伸びるため自滅に注意してください。');
+    } else if (battleState.stage === 'colosseum') {
+      hints.push('狭小円卓。中央付近を維持し、突進押し込み(スピン1)で場外へ弾き出せます。');
+    } else if (battleState.stage === 'stationery') {
+      hints.push('文房具障害物あり。角や消しゴムをクッション壁として反射ショットを活用できます。');
+    }
+
+    tacticsEl.textContent = hints.length > 0
+      ? hints.join(' ')
+      : 'バランス型機体。角度を付けて相手の側面に文字の突起をヒットさせましょう。';
+  }
+
+  // Stage Info Desc
+  const stageDescEl = document.getElementById('battleStageInfoDesc');
+  if (stageDescEl) {
+    const stg = BATTLE_STAGES[battleState.stage] || BATTLE_STAGES.standard;
+    stageDescEl.textContent = `${stg.name} - ${stg.desc || '標準的な机上バトルフィールド。'}`;
+  }
+}
+
 function updateBattleHUD() {
   const u1 = battleState.units[0];
   const u2 = battleState.units[1];
@@ -4741,6 +4863,7 @@ function updateBattleHUD() {
   } else {
     skillBtn.classList.add('hidden');
   }
+  updateBattleTelemetryPanels(u1, u2);
 }
 
 // Battle Canvas Slingshot Input

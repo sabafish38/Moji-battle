@@ -2007,6 +2007,279 @@ button:active {
   letter-spacing: 0.04em;
 }
 
+/* ================= BATTLE 3-COLUMN COCKPIT LAYOUT ================= */
+.battle-cockpit-layout {
+  display: grid;
+  grid-template-columns: 290px minmax(520px, 1fr) 290px;
+  width: 100%;
+  height: calc(100% - 70px - 54px);
+  min-height: 0;
+  overflow: hidden;
+  background: #05080e;
+  gap: 1px;
+}
+
+@media (min-width: 1680px) {
+  .battle-cockpit-layout {
+    grid-template-columns: 330px minmax(620px, 1fr) 330px;
+  }
+}
+
+@media (max-width: 1280px) {
+  .battle-cockpit-layout {
+    grid-template-columns: 250px minmax(460px, 1fr) 250px;
+  }
+}
+
+/* Battle Telemetry Sidebars */
+.battle-telemetry-panel {
+  background: var(--bg-panel);
+  backdrop-filter: blur(14px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 16px;
+  overflow-y: auto;
+  position: relative;
+  z-index: 5;
+}
+
+.battle-telemetry-panel.p1-telemetry {
+  border-right: 1px solid var(--border-tech);
+}
+
+.battle-telemetry-panel.p2-telemetry {
+  border-left: 1px solid var(--border-tech);
+}
+
+/* Section Title Badges */
+.panel-section-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  font-family: var(--font-family-mono);
+  font-size: 10.5px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border-radius: 2px;
+  width: fit-content;
+}
+
+.panel-section-badge.ally {
+  background: rgba(0, 229, 255, 0.15);
+  color: var(--apex-cyan);
+  border: 1px solid rgba(0, 229, 255, 0.4);
+}
+
+.panel-section-badge.rival {
+  background: rgba(235, 45, 58, 0.15);
+  color: var(--apex-red);
+  border: 1px solid rgba(235, 45, 58, 0.4);
+}
+
+/* Machine Header */
+.telemetry-machine-header {
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 8px;
+}
+
+.telemetry-machine-header h3 {
+  font-size: 20px;
+  font-weight: 900;
+  color: #ffffff;
+  margin: 0 0 4px 0;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.telemetry-type-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--apex-cyan);
+  background: rgba(0, 229, 255, 0.1);
+  padding: 2px 6px;
+  border-radius: 2px;
+}
+
+.telemetry-type-badge.rival {
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.12);
+}
+
+/* Spec 2x2 Grid */
+.telemetry-spec-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-tech);
+  padding: 10px 12px;
+}
+
+.telemetry-spec-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.telemetry-spec-item .spec-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.telemetry-spec-item strong {
+  font-size: 16px;
+  font-weight: 900;
+  color: #f8fafc;
+  font-family: var(--font-family-mono);
+}
+
+/* Stability / HP Bar Box */
+.telemetry-stability-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border-tech);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stability-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: #cbd5e1;
+}
+
+.stability-header strong {
+  font-size: 16px;
+  font-weight: 900;
+  color: #ffffff;
+}
+
+.telemetry-bar-track {
+  height: 12px;
+  background: #080b11;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.telemetry-bar-fill {
+  height: 100%;
+  transition: width 0.25s ease;
+}
+
+.telemetry-bar-fill.p1 {
+  background: linear-gradient(90deg, #0284c7, var(--apex-cyan));
+  box-shadow: 0 0 10px var(--apex-cyan-glow);
+}
+
+.telemetry-bar-fill.p2 {
+  background: linear-gradient(90deg, #ea580c, var(--apex-red));
+  box-shadow: 0 0 10px var(--apex-red-glow);
+}
+
+/* Telemetry Box Generic */
+.telemetry-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border-tech);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.telemetry-box .box-title {
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #94a3b8;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* Glyph Chips */
+.battle-glyph-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.battle-glyph-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #151d2c;
+  border: 1px solid var(--border-tech);
+  padding: 3px 8px;
+  border-radius: 2px;
+}
+
+.battle-glyph-chip .chip-char {
+  font-size: 16px;
+  font-weight: 900;
+  color: #ffffff;
+}
+
+.battle-glyph-chip .chip-mat {
+  font-size: 10.5px;
+  color: #94a3b8;
+  font-weight: 700;
+}
+
+/* Current Spin Badge */
+.current-spin-badge {
+  font-size: 13px;
+  font-weight: 900;
+  color: #38bdf8;
+  background: rgba(14, 165, 233, 0.12);
+  padding: 6px 10px;
+  border-left: 3px solid #38bdf8;
+}
+
+/* Operation Hint List */
+.telemetry-hint-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.telemetry-hint-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #cbd5e1;
+}
+
+/* Tactics Desc Box */
+.tactics-desc {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.08);
+  padding: 8px 10px;
+  border-left: 3px solid var(--apex-red);
+}
+
+/* Stage Desc Box */
+.stage-desc {
+  font-size: 12px;
+  line-height: 1.45;
+  color: #e2e8f0;
+}
+
+
 /* ================= ARENA CONTAINER & CONTROLS ================= */
 .arena-container {
   flex: 1;

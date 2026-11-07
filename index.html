@@ -513,24 +513,146 @@
         </div>
       </div>
 
-      <!-- Battle Canvas Container -->
-      <main class="arena-container" id="arenaContainer">
-        <canvas id="gameCanvas"></canvas>
+      <!-- Battle 3-Column Cockpit Layout (Center Arena with Dual Flank Telemetry) -->
+      <div class="battle-cockpit-layout">
+        <!-- LEFT FLANK: 1P Ally Machine Telemetry Dock -->
+        <aside class="battle-telemetry-panel p1-telemetry no-scrollbar" id="battleP1Panel">
+          <div class="panel-section-badge ally">1P 自機テレメトリ</div>
+          <div class="telemetry-machine-header">
+            <h3 id="battleP1MachineName">自機</h3>
+            <span class="telemetry-type-badge" id="battleP1TypeBadge">バランス型</span>
+          </div>
 
-        <!-- Non-intrusive Action Toast Notification -->
-        <div id="battleToast" class="battle-toast hidden"></div>
+          <div class="telemetry-spec-grid">
+            <div class="telemetry-spec-item">
+              <span class="spec-label">総重量</span>
+              <strong id="battleP1WeightVal">25.0g</strong>
+            </div>
+            <div class="telemetry-spec-item">
+              <span class="spec-label">攻撃力</span>
+              <strong id="battleP1AtkVal">65</strong>
+            </div>
+            <div class="telemetry-spec-item">
+              <span class="spec-label">防御力</span>
+              <strong id="battleP1DefVal">60</strong>
+            </div>
+            <div class="telemetry-spec-item">
+              <span class="spec-label">機動力</span>
+              <strong id="battleP1SpdVal">70</strong>
+            </div>
+          </div>
 
-        <button id="skillActionBtn" class="skill-action-btn hidden">
-          <span class="skill-key-hint">[SPACE / TAP] ACTIVE SKILL</span>
-          <span class="skill-btn-title" id="skillBtnTitle">文字剣・一閃突破！</span>
-        </button>
+          <div class="telemetry-stability-box">
+            <div class="stability-header">
+              <span>機体耐久度 (HP)</span>
+              <strong id="battleP1HpVal">100%</strong>
+            </div>
+            <div class="telemetry-bar-track">
+              <div class="telemetry-bar-fill p1" id="battleP1HpBar" style="width: 100%"></div>
+            </div>
+          </div>
 
-        <div id="centerBanner" class="center-banner hidden">
-          <div class="banner-sub" id="bannerSub">ROUND 1</div>
-          <div class="banner-main" id="bannerMain">FIGHT!!</div>
-          <div class="banner-desc" id="bannerDesc">文字の輪郭と質量で相手を机から弾き落とせ！</div>
-        </div>
-      </main>
+          <div class="telemetry-box">
+            <div class="box-title">合体文字パーツ構成</div>
+            <div class="battle-glyph-tags" id="battleP1GlyphsList">
+              <!-- Dynamically populated glyph chips -->
+            </div>
+          </div>
+
+          <div class="telemetry-box">
+            <div class="box-title">現在のスピン回転</div>
+            <div class="current-spin-badge" id="battleP1SpinBadge">標準 [NORMAL]</div>
+          </div>
+
+          <div class="telemetry-box operation-hint-box">
+            <div class="box-title">PC操作ショートカット</div>
+            <ul class="telemetry-hint-list">
+              <li><kbd>左ドラッグ</kbd> 照準・発射</li>
+              <li><kbd>右クリック</kbd> 照準キャンセル</li>
+              <li><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> スピン切替</li>
+              <li><kbd>Space</kbd> 必殺技発動</li>
+            </ul>
+          </div>
+        </aside>
+
+        <!-- CENTER: Arena Canvas Container -->
+        <main class="arena-container" id="arenaContainer">
+          <canvas id="gameCanvas"></canvas>
+
+          <!-- Non-intrusive Action Toast Notification -->
+          <div id="battleToast" class="battle-toast hidden"></div>
+
+          <button id="skillActionBtn" class="skill-action-btn hidden">
+            <span class="skill-key-hint">[SPACE / TAP] ACTIVE SKILL</span>
+            <span class="skill-btn-title" id="skillBtnTitle">奥義発動！</span>
+          </button>
+
+          <div id="centerBanner" class="center-banner hidden">
+            <div class="banner-sub" id="bannerSub">ROUND 1</div>
+            <div class="banner-main" id="bannerMain">FIGHT!!</div>
+            <div class="banner-desc" id="bannerDesc">文字の輪郭と質量で相手を弾き飛ばせ！</div>
+          </div>
+        </main>
+
+        <!-- RIGHT FLANK: 2P / CPU Rival Machine Telemetry & Weakness Scanner -->
+        <aside class="battle-telemetry-panel p2-telemetry no-scrollbar" id="battleP2Panel">
+          <div class="panel-section-badge rival">ENEMY 相手機体スキャン</div>
+          <div class="telemetry-machine-header rival">
+            <h3 id="battleP2MachineName">相手機体</h3>
+            <span class="telemetry-type-badge rival" id="battleP2TypeBadge">突進アタッカー</span>
+          </div>
+
+          <div class="telemetry-spec-grid rival">
+            <div class="telemetry-spec-item">
+              <span class="spec-label">推定重量</span>
+              <strong id="battleP2WeightVal">28.0g</strong>
+            </div>
+            <div class="telemetry-spec-item">
+              <span class="spec-label">攻撃力</span>
+              <strong id="battleP2AtkVal">75</strong>
+            </div>
+            <div class="telemetry-spec-item">
+              <span class="spec-label">防御力</span>
+              <strong id="battleP2DefVal">55</strong>
+            </div>
+            <div class="telemetry-spec-item">
+              <span class="spec-label">機動力</span>
+              <strong id="battleP2SpdVal">60</strong>
+            </div>
+          </div>
+
+          <div class="telemetry-stability-box">
+            <div class="stability-header">
+              <span>相手機体耐久度 (HP)</span>
+              <strong id="battleP2HpVal">100%</strong>
+            </div>
+            <div class="telemetry-bar-track rival">
+              <div class="telemetry-bar-fill p2" id="battleP2HpBar" style="width: 100%"></div>
+            </div>
+          </div>
+
+          <div class="telemetry-box">
+            <div class="box-title">相手の合体文字パーツ</div>
+            <div class="battle-glyph-tags" id="battleP2GlyphsList">
+              <!-- Dynamically populated rival glyph chips -->
+            </div>
+          </div>
+
+          <div class="telemetry-box tactics-box">
+            <div class="box-title">戦術アドバイス // 弱点分析</div>
+            <div class="tactics-desc" id="battleP2TacticsHint">
+              相手の機体構造と重心バランスをリアルタイム解析中...
+            </div>
+          </div>
+
+          <div class="telemetry-box stage-box">
+            <div class="box-title">環境・ステージ情報</div>
+            <div class="stage-desc" id="battleStageInfoDesc">
+              超円卓ガラス・低摩擦
+            </div>
+          </div>
+        </aside>
+      </div>
 
       <!-- Bottom Battle Controls (PC Desktop Command Deck) -->
       <footer class="hud-footer">
