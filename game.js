@@ -1549,6 +1549,7 @@ function drawEraserMachine(ctx, x, y, angle, build, options = {}) {
 
     // 2. Tactical Chassis Outline & Precision Edge
     const mat = GLYPH_MATERIALS[sb.matId] || GLYPH_MATERIALS.mecha;
+    const baseCol = sb.color || mat.defaultColor || '#38bdf8';
     const isMatChrome = sb.matId === 'chrome';
     const isMatTitanium = sb.matId === 'titanium';
     const isMatDamascus = sb.matId === 'damascus';
@@ -1557,90 +1558,89 @@ function drawEraserMachine(ctx, x, y, angle, build, options = {}) {
     const isMatBlade = sb.matId === 'blade';
     const isMatNeon = sb.matId === 'neon';
 
-    ctx.strokeStyle = isMatChrome
-      ? '#ffffff'
-      : isMatTitanium
-      ? '#f1f5f9'
-      : isMatDamascus
-      ? '#64748b'
-      : isMatBrass
-      ? '#fde68a'
-      : isMatGold
-      ? '#fef08a'
-      : isMatBlade
-      ? '#fecaca'
-      : isMatNeon
-      ? sb.color
-      : '#0f172a';
+    const brightness = getHexBrightness(baseCol);
+    let outlineCol;
+    if (isMatNeon) {
+      outlineCol = baseCol;
+    } else if (isMatChrome || isMatTitanium) {
+      outlineCol = lightenHex(baseCol, 45);
+    } else if (isMatGold || isMatBrass) {
+      outlineCol = lightenHex(baseCol, 38);
+    } else if (isMatBlade) {
+      outlineCol = lightenHex(baseCol, 40);
+    } else {
+      outlineCol = brightness < 45 ? lightenHex(baseCol, 35) : '#0f172a';
+    }
+    ctx.strokeStyle = outlineCol;
     ctx.lineWidth = Math.max(4.5, fontPx * 0.19);
     ctx.strokeText(sb.char, 0, 0);
 
-    // 3. Multi-Material Procedural Shader Fill (Diverse Materials)
+    // 3. Multi-Material Procedural Shader Fill (Diverse Materials + User Custom Surface Color)
     const grad = ctx.createLinearGradient(-fontPx * 0.35, -fontPx * 0.45, fontPx * 0.35, fontPx * 0.45);
     const mId = sb.matId || 'eraser';
 
     if (mId === 'eraser') {
-      // 1. Pure Matte White Eraser with Blue Brand Sleeve Accent
-      grad.addColorStop(0, '#ffffff');
-      grad.addColorStop(0.55, '#f1f5f9');
-      grad.addColorStop(0.75, '#e2e8f0');
-      grad.addColorStop(1, '#0284c7');
+      // 1. Eraser: Smooth matte texture with soft bevel lighting
+      grad.addColorStop(0, lightenHex(baseCol, 36));
+      grad.addColorStop(0.40, lightenHex(baseCol, 12));
+      grad.addColorStop(0.70, baseCol);
+      grad.addColorStop(1, darkenHex(baseCol, 24));
     } else if (mId === 'wood') {
-      // 2. Natural Hinoki & Walnut Grain Wood
-      grad.addColorStop(0, '#fde68a');
-      grad.addColorStop(0.25, '#d97706');
-      grad.addColorStop(0.50, '#92400e');
-      grad.addColorStop(0.75, '#b45309');
-      grad.addColorStop(1, '#451a03');
+      // 2. Natural Wood: Realistic grain striations modulated by surface color
+      grad.addColorStop(0, lightenHex(baseCol, 30));
+      grad.addColorStop(0.24, baseCol);
+      grad.addColorStop(0.48, darkenHex(baseCol, 26));
+      grad.addColorStop(0.74, lightenHex(baseCol, 10));
+      grad.addColorStop(1, darkenHex(baseCol, 42));
     } else if (mId === 'glass' || mId === 'chrome' || mId === 'neon') {
-      // 3. Crystal Toughened Glass (Translucent Cyan/Emerald Sheen)
-      grad.addColorStop(0, '#ffffff');
-      grad.addColorStop(0.20, '#a5f3fc');
-      grad.addColorStop(0.50, '#06b6d4');
-      grad.addColorStop(0.70, '#0891b2');
-      grad.addColorStop(0.85, '#67e8f9');
-      grad.addColorStop(1, '#ffffff');
+      // 3. Crystal Glass & Reflective: Brilliant specular catchlight and deep luster
+      grad.addColorStop(0, lightenHex(baseCol, 65));
+      grad.addColorStop(0.20, lightenHex(baseCol, 35));
+      grad.addColorStop(0.50, baseCol);
+      grad.addColorStop(0.72, darkenHex(baseCol, 18));
+      grad.addColorStop(0.86, lightenHex(baseCol, 38));
+      grad.addColorStop(1, lightenHex(baseCol, 60));
     } else if (mId === 'stone') {
-      // 4. Heavy Granite & Basalt Rock
-      grad.addColorStop(0, '#94a3b8');
-      grad.addColorStop(0.30, '#64748b');
-      grad.addColorStop(0.60, '#334155');
-      grad.addColorStop(0.80, '#1e293b');
-      grad.addColorStop(1, '#475569');
+      // 4. Granite & Basalt Rock: Heavy mineral matte finish
+      grad.addColorStop(0, lightenHex(baseCol, 24));
+      grad.addColorStop(0.30, baseCol);
+      grad.addColorStop(0.60, darkenHex(baseCol, 22));
+      grad.addColorStop(0.80, darkenHex(baseCol, 36));
+      grad.addColorStop(1, darkenHex(baseCol, 18));
     } else if (mId === 'slime') {
-      // 5. Viscous Neon Slime Gel
-      grad.addColorStop(0, '#a7f3d0');
-      grad.addColorStop(0.35, '#34d399');
-      grad.addColorStop(0.65, '#059669');
-      grad.addColorStop(1, '#10b981');
+      // 5. Viscous Slime Gel: Translucent core illumination
+      grad.addColorStop(0, lightenHex(baseCol, 48));
+      grad.addColorStop(0.35, lightenHex(baseCol, 22));
+      grad.addColorStop(0.68, baseCol);
+      grad.addColorStop(1, darkenHex(baseCol, 20));
     } else if (mId === 'rubber') {
-      // 6. Matte Elastomer Tire Rubber
-      grad.addColorStop(0, '#64748b');
-      grad.addColorStop(0.50, '#334155');
-      grad.addColorStop(1, '#0f172a');
+      // 6. Matte Elastomer Tire Rubber: High-density friction texture
+      grad.addColorStop(0, lightenHex(baseCol, 20));
+      grad.addColorStop(0.45, baseCol);
+      grad.addColorStop(1, darkenHex(baseCol, 36));
     } else if (mId === 'blade' || mId === 'damascus') {
-      // 7. Crimson Tempered Blade Steel
-      grad.addColorStop(0, '#fee2e2');
-      grad.addColorStop(0.28, '#ef4444');
-      grad.addColorStop(0.52, '#7f1d1d');
-      grad.addColorStop(0.78, '#b91c1c');
-      grad.addColorStop(1, '#f87171');
+      // 7. Tempered Blade Steel: High-contrast razor edge bevel
+      grad.addColorStop(0, lightenHex(baseCol, 52));
+      grad.addColorStop(0.26, baseCol);
+      grad.addColorStop(0.50, darkenHex(baseCol, 42));
+      grad.addColorStop(0.76, darkenHex(baseCol, 16));
+      grad.addColorStop(1, lightenHex(baseCol, 28));
     } else if (mId === 'gold' || mId === 'brass') {
-      // 8. Royal Solid Gold
-      grad.addColorStop(0, '#fffbeb');
-      grad.addColorStop(0.22, '#fef08a');
-      grad.addColorStop(0.48, '#f59e0b');
-      grad.addColorStop(0.54, '#78350f');
-      grad.addColorStop(0.80, '#fbbf24');
-      grad.addColorStop(1, '#fef08a');
+      // 8. Solid Gold / Brass: Rich reflective metallic gleam
+      grad.addColorStop(0, lightenHex(baseCol, 48));
+      grad.addColorStop(0.22, lightenHex(baseCol, 24));
+      grad.addColorStop(0.48, baseCol);
+      grad.addColorStop(0.54, darkenHex(baseCol, 36));
+      grad.addColorStop(0.80, lightenHex(baseCol, 26));
+      grad.addColorStop(1, baseCol);
     } else {
-      // 9. Titanium Alloy (Default Metal)
-      grad.addColorStop(0, '#f8fafc');
-      grad.addColorStop(0.25, '#cbd5e1');
-      grad.addColorStop(0.48, '#64748b');
-      grad.addColorStop(0.55, '#475569');
-      grad.addColorStop(0.78, '#94a3b8');
-      grad.addColorStop(1, '#cbd5e1');
+      // 9. Titanium Alloy & Advanced Composites: Precision machined aerospace sheen
+      grad.addColorStop(0, lightenHex(baseCol, 42));
+      grad.addColorStop(0.25, lightenHex(baseCol, 16));
+      grad.addColorStop(0.48, baseCol);
+      grad.addColorStop(0.56, darkenHex(baseCol, 26));
+      grad.addColorStop(0.80, lightenHex(baseCol, 12));
+      grad.addColorStop(1, darkenHex(baseCol, 18));
     }
 
     ctx.fillStyle = grad;
@@ -1736,6 +1736,14 @@ function drawEraserMachine(ctx, x, y, angle, build, options = {}) {
   }
 
   ctx.restore();
+}
+
+function getHexBrightness(hex) {
+  const num = parseInt((hex || '#38bdf8').replace('#', ''), 16) || 0x38bdf8;
+  const r = (num >> 16) & 0xff;
+  const g = (num >> 8) & 0xff;
+  const b = num & 0xff;
+  return (r * 299 + g * 587 + b * 114) / 1000;
 }
 
 function lightenHex(hex, percent) {
@@ -2804,8 +2812,14 @@ function updateCraftUI(skipLists = false) {
     document.getElementById('tuneOffsetY').value = Math.round(sel.y);
     document.getElementById('tuneOffsetYVal').textContent = `${Math.round(sel.y)}`;
 
-    document.getElementById('selectedColorInput').value = sel.color || '#38bdf8';
-    document.getElementById('selectedDepthColorInput').value = sel.depthColor || '#0f172a';
+    const colorInput = document.getElementById('selectedColorInput');
+    if (colorInput && document.activeElement !== colorInput) {
+      colorInput.value = sel.color || '#38bdf8';
+    }
+    const depthColorInput = document.getElementById('selectedDepthColorInput');
+    if (depthColorInput && document.activeElement !== depthColorInput) {
+      depthColorInput.value = sel.depthColor || '#0f172a';
+    }
     const selFontBox = document.getElementById('selectedFontSelect');
     if (selFontBox) {
       selFontBox.value = sel.fontStyle || 'heavy';
@@ -3218,20 +3232,30 @@ document.querySelectorAll('#selectedMaterialGroup .mat-pill').forEach(btn => {
   });
 });
 
-document.getElementById('selectedColorInput')?.addEventListener('input', evt => {
-  const sel = getSelectedGlyph();
-  if (!sel) return;
-  sel.color = evt.target.value;
-  saveStateToStorage();
-  updateCraftUI(true);
+['input', 'change'].forEach(evName => {
+  document.getElementById('selectedColorInput')?.addEventListener(evName, evt => {
+    const sel = getSelectedGlyph();
+    if (!sel) return;
+    sel.color = evt.target.value;
+    defaultNewColor = sel.color;
+    saveStateToStorage();
+    updateCraftUI(true);
+  });
+
+  document.getElementById('selectedDepthColorInput')?.addEventListener(evName, evt => {
+    const sel = getSelectedGlyph();
+    if (!sel) return;
+    sel.depthColor = evt.target.value;
+    saveStateToStorage();
+    updateCraftUI(true);
+  });
 });
 
-document.getElementById('selectedDepthColorInput')?.addEventListener('input', evt => {
-  const sel = getSelectedGlyph();
-  if (!sel) return;
-  sel.depthColor = evt.target.value;
-  saveStateToStorage();
-  updateCraftUI(true);
+document.getElementById('selectedColorInput')?.addEventListener('change', () => {
+  pushCraftUndo();
+});
+document.getElementById('selectedDepthColorInput')?.addEventListener('change', () => {
+  pushCraftUndo();
 });
 
 document.getElementById('customEraserNameInput')?.addEventListener('input', evt => {
