@@ -5046,3 +5046,220 @@ document.getElementById('resultToCraftBtn')?.addEventListener('click', () => {
   hideMatchResultModal();
   document.getElementById('tabCraftBtn')?.click();
 });
+
+
+// ==========================================================================
+// PC EDITION: DESKTOP KEYBOARD, MOUSE, AND MODAL CONTROLLERS
+// ==========================================================================
+
+// PC Controls Guide Modal Toggle
+const pcGuideModal = document.getElementById('pcKeyGuideModal');
+const keyGuideToggleBtn = document.getElementById('keyGuideToggleBtn');
+const closePcGuideBtn = document.getElementById('closePcGuideBtn');
+const pcKeyGuideBackdrop = document.getElementById('pcKeyGuideBackdrop');
+
+function togglePcGuideModal(show) {
+  if (!pcGuideModal) return;
+  const isHidden = pcGuideModal.classList.contains('hidden');
+  const target = (typeof show === 'boolean') ? show : isHidden;
+  if (target) {
+    pcGuideModal.classList.remove('hidden');
+    sfx.playClick();
+  } else {
+    pcGuideModal.classList.add('hidden');
+    sfx.playClick();
+  }
+}
+
+keyGuideToggleBtn?.addEventListener('click', () => togglePcGuideModal());
+closePcGuideBtn?.addEventListener('click', () => togglePcGuideModal(false));
+pcKeyGuideBackdrop?.addEventListener('click', () => togglePcGuideModal(false));
+
+// Fullscreen Toggle
+const fullscreenToggleBtn = document.getElementById('fullscreenToggleBtn');
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(() => {});
+  } else {
+    document.exitFullscreen().catch(() => {});
+  }
+}
+fullscreenToggleBtn?.addEventListener('click', toggleFullscreen);
+
+// Right-Click Context Menu Suppression & Aim Cancel
+gameCanvas.addEventListener('contextmenu', evt => {
+  evt.preventDefault();
+  if (battleState.isDragging || battleState.isAiming) {
+    battleState.isDragging = false;
+    battleState.isAiming = false;
+    sfx.playCancel();
+    showBattleToast('照準をキャンセルしました');
+  }
+});
+
+// Mouse Wheel for Spin Selection in Battle
+window.addEventListener('wheel', evt => {
+  if (activeView === 'battle' && battleState.turn === 'p1' && battleState.p1.shotsRemaining > 0) {
+    const spins = ['top', 'normal', 'back'];
+    let idx = spins.indexOf(battleState.spinEffect);
+    if (idx === -1) idx = 1;
+    if (evt.deltaY > 0) {
+      idx = Math.min(spins.length - 1, idx + 1);
+    } else if (evt.deltaY < 0) {
+      idx = Math.max(0, idx - 1);
+    }
+    const nextSpin = spins[idx];
+    if (nextSpin !== battleState.spinEffect) {
+      setSpinEffect(nextSpin);
+    }
+  }
+}, { passive: true });
+
+// Comprehensive Global PC Keydown Dispatcher
+window.addEventListener('keydown', evt => {
+  const activeEl = document.activeElement;
+  const isEditing = activeEl && (
+    ['INPUT', 'TEXTAREA', 'SELECT'].includes(activeEl.tagName) ||
+    activeEl.isContentEditable
+  );
+
+  // Global Guide Modal Hotkey (? or Shift+/)
+  if (!isEditing && (evt.key === '?' || (evt.key === '/' && evt.shiftKey))) {
+    evt.preventDefault();
+    togglePcGuideModal();
+    return;
+  }
+
+  // Close modals on Escape
+  if (evt.key === 'Escape') {
+    if (pcGuideModal && !pcGuideModal.classList.contains('hidden')) {
+      evt.preventDefault();
+      togglePcGuideModal(false);
+      return;
+    }
+  }
+
+  // Hotkeys during Craft View
+  if (activeView === 'craft') {
+    // Navigation tabs hotkeys
+    if (!isEditing && evt.key === '1' && !evt.ctrlKey && !evt.altKey) {
+      document.getElementById('tabCraftBtn')?.click();
+    }
+    if (!isEditing && evt.key === '2' && !evt.ctrlKey && !evt.altKey) {
+      document.getElementById('tabBattleBtn')?.click();
+    }
+
+    // Space: Toggle Test Mode
+    if (!isEditing && evt.code === 'Space') {
+      evt.preventDefault();
+      if (craftWorkbenchMode === 'edit') {
+        document.getElementById('wbModeTestBtn')?.click();
+      } else {
+        document.getElementById('wbModeEditBtn')?.click();
+      }
+      return;
+    }
+
+    // Enter: Deploy to Battle if valid build
+    if (!isEditing && evt.key === 'Enter') {
+      evt.preventDefault();
+      const launchBtn = document.getElementById('launchBattleBtn');
+      if (launchBtn && !launchBtn.classList.contains('disabled')) {
+        launchBtn.click();
+      }
+      return;
+    }
+
+    // Selected Glyph Nudge & Rotate
+    if (!isEditing && selectedGlyphId !== null) {
+      const g = customBuild.glyphs.find(item => item.id === selectedGlyphId);
+      if (g) {
+        let changed = false;
+        const step = evt.shiftKey ? 10 : 2;
+        if (evt.code === 'KeyW' || evt.key === 'ArrowUp') {
+          evt.preventDefault();
+          g.y -= step;
+          changed = true;
+        } else if (evt.code === 'KeyS' || evt.key === 'ArrowDown') {
+          evt.preventDefault();
+          g.y += step;
+          changed = true;
+        } else if (evt.code === 'KeyA' || evt.key === 'ArrowLeft') {
+          evt.preventDefault();
+          g.x -= step;
+          changed = true;
+        } else if (evt.code === 'KeyD' || evt.key === 'ArrowRight') {
+          evt.preventDefault();
+          g.x += step;
+          changed = true;
+        } else if (evt.code === 'KeyQ') {
+          evt.preventDefault();
+          g.rotation = (g.rotation - 15) % 360;
+          if (g.rotation < 0) g.rotation += 360;
+          changed = true;
+        } else if (evt.code === 'KeyE') {
+          evt.preventDefault();
+          g.rotation = (g.rotation + 15) % 360;
+          changed = true;
+        }
+
+        if (changed) {
+          pushCraftHistory();
+          updateLiveSpecsAndBreakdown();
+          syncFineTuneInputsFromSelected();
+        }
+      }
+    }
+  }
+
+  // Hotkeys during Battle View
+  if (activeView === 'battle') {
+    // 1/2/3 Spin selection
+    if (!isEditing && (evt.key === '1' || evt.code === 'Digit1')) {
+      evt.preventDefault();
+      setSpinEffect('top');
+      return;
+    }
+    if (!isEditing && (evt.key === '2' || evt.code === 'Digit2')) {
+      evt.preventDefault();
+      setSpinEffect('normal');
+      return;
+    }
+    if (!isEditing && (evt.key === '3' || evt.code === 'Digit3')) {
+      evt.preventDefault();
+      setSpinEffect('back');
+      return;
+    }
+
+    // Space: Trigger Skill
+    if (!isEditing && evt.code === 'Space') {
+      evt.preventDefault();
+      const skillBtn = document.getElementById('activeSkillBtn');
+      if (skillBtn && !skillBtn.classList.contains('disabled')) {
+        skillBtn.click();
+      }
+      return;
+    }
+
+    // Z: Undo turn
+    if (!isEditing && (evt.code === 'KeyZ' && !evt.ctrlKey)) {
+      evt.preventDefault();
+      document.getElementById('undoBattleTurnBtn')?.click();
+      return;
+    }
+
+    // R: Restart match
+    if (!isEditing && evt.code === 'KeyR' && !evt.ctrlKey) {
+      evt.preventDefault();
+      document.getElementById('resetMatchBtn')?.click();
+      return;
+    }
+
+    // Esc: Return to craft
+    if (evt.key === 'Escape') {
+      evt.preventDefault();
+      document.getElementById('backToCraftBtn')?.click();
+      return;
+    }
+  }
+});

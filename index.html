@@ -2,8 +2,8 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>消しバトNeo - 文字合体クラフト＆バトル</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>消しバトNeo [PC Edition] - 文字合体クラフト＆物理バトル</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body class="no-scrollbar">
@@ -11,20 +11,22 @@
     <!-- Global Top Navigation Bar -->
     <header class="top-nav">
       <div class="brand-logo">
-        <span class="logo-badge">NEO</span>
-        <h1>消しバトNeo <small>〜最大5文字・密着合体クラフト＆物理バトル〜</small></h1>
+        <span class="logo-badge">PC ED.</span>
+        <h1>消しバトNeo <span class="header-sub-tag">BATTLE BUILD DOCK</span></h1>
       </div>
 
       <nav class="main-tabs">
         <button class="nav-tab active" id="tabCraftBtn">
-          機体設計室
+          機体設計室 [1]
         </button>
         <button class="nav-tab battle-tab-btn" id="tabBattleBtn">
-          バトル出撃
+          バトル出撃 [2]
         </button>
       </nav>
 
       <div class="nav-right">
+        <button class="icon-btn pc-guide-btn" id="keyGuideToggleBtn" title="キーボード・操作ガイド"><kbd>?</kbd> 操作ガイド</button>
+        <button class="icon-btn" id="fullscreenToggleBtn" title="全画面表示 (F11)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg></button>
         <button class="icon-btn" id="soundToggleBtn" title="サウンド ON/OFF"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg></button>
       </div>
     </header>
@@ -333,7 +335,7 @@
 
           <!-- Saved Custom Slots Bar (Bottom of Workbench) -->
           <div class="saved-builds-bar">
-            <span class="saved-label">保存枠:</span>
+            <span class="saved-label">保存スロット:</span>
             <div class="save-slots-group" id="saveSlotsGroup">
               <button class="save-slot-btn active" data-slot="0">1号機</button>
               <button class="save-slot-btn" data-slot="1">2号機</button>
@@ -341,6 +343,17 @@
               <button class="save-slot-btn" data-slot="3">4号機</button>
               <button class="save-slot-btn" data-slot="4">5号機</button>
             </div>
+          </div>
+
+          <!-- PC Key Shortcuts Permanent Dock -->
+          <div class="pc-shortcuts-dock">
+            <span class="dock-title">PC COMMANDS:</span>
+            <span class="dock-item"><kbd>Del</kbd> 削除</span>
+            <span class="dock-item"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 微移動</span>
+            <span class="dock-item"><kbd>Q</kbd><kbd>E</kbd> 15°回転</span>
+            <span class="dock-item"><kbd>Ctrl+Z</kbd> 取消</span>
+            <span class="dock-item"><kbd>Space</kbd> 試射テスト</span>
+            <span class="dock-item"><kbd>Enter</kbd> バトル出撃</span>
           </div>
         </main>
 
@@ -519,37 +532,86 @@
         </div>
       </main>
 
-      <!-- Bottom Battle Controls -->
+      <!-- Bottom Battle Controls (PC Desktop Command Deck) -->
       <footer class="hud-footer">
         <div class="spin-selector-group">
-          <span class="group-title">スピン回転制御 [1/2/3]:</span>
+          <span class="group-title">スピン切替:</span>
           <button class="spin-btn" data-spin="top">
-            <span class="spin-icon"></span>
-            <div class="spin-text"><strong>強前進 (DRIVE)</strong><small>直進推進・突進力UP</small></div>
+            <kbd>1</kbd>
+            <div class="spin-text"><strong>前進 (DRIVE)</strong><small>突進・押し込み</small></div>
           </button>
           <button class="spin-btn active" data-spin="normal">
-            <span class="spin-icon"></span>
-            <div class="spin-text"><strong>標準 (NORMAL)</strong><small>バランス直進</small></div>
+            <kbd>2</kbd>
+            <div class="spin-text"><strong>標準 (NORMAL)</strong><small>ニュートラル</small></div>
           </button>
           <button class="spin-btn" data-spin="back">
-            <span class="spin-icon"></span>
-            <div class="spin-text"><strong>ブレーキ (BACK)</strong><small>衝突時急停止・自滅防止</small></div>
+            <kbd>3</kbd>
+            <div class="spin-text"><strong>ブレーキ (BACK)</strong><small>衝突時急停止</small></div>
           </button>
         </div>
 
+        <div class="pc-battle-mouse-hint">
+          <span class="hint-badge"><kbd>左ドラッグ</kbd> ショット</span>
+          <span class="hint-badge"><kbd>右クリック</kbd> 狙い解除</span>
+          <span class="hint-badge"><kbd>ホイール</kbd> スピン</span>
+          <span class="hint-badge"><kbd>Space</kbd> 必殺技</span>
+        </div>
+
         <div class="utility-btn-group">
-          <button class="action-btn" id="undoBattleTurnBtn" title="直前のプレイヤーの手番冒頭まで巻き戻します">
-            1手戻す (UNDO)
+          <button class="action-btn" id="undoBattleTurnBtn" title="直前の手番冒頭まで戻します">
+            <kbd>Z</kbd> 1手戻す
           </button>
           <button class="action-btn primary-btn" id="backToCraftBtn">
-            設計室に戻る
+            <kbd>Esc</kbd> 設計室へ
           </button>
           <button class="action-btn" id="resetMatchBtn">
-            最初から再戦
+            <kbd>R</kbd> 最初から
           </button>
         </div>
       </footer>
     </section>
+    <!-- PC Controls Guide Modal -->
+    <div id="pcKeyGuideModal" class="pc-guide-modal hidden">
+      <div class="modal-backdrop" id="pcKeyGuideBackdrop"></div>
+      <div class="pc-guide-card">
+        <div class="guide-header-row">
+          <h2>PC操作ガイド</h2>
+          <button class="modal-close-btn" id="closePcGuideBtn">閉じる</button>
+        </div>
+        <div class="guide-grid">
+          <div class="guide-col">
+            <h3>機体設計室 (CRAFT STUDIO)</h3>
+            <ul class="guide-list">
+              <li><kbd>マウス左ドラッグ</kbd> 文字パーツの配置・自由移動</li>
+              <li><kbd>マウスホイール</kbd> ボードの拡大・縮小 (ズーム)</li>
+              <li><kbd>Delete</kbd> / <kbd>Backspace</kbd> 選択中の文字を削除</li>
+              <li><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> / 矢印キー 文字の精密な微移動</li>
+              <li><kbd>Q</kbd> / <kbd>E</kbd> 15度回転 (左 / 右)</li>
+              <li><kbd>Ctrl+Z</kbd> / <kbd>Ctrl+Y</kbd> 元に戻す / やり直す</li>
+              <li><kbd>Space</kbd> 試し撃ちテストモード切替</li>
+              <li><kbd>Enter</kbd> バトル出撃</li>
+            </ul>
+          </div>
+          <div class="guide-col">
+            <h3>バトルアリーナ (BATTLE ARENA)</h3>
+            <ul class="guide-list">
+              <li><kbd>マウス左ドラッグ</kbd> 引っ張って角度と威力を照準、離して発射</li>
+              <li><kbd>マウス右クリック</kbd> 照準中のショットキャンセル</li>
+              <li><kbd>マウスホイール</kbd> スピン（前進/標準/ブレーキ）切替</li>
+              <li><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> スピン回転のダイレクト選択</li>
+              <li><kbd>Space</kbd> 必殺技発動 (ゲージ蓄積時)</li>
+              <li><kbd>Z</kbd> 1手戻す (UNDO)</li>
+              <li><kbd>R</kbd> ラウンドの最初からやり直し</li>
+              <li><kbd>Esc</kbd> 設計室へ戻る</li>
+            </ul>
+          </div>
+        </div>
+        <div class="guide-footer-tip">
+          PCのキーボードとマウスで本格的な物理対戦をお楽しみいただけます。
+        </div>
+      </div>
+    </div>
+
     <!-- Match End Victory/Defeat Modal (Apex Legends Champion Style) -->
     <div id="matchResultModal" class="match-result-modal hidden">
       <div class="result-backdrop"></div>
