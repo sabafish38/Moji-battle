@@ -857,7 +857,7 @@ function analyzeGlyph(rawChar, fontStyle = 'heavy') {
  */
 function getGlyphTransformedNodes(g) {
   const info = analyzeGlyph(g.char, g.fontStyle || 'heavy');
-  const sc = Math.max(0.50, Math.min(2.00, (g.scale || 105) / 100));
+  const sc = Math.max(0.50, Math.min(1.50, (g.scale || 105) / 100));
   const rad = ((g.angle || 0) * Math.PI) / 180;
   const cos = Math.cos(rad);
   const sin = Math.sin(rad);
@@ -879,7 +879,7 @@ function getGlyphTransformedNodes(g) {
 
 function getGlyphContactRadius(g) {
   const info = analyzeGlyph(g.char, g.fontStyle || 'heavy');
-  const sc = Math.max(0.50, Math.min(2.00, (g.scale || 105) / 100));
+  const sc = Math.max(0.50, Math.min(1.50, (g.scale || 105) / 100));
   return Math.max(12, info.maxLocalRadius * sc);
 }
 
@@ -937,7 +937,7 @@ function enforceConnectedGlyphs(glyphs, activeGlyphId = null, recenter = false) 
   }
   glyphs.forEach(g => {
     g.char = extractFirstGrapheme(g.char);
-    g.scale = Math.max(50, Math.min(200, Math.round(Number(g.scale) || 105)));
+    g.scale = Math.max(50, Math.min(150, Math.round(Number(g.scale) || 105)));
     g.x = Number.isFinite(g.x) ? Math.max(-115, Math.min(115, g.x)) : 0;
     g.y = Number.isFinite(g.y) ? Math.max(-115, Math.min(115, g.y)) : 0;
     g.angle = Number.isFinite(g.angle) ? g.angle : 0;
@@ -1044,7 +1044,7 @@ function cloneGlyphs(glyphs) {
     x: Math.round(Number(g.x) || 0),
     y: Math.round(Number(g.y) || 0),
     angle: Math.round(Number(g.angle) || 0),
-    scale: Math.max(50, Math.min(200, Math.round(Number(g.scale) || 105))),
+    scale: Math.max(50, Math.min(150, Math.round(Number(g.scale) || 105))),
     mat: GLYPH_MATERIALS[g.mat] ? g.mat : 'mecha',
     color: g.color || '#38bdf8',
     depthColor: g.depthColor || '#0f172a',
@@ -1185,7 +1185,7 @@ function calculateMachineSpec(build) {
   rawGlyphs.forEach((g, idx) => {
     const info = analyzeGlyph(g.char, g.fontStyle || 'heavy');
     const mat = GLYPH_MATERIALS[g.mat] || GLYPH_MATERIALS.mecha;
-    const scaleRatio = Math.max(0.50, Math.min(2.00, (g.scale || 105) / 100));
+    const scaleRatio = Math.max(0.50, Math.min(1.50, (g.scale || 105) / 100));
 
     const diminishing = 1 / Math.pow(idx + 1, 0.14);
     const gMass = info.weight * mat.weightMul * Math.pow(scaleRatio, 1.15) * diminishing;
@@ -2504,7 +2504,7 @@ craftCanvas.addEventListener('pointermove', evt => {
       const startDist = Math.max(12, Math.hypot(editorDragStartMouse.x - gx, editorDragStartMouse.y - gy));
       const curDist = Math.max(12, Math.hypot(pos.x - gx, pos.y - gy));
       const newScale = Math.round(editorDragInitialGlyph.scale * (curDist / startDist));
-      g.scale = Math.max(50, Math.min(200, newScale));
+      g.scale = Math.max(50, Math.min(150, newScale));
       enforceConnectedGlyphs(currentBuild.glyphs, g.id, false);
     }
 
@@ -2550,7 +2550,7 @@ craftCanvas.addEventListener('wheel', evt => {
   const g = getSelectedGlyph();
   if (!g) return;
   const delta = evt.deltaY < 0 ? 6 : -6;
-  g.scale = Math.max(50, Math.min(200, (g.scale || 105) + delta));
+  g.scale = Math.max(50, Math.min(150, (g.scale || 105) + delta));
   enforceConnectedGlyphs(currentBuild.glyphs, g.id, false);
   saveStateToStorage();
   updateCraftUI();
