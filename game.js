@@ -3492,17 +3492,45 @@ function showCenterBanner(sub, main, desc, duration = 1500) {
 
 function createRivalBuild() {
   const mode = document.getElementById('battleModeSelect')?.value || 'cpu-normal';
+  if (mode === 'cpu-expert') {
+    const expertBosses = [
+      {
+        name: '超絶極光・滅神',
+        weldChassis: true,
+        glyphs: [
+          { id: 'ex1', char: '滅', x: 0,   y: 0,   angle: 0,   scale: 135, mat: 'blade', color: '#ef4444', depthColor: '#450a0a' },
+          { id: 'ex2', char: '極', x: 0,   y: -32, angle: 0,   scale: 120, mat: 'blade', color: '#f43f5e', depthColor: '#881337' },
+          { id: 'ex3', char: '神', x: -32, y: 0,   angle: -25, scale: 115, mat: 'mecha', color: '#38bdf8', depthColor: '#0f172a' },
+          { id: 'ex4', char: '神', x: 32,  y: 0,   angle: 25,  scale: 115, mat: 'mecha', color: '#38bdf8', depthColor: '#0f172a', flipX: true },
+          { id: 'ex5', char: '鉄', x: 0,   y: 34,  angle: 0,   scale: 125, mat: 'gold',  color: '#f59e0b', depthColor: '#451a03' }
+        ]
+      },
+      {
+        name: '鋼鉄重塞・巨霊',
+        weldChassis: true,
+        glyphs: [
+          { id: 'exb1', char: '巨', x: 0,   y: 0,   angle: 0,   scale: 135, mat: 'gold',  color: '#f59e0b', depthColor: '#451a03' },
+          { id: 'exb2', char: '霊', x: 0,   y: -30, angle: 0,   scale: 118, mat: 'blade', color: '#f8fafc', depthColor: '#334155' },
+          { id: 'exb3', char: '塞', x: -34, y: 4,   angle: -15, scale: 118, mat: 'rubber', color: '#10b981', depthColor: '#064e3b' },
+          { id: 'exb4', char: '塞', x: 34,  y: 4,   angle: 15,  scale: 118, mat: 'rubber', color: '#10b981', depthColor: '#064e3b', flipX: true },
+          { id: 'exb5', char: '重', x: 0,   y: 34,  angle: 0,   scale: 125, mat: 'gold',  color: '#f59e0b', depthColor: '#451a03' }
+        ]
+      }
+    ];
+    const picked = expertBosses[Math.floor(Math.random() * expertBosses.length)];
+    return createBuildFromPreset(picked);
+  }
   if (mode === 'cpu-hard') {
     const bosses = [
       {
-        name: '四天王・獄炎龍覇王',
+        name: '覇王・剛',
         weldChassis: true,
         glyphs: [
-          { id: 'b1', char: '覇', x: 0,   y: 0,   angle: 0,   scale: 125, mat: 'gold',  color: '#f59e0b', depthColor: '#451a03' },
-          { id: 'b2', char: '龍', x: 0,   y: -34, angle: 0,   scale: 112, mat: 'blade', color: '#ef4444', depthColor: '#450a0a' },
-          { id: 'b3', char: '斬', x: -33, y: -3,  angle: -20, scale: 108, mat: 'blade', color: '#f8fafc', depthColor: '#334155' },
-          { id: 'b4', char: '斬', x: 33,  y: -3,  angle: 20,  scale: 108, mat: 'blade', color: '#f8fafc', depthColor: '#334155', flipX: true },
-          { id: 'b5', char: '轟', x: 0,   y: 34,  angle: 0,   scale: 110, mat: 'gold',  color: '#f59e0b', depthColor: '#451a03' }
+          { id: 'b1', char: '剛', x: 0,   y: 0,   angle: 0,   scale: 125, mat: 'gold',  color: '#f59e0b', depthColor: '#451a03' },
+          { id: 'b2', char: '覇', x: 0,   y: -34, angle: 0,   scale: 112, mat: 'blade', color: '#ef4444', depthColor: '#450a0a' },
+          { id: 'b3', char: '刃', x: -33, y: -3,  angle: -20, scale: 108, mat: 'blade', color: '#f8fafc', depthColor: '#334155' },
+          { id: 'b4', char: '刃', x: 33,  y: -3,  angle: 20,  scale: 108, mat: 'blade', color: '#f8fafc', depthColor: '#334155', flipX: true },
+          { id: 'b5', char: '鉄', x: 0,   y: 34,  angle: 0,   scale: 110, mat: 'gold',  color: '#f59e0b', depthColor: '#451a03' }
         ]
       },
       PRESET_MACHINES[1],
@@ -3671,7 +3699,17 @@ function initBattleMatch() {
 function startBattleRound(roundNum) {
   clearTimeout(cpuThinkTimeout);
   battleState.turn = 1;
-  battleState.activePlayer = 1;
+
+  // Determine starting player from Turn Order selector
+  const orderSetting = document.getElementById('battleTurnOrderSelect')?.value || 'p1-first';
+  let startingPlayer = 1;
+  if (orderSetting === 'p2-first') {
+    startingPlayer = 2;
+  } else if (orderSetting === 'random') {
+    startingPlayer = Math.random() < 0.5 ? 1 : 2;
+  }
+  battleState.startingPlayer = startingPlayer;
+  battleState.activePlayer = startingPlayer;
   battleState.phase = 'aim';
   battleState.suddenDeathShrink = 0;
   battleState.particles = [];
@@ -3760,7 +3798,15 @@ function startBattleRound(roundNum) {
 
   saveBattleUndoSnapshot();
   updateBattleHUD();
-  showCenterBanner(`ROUND ${roundNum}`, 'FIGHT!!', '密着合体した文字の輪郭と質量で相手を机から弾き落とせ！', 1400);
+  const orderDesc = (battleState.activePlayer === 1)
+    ? '1P 先手で開始！引っ張って狙え！'
+    : (battleState.mode === 'pvp' ? '2P 先手で開始！' : 'CPU 先手で開始！相手の初手を警戒せよ！');
+  showCenterBanner(`ROUND ${roundNum}`, 'FIGHT!!', orderDesc, 1400);
+
+  // If CPU starts first (1P is second)
+  if (battleState.activePlayer === 2 && battleState.mode !== 'pvp') {
+    cpuThinkTimeout = setTimeout(executeCPUTurn, 1600);
+  }
 }
 
 function saveBattleUndoSnapshot() {
@@ -3922,24 +3968,140 @@ function executeCPUTurn() {
   if (battleState.phase !== 'aim' || battleState.activePlayer !== 2) return;
   const cpu = battleState.units[1];
   const p1 = battleState.units[0];
-  if (!cpu || !p1) return;
+  if (!cpu || !p1 || cpu.fallen || p1.fallen) return;
 
   const desk = getDeskBounds();
+  const mode = battleState.mode || 'cpu-normal';
+
+  // Vector to Player
   const dx = p1.x - cpu.x;
   const dy = p1.y - cpu.y;
-  const dist = Math.hypot(dx, dy);
-  const jitter = battleState.mode === 'cpu-hard' ? (Math.random() - 0.5) * 0.08 : (Math.random() - 0.5) * 0.22;
-  const aimAngle = Math.atan2(dy, dx) + jitter;
+  const directDist = Math.hypot(dx, dy);
+  const directAngle = Math.atan2(dy, dx);
 
-  const edgeSafeFactor = (p1.x < desk.left + 90 || p1.x > desk.right - 90 || p1.y < desk.top + 90 || p1.y > desk.bottom - 90)
-    ? 0.66
-    : 0.78;
-  const powerRatio = Math.min(0.88, Math.max(0.46, (dist / 360) * edgeSafeFactor));
-  const spinChoice = powerRatio > 0.72 ? 'back' : 'normal';
+  // Player distance to desk edges (find nearest edge for lethal push-out)
+  const distToLeft = p1.x - desk.left;
+  const distToRight = desk.right - p1.x;
+  const distToTop = p1.y - desk.top;
+  const distToBottom = desk.bottom - p1.y;
+  const minEdgeDist = Math.min(distToLeft, distToRight, distToTop, distToBottom);
 
-  showBattleToast(`${cpu.spec.name} が狙いを定めてショット`);
-  launchUnit(cpu, powerRatio, aimAngle, spinChoice);
+  // Multi-Candidate Trajectory & Impact Search
+  const angleOffsets = (mode === 'cpu-expert')
+    ? [-0.32, -0.22, -0.14, -0.06, 0, 0.06, 0.14, 0.22, 0.32]
+    : (mode === 'cpu-hard')
+      ? [-0.20, -0.10, 0, 0.10, 0.20]
+      : [-0.08, 0, 0.08];
 
+  const powerSteps = (mode === 'cpu-expert')
+    ? [0.48, 0.62, 0.76, 0.88, 0.98]
+    : (mode === 'cpu-hard')
+      ? [0.55, 0.72, 0.88]
+      : [0.58, 0.75];
+
+  const spinCandidates = (mode === 'cpu-expert' || mode === 'cpu-hard')
+    ? ['normal', 'back', 'top']
+    : ['normal', 'back'];
+
+  let bestScore = -Infinity;
+  let bestAngle = directAngle;
+  let bestPower = 0.74;
+  let bestSpin = 'normal';
+
+  // Evaluate candidate shots using virtual physics approximation
+  for (const aOff of angleOffsets) {
+    const testAngle = directAngle + aOff;
+    for (const testPower of powerSteps) {
+      for (const testSpin of spinCandidates) {
+        let score = 0;
+
+        const launchSpd = (cpu.spec.maxLaunchSpeed || 16) * testPower;
+        const vx = Math.cos(testAngle) * launchSpd;
+        const vy = Math.sin(testAngle) * launchSpd;
+
+        // Intersection with P1's bounding sphere
+        const tColl = Math.max(0, (dx * vx + dy * vy) / (vx * vx + vy * vy + 0.001));
+        const closestX = cpu.x + vx * tColl;
+        const closestY = cpu.y + vy * tColl;
+        const missDist = Math.hypot(closestX - p1.x, closestY - p1.y);
+        const contactRadius = (cpu.spec.boundingRadius || 28) + (p1.spec.boundingRadius || 28);
+
+        if (missDist < contactRadius * 1.15) {
+          score += 150; // Successful hit candidate
+
+          // Knockback transfer calculation
+          const massRatio = Math.max(0.65, Math.min(1.45, cpu.spec.weight / (p1.spec.weight + 0.001)));
+          const atkMult = (cpu.spec.atk || 60) / 60;
+          const hitPower = launchSpd * massRatio * atkMult * (1 - missDist / (contactRadius * 1.3));
+
+          // Post-collision P1 position estimate
+          const p1KnockAngle = Math.atan2(p1.y - closestY, p1.x - closestX);
+          const p1FinalX = p1.x + Math.cos(p1KnockAngle) * hitPower * 14;
+          const p1FinalY = p1.y + Math.sin(p1KnockAngle) * hitPower * 14;
+
+          // Check if P1 is knocked out of desk
+          const p1RingOut = desk.isRound
+            ? Math.hypot(p1FinalX - desk.cx, p1FinalY - desk.cy) > desk.radius
+            : (p1FinalX < desk.left || p1FinalX > desk.right || p1FinalY < desk.top || p1FinalY > desk.bottom);
+
+          if (p1RingOut) {
+            score += 1500; // Tremendous reward for ring-out kill!
+          } else {
+            const p1DistToEdge = desk.isRound
+              ? desk.radius - Math.hypot(p1FinalX - desk.cx, p1FinalY - desk.cy)
+              : Math.min(p1FinalX - desk.left, desk.right - p1FinalX, p1FinalY - desk.top, desk.bottom - p1FinalY);
+            score += (160 - Math.max(0, p1DistToEdge)) * 3;
+          }
+
+          // Estimate post-collision CPU position
+          // Backspin stops CPU quickly after hit! Topspin drives through!
+          const reboundFriction = (testSpin === 'back') ? 0.35 : (testSpin === 'top') ? 0.90 : 0.62;
+          const cpuFinalX = closestX + vx * reboundFriction * 6;
+          const cpuFinalY = closestY + vy * reboundFriction * 6;
+
+          const cpuRingOut = desk.isRound
+            ? Math.hypot(cpuFinalX - desk.cx, cpuFinalY - desk.cy) > desk.radius * 0.96
+            : (cpuFinalX < desk.left + 15 || cpuFinalX > desk.right - 15 || cpuFinalY < desk.top + 15 || cpuFinalY > desk.bottom - 15);
+
+          if (cpuRingOut) {
+            score -= 3500; // Strict penalty for self ring-out!
+          } else {
+            // Reward staying safe near center
+            const cpuDistFromCenter = Math.hypot(cpuFinalX - desk.cx, cpuFinalY - desk.cy);
+            score -= cpuDistFromCenter * 0.35;
+          }
+
+          // Backspin tactical bonus when playing near edge
+          if (testSpin === 'back' && minEdgeDist < 90) {
+            score += 200;
+          }
+          // Topspin lethal push bonus when P1 is near edge
+          if (testSpin === 'top' && minEdgeDist < 60) {
+            score += 260;
+          }
+        } else {
+          score -= 500 + missDist * 2;
+        }
+
+        if (score > bestScore) {
+          bestScore = score;
+          bestAngle = testAngle;
+          bestPower = testPower;
+          bestSpin = testSpin;
+        }
+      }
+    }
+  }
+
+  // Jitter based on difficulty mode
+  const jitterMag = (mode === 'cpu-expert') ? 0.012 : (mode === 'cpu-hard') ? 0.035 : 0.10;
+  bestAngle += (Math.random() - 0.5) * jitterMag;
+
+  const spinLabels = { top: '前進', normal: '標準', back: '急停止' };
+  showBattleToast(`${cpu.spec.name} [${spinLabels[bestSpin] || '標準'}] 精密狙い撃ち!`);
+  launchUnit(cpu, bestPower, bestAngle, bestSpin);
+
+  // High-performance tactical skill trigger
   if ((cpu.skillStock || 0) > 0 && !cpu.fallen) {
     const cpuSkillChecker = setInterval(() => {
       if (battleState.phase !== 'moving' || cpu.fallen || (cpu.skillStock || 0) <= 0) {
@@ -3948,23 +4110,22 @@ function executeCPUTurn() {
       }
       const dNow = Math.hypot(p1.x - cpu.x, p1.y - cpu.y);
       const curDesk = getDeskBounds();
-      const distToEdge = Math.min(
-        cpu.x - curDesk.left, curDesk.right - cpu.x,
-        cpu.y - curDesk.top, curDesk.bottom - cpu.y
-      );
-      const skillId = cpu.spec.activeSkill.id;
+      const distToEdge = curDesk.isRound
+        ? curDesk.radius - Math.hypot(cpu.x - curDesk.cx, cpu.y - curDesk.cy)
+        : Math.min(cpu.x - curDesk.left, curDesk.right - cpu.x, cpu.y - curDesk.top, curDesk.bottom - cpu.y);
 
+      const skillId = cpu.spec.activeSkill.id;
       let shouldFire = false;
-      if (skillId === 'anchor' && distToEdge < 65) shouldFire = true;
-      else if ((skillId === 'slash' || skillId === 'boost') && dNow < 140) shouldFire = true;
-      else if ((skillId === 'vortex' || skillId === 'buster') && dNow < 155) shouldFire = true;
-      else if (Math.random() < 0.08) shouldFire = true;
+      if (skillId === 'anchor' && distToEdge < 45) shouldFire = true;
+      else if ((skillId === 'slash' || skillId === 'boost' || skillId === 'buster') && dNow < 120) shouldFire = true;
+      else if (skillId === 'vortex' && dNow < 140) shouldFire = true;
+      else if (mode === 'cpu-expert' && dNow < 95) shouldFire = true;
 
       if (shouldFire) {
         clearInterval(cpuSkillChecker);
         activateUnitSkill(cpu, battleState.units, battleState.particles);
       }
-    }, 70);
+    }, 60);
   }
 }
 
@@ -4588,11 +4749,14 @@ function updateBattlePhysicsAndRender() {
 function advanceToNextTurn() {
   document.getElementById('skillActionBtn')?.classList.add('hidden');
   battleState.activePlayer = battleState.activePlayer === 1 ? 2 : 1;
-  if (battleState.activePlayer === 1) {
+
+  // Turn count advances when returning to the starting player
+  const startingPlayer = battleState.startingPlayer || 1;
+  if (battleState.activePlayer === startingPlayer) {
     battleState.turn++;
     if (battleState.turn >= 7) {
       battleState.suddenDeathShrink = Math.min(130, (battleState.turn - 6) * 24);
-      showBattleToast('SUDDEN DEATH: エリア縮小 / 吹っ飛び率上昇');
+      showBattleToast('SUDDEN DEATH: エリア縮小 / 吹っ飛び倍率上昇');
       battleState.units.forEach(u => { addUnitDamage(u, 15); });
     }
     saveBattleUndoSnapshot();
@@ -4602,7 +4766,8 @@ function advanceToNextTurn() {
   updateBattleHUD();
 
   if (battleState.activePlayer === 2 && battleState.mode !== 'pvp') {
-    cpuThinkTimeout = setTimeout(executeCPUTurn, 650);
+    const thinkDelay = battleState.mode === 'cpu-expert' ? 520 : 650;
+    cpuThinkTimeout = setTimeout(executeCPUTurn, thinkDelay);
   }
 }
 

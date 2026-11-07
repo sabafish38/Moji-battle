@@ -466,10 +466,16 @@
         <!-- Center Turn Status & Stage Selector -->
         <div class="turn-status-box">
           <div class="battle-quick-settings">
-            <select id="battleModeSelect" class="HudSelect">
+            <select id="battleModeSelect" class="HudSelect" title="対戦モード・難易度">
               <option value="cpu-normal">vs CPU [NORMAL]</option>
-              <option value="cpu-hard">vs BOSS [HARD]</option>
+              <option value="cpu-hard">vs CPU [HARD]</option>
+              <option value="cpu-expert" selected>vs CPU [EXPERT (超強敵)]</option>
               <option value="pvp">PVP [1P vs 2P]</option>
+            </select>
+            <select id="battleTurnOrderSelect" class="HudSelect" title="対戦の手番順序を選択">
+              <option value="p1-first" selected>手番: 1P先手</option>
+              <option value="p2-first">手番: 1P後手 (CPU先手)</option>
+              <option value="random">手番: ランダム</option>
             </select>
             <select id="battleStageSelect" class="HudSelect">
               <option value="standard" selected>STAGE 01: スタンダード木製机</option>
