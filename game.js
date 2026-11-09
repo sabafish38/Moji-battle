@@ -3468,6 +3468,15 @@ let selectedSpinType = 'normal'; // 'top' | 'normal' | 'back'
 let cpuThinkTimeout = null;
 
 
+const ALL_STAGE_IDS = [
+  'standard', 'stationery', 'pinball', 'bridge', 'colosseum',
+  'crossroad', 'islands', 'gridlock', 'ice_glass', 'volcano'
+];
+
+function getRandomStageId() {
+  return ALL_STAGE_IDS[Math.floor(Math.random() * ALL_STAGE_IDS.length)];
+}
+
 // 10 Distinct Dynamic Battle Stages
 const BATTLE_STAGES = {
   standard: {
@@ -3847,7 +3856,11 @@ function initBattleMatch() {
   clearTimeout(cpuThinkTimeout);
   resizeBattleCanvas();
   battleState.mode = document.getElementById('battleModeSelect')?.value || 'cpu-normal';
-  battleState.stage = document.getElementById('battleStageSelect')?.value || 'standard';
+  let selectedStage = document.getElementById('battleStageSelect')?.value || 'standard';
+  if (selectedStage === 'random') {
+    selectedStage = getRandomStageId();
+  }
+  battleState.stage = selectedStage;
   battleState.p1Score = 0;
   battleState.p2Score = 0;
   battleState.undoHistory = [];
@@ -5425,8 +5438,14 @@ window.addEventListener('pointerup', () => {
 
 // Battle Controls & Navigation
 document.getElementById('skillActionBtn')?.addEventListener('click', () => {
+  const isOnline = (battleState.mode === 'p2p-online');
+  const myNum = (isOnline && window.p2pState) ? window.p2pState.myPlayerNum : 1;
+  const canControl = isOnline ? (battleState.activePlayer === myNum) : (battleState.activePlayer === 1 || battleState.mode === 'pvp');
   const unit = battleState.units[battleState.activePlayer - 1];
-  if (unit) activateUnitSkill(unit, battleState.units, battleState.particles);
+  if (unit && canControl && (unit.skillStock || 0) > 0) {
+    activateUnitSkill(unit, battleState.units, battleState.particles);
+    if (isOnline && typeof sendP2PSkill === 'function') sendP2PSkill();
+  }
 });
 
 window.addEventListener('keydown', evt => {
@@ -5447,9 +5466,13 @@ window.addEventListener('keydown', evt => {
   if (evt.code === 'Space') {
     if (activeView === 'battle' && battleState.phase === 'moving') {
       evt.preventDefault();
+      const isOnline = (battleState.mode === 'p2p-online');
+      const myNum = (isOnline && window.p2pState) ? window.p2pState.myPlayerNum : 1;
+      const canControl = isOnline ? (battleState.activePlayer === myNum) : (battleState.activePlayer === 1 || battleState.mode === 'pvp');
       const unit = battleState.units[battleState.activePlayer - 1];
-      if (unit && (battleState.activePlayer === 1 || battleState.mode === 'pvp')) {
+      if (unit && canControl && (unit.skillStock || 0) > 0) {
         activateUnitSkill(unit, battleState.units, battleState.particles);
+        if (isOnline && typeof sendP2PSkill === 'function') sendP2PSkill();
       }
     } else if (activeView === 'craft' && workbenchMode === 'test' && testPlayerUnit) {
       evt.preventDefault();
@@ -6013,6 +6036,7 @@ const I18N_DATA = {
     }
   },
   stages: {
+    random:     { enName: 'STAGE: RANDOM (ALL 10 ARENAS)',    enDesc: 'A random arena chosen from all 10 desk battlefields.', jaName: 'ステージ: ランダム (全10種)', jaDesc: '全10種の机上アリーナからランダムに選ばれます。' },
     standard:   { enName: 'STAGE 01: Standard Wood Desk',    enDesc: 'Classic school desk arena. Pure physics, mass, and character geometry decide the winner.', jaName: 'STAGE 01: スタンダード木製机', jaDesc: '標準的な木製机。純粋な文字性能と体幹が試される王道ステージ。' },
     stationery: { enName: 'STAGE 02: Ruler Ricochet Desk',   enDesc: 'Two acrylic rulers and flank boost pads enable bank shots and high-speed flanking.', jaName: 'STAGE 02: 定規文房具ギミック机', jaDesc: 'ハの字に置かれた2本のアクリル定規が壁面反射を生む。' },
     pinball:    { enName: 'STAGE 03: Pinball Bumper Arena',  enDesc: 'High-restitution bumpers and a central turntable trigger explosive ricochet combos.', jaName: 'STAGE 03: ピンボールバンパー机', jaDesc: '高反発バンパーが複数配置され、跳弾と不意のノックバックが連鎖する。' },
@@ -6684,6 +6708,27 @@ document.getElementById('resultAdRematchBtn')?.addEventListener('click', () => {
 document.getElementById('resultRematchBtn')?.addEventListener('click', () => {
   sfx.playClick();
   requestCrazyGamesAd('midgame', () => {
+    if (battleState.mode === 'p2p-online' && window.p2pState && window.p2pState.connected && window.p2pState.conn) {
+      if (window.p2pState.isHost) {
+        let nextStage = document.getElementById('sortieStageSelect')?.value || document.getElementById('battleStageSelect')?.value || 'standard';
+        if (nextStage === 'random') {
+          nextStage = getRandomStageId();
+        }
+        const nextOrder = (battleState.startingPlayer === 1) ? 2 : 1;
+        window.p2pState.conn.send({
+          type: 'P2P_REMATCH',
+          stage: nextStage,
+          startingPlayer: nextOrder
+        });
+        hideMatchResultModal();
+        startOnlineP2PBattle(nextStage, nextOrder);
+      } else {
+        // Guest requested rematch
+        window.p2pState.conn.send({ type: 'REQUEST_REMATCH' });
+        showBattleToast(isEn() ? 'Rematch requested! Waiting for Host...' : '再戦をリクエストしました。ホストの応答を待機中...');
+      }
+      return;
+    }
     hideMatchResultModal();
     initBattleMatch();
   });
@@ -6892,7 +6937,10 @@ function setupP2PConnection(conn) {
 
     if (data.type === 'HELLO_GUEST' && window.p2pState.isHost) {
       window.p2pState.remoteBuild = data.build;
-      const stage = document.getElementById('sortieStageSelect')?.value || 'standard';
+      let stage = document.getElementById('sortieStageSelect')?.value || document.getElementById('battleStageSelect')?.value || 'standard';
+      if (stage === 'random') {
+        stage = getRandomStageId();
+      }
       conn.send({
         type: 'START_MATCH',
         hostBuild: currentBuild,
@@ -6902,6 +6950,22 @@ function setupP2PConnection(conn) {
       startOnlineP2PBattle(stage, 1);
     } else if (data.type === 'START_MATCH' && !window.p2pState.isHost) {
       window.p2pState.remoteBuild = data.hostBuild;
+      startOnlineP2PBattle(data.stage || 'standard', data.startingPlayer || 1);
+    } else if (data.type === 'REQUEST_REMATCH' && window.p2pState.isHost) {
+      let nextStage = document.getElementById('sortieStageSelect')?.value || document.getElementById('battleStageSelect')?.value || 'standard';
+      if (nextStage === 'random') {
+        nextStage = getRandomStageId();
+      }
+      const nextOrder = (battleState.startingPlayer === 1) ? 2 : 1;
+      conn.send({
+        type: 'P2P_REMATCH',
+        stage: nextStage,
+        startingPlayer: nextOrder
+      });
+      hideMatchResultModal();
+      startOnlineP2PBattle(nextStage, nextOrder);
+    } else if (data.type === 'P2P_REMATCH' && !window.p2pState.isHost) {
+      hideMatchResultModal();
       startOnlineP2PBattle(data.stage || 'standard', data.startingPlayer || 1);
     } else if (data.type === 'SHOT') {
       const shooterIdx = (battleState.activePlayer || 1) - 1;
