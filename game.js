@@ -4426,8 +4426,8 @@ function executeCPUTurn() {
 
 function checkBurstCondition(defender, attacker, hit, impactMag) {
   const dmg = defender.damagePct || 0;
-  // Below 40% damage: Structural integrity is solid, cannot burst
-  if (dmg < 40) return false;
+  // Below 25% damage: Structural integrity is solid, cannot burst
+  if (dmg < 25) return false;
 
   const spec = defender.spec;
   const glyphs = defender.build?.glyphs || [];
@@ -4439,30 +4439,29 @@ function checkBurstCondition(defender, attacker, hit, impactMag) {
   // Long, spindly or high-aspect ratio machines have high dispersion (higher mechanical moment).
   const numGlyphs = Math.max(1, spec.subBoxes.length);
   const avgDist = spec.subBoxes.reduce((acc, b) => acc + Math.hypot(b.relX, b.relY), 0) / numGlyphs;
-  const dispersion = Math.min(2.1, Math.max(0.65, avgDist / 26.0));
+  const dispersion = Math.min(1.6, Math.max(0.75, avgDist / 28.0));
 
   // 2. Armor Rigidity (Higher Def & Weight reinforce weld bonds)
-  const rigidity = Math.max(0.55, (spec.def * 0.85 + spec.weight * 2.2) / 100);
+  const rigidity = Math.max(0.65, (spec.def * 0.70 + spec.weight * 2.0) / 100);
 
   // 3. Attacker Cutting / Shear Intensity (Attack stat + Blade Stroke Sharpness)
-  const atkBonus = 1.0 + (attacker.spec.atk - 50) * 0.012;
-  const sharpnessBonus = 1.0 + (hit.sharpnessSum || 0) * 0.16;
+  const atkBonus = 1.0 + (attacker.spec.atk - 50) * 0.008;
+  const sharpnessBonus = 1.0 + (hit.sharpnessSum || 0) * 0.12;
 
-  // 4. Physical Impact Force (Requires meaningful velocity, threshold ~4.2)
-  const impactStress = Math.max(0, (impactMag - 4.2) / 9.5);
-  if (impactStress <= 0.05) return false;
+  // 4. Physical Impact Force (Impact velocity normalized)
+  const impactStress = Math.max(0.2, (impactMag - 2.0) / 7.5);
 
-  // 5. Exponential Damage Instability
-  const damageFactor = Math.pow((dmg - 35) / 92, 1.65);
+  // 5. Exponential Damage Instability: At ~40% damage, firmly within lethal burst territory!
+  const damageFactor = Math.pow(Math.max(0, (dmg - 22) / 22.0), 1.35);
 
-  const totalStress = (damageFactor * impactStress * atkBonus * sharpnessBonus * dispersion) / rigidity;
+  const totalStress = (damageFactor * impactStress * atkBonus * sharpnessBonus * dispersion) / (rigidity * 1.65);
 
-  // Threshold:
-  // totalStress >= 1.25 -> Guaranteed Critical Fracture
-  // totalStress >= 0.70 -> Probabilistic Fracture (0% to 100%)
-  if (totalStress >= 1.25) return true;
-  if (totalStress >= 0.70) {
-    const chance = (totalStress - 0.70) / 0.55;
+  // Thresholds:
+  // totalStress >= 1.10 -> Guaranteed Critical Fracture (100%)
+  // totalStress >= 0.45 -> Probabilistic Fracture (0% to 100%)
+  if (totalStress >= 1.10) return true;
+  if (totalStress >= 0.45) {
+    const chance = (totalStress - 0.45) / 0.65;
     return Math.random() < chance;
   }
   return false;
@@ -5552,8 +5551,8 @@ function updateBattleTelemetryPanels(u1, u2) {
 
   const p1HpEl = document.getElementById('battleP1HpVal');
   if (p1HpEl) {
-    p1HpEl.textContent = `${u1.damagePct}%${u1.damagePct >= 80 ? ' [BURST RISK]' : ''}`;
-    p1HpEl.style.color = u1.damagePct >= 100 ? 'var(--apex-red)' : u1.damagePct >= 80 ? '#f97316' : u1.damagePct >= 50 ? 'var(--apex-gold)' : '#ffffff';
+    p1HpEl.textContent = `${u1.damagePct}%${u1.damagePct >= 40 ? ' [BURST RISK]' : ''}`;
+    p1HpEl.style.color = u1.damagePct >= 65 ? 'var(--apex-red)' : u1.damagePct >= 40 ? '#f97316' : u1.damagePct >= 25 ? 'var(--apex-gold)' : '#ffffff';
   }
   const p1HpBar = document.getElementById('battleP1HpBar');
   if (p1HpBar) {
@@ -5605,8 +5604,8 @@ function updateBattleTelemetryPanels(u1, u2) {
 
   const p2HpEl = document.getElementById('battleP2HpVal');
   if (p2HpEl) {
-    p2HpEl.textContent = `${u2.damagePct}%${u2.damagePct >= 80 ? ' [BURST RISK]' : ''}`;
-    p2HpEl.style.color = u2.damagePct >= 100 ? 'var(--apex-red)' : u2.damagePct >= 80 ? '#f97316' : u2.damagePct >= 50 ? 'var(--apex-gold)' : '#ffffff';
+    p2HpEl.textContent = `${u2.damagePct}%${u2.damagePct >= 40 ? ' [BURST RISK]' : ''}`;
+    p2HpEl.style.color = u2.damagePct >= 65 ? 'var(--apex-red)' : u2.damagePct >= 40 ? '#f97316' : u2.damagePct >= 25 ? 'var(--apex-gold)' : '#ffffff';
   }
   const p2HpBar = document.getElementById('battleP2HpBar');
   if (p2HpBar) {
@@ -5685,15 +5684,15 @@ function updateBattleHUD() {
   document.getElementById('p1Name').textContent = u1.spec.name;
   document.getElementById('p1WeightTag').textContent = `${u1.spec.weight}g`;
   const p1DmgText = document.getElementById('p1DamageText');
-  p1DmgText.textContent = `${u1.damagePct}%`;
-  p1DmgText.style.color = u1.damagePct >= 100 ? 'var(--apex-red)' : u1.damagePct >= 50 ? 'var(--apex-gold)' : 'var(--apex-gold)';
+  p1DmgText.textContent = `${u1.damagePct}%${u1.damagePct >= 40 ? ' [BURST!]' : ''}`;
+  p1DmgText.style.color = u1.damagePct >= 65 ? 'var(--apex-red)' : u1.damagePct >= 40 ? '#f97316' : 'var(--apex-gold)';
   document.getElementById('p1DamageBar').style.width = `${Math.min(100, Math.max(0, u1.damagePct))}%`;
 
   document.getElementById('p2Name').textContent = u2.spec.name;
   document.getElementById('p2WeightTag').textContent = `${u2.spec.weight}g`;
   const p2DmgText = document.getElementById('p2DamageText');
-  p2DmgText.textContent = `${u2.damagePct}%`;
-  p2DmgText.style.color = u2.damagePct >= 100 ? 'var(--apex-red)' : u2.damagePct >= 50 ? 'var(--apex-gold)' : 'var(--apex-gold)';
+  p2DmgText.textContent = `${u2.damagePct}%${u2.damagePct >= 40 ? ' [BURST!]' : ''}`;
+  p2DmgText.style.color = u2.damagePct >= 65 ? 'var(--apex-red)' : u2.damagePct >= 40 ? '#f97316' : 'var(--apex-gold)';
   document.getElementById('p2DamageBar').style.width = `${Math.min(100, Math.max(0, u2.damagePct))}%`;
 
   const renderStars = (elId, score) => {
