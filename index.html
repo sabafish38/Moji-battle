@@ -158,7 +158,7 @@
                   type="text"
                   id="glyphKeyboardInput"
                   class="glyph-text-input"
-                  placeholder="e.g. 剣, ▲, V, X..."
+                  placeholder="e.g. A, V, X, ★, 剣..."
                   maxlength="5"
                   value="剣"
                 />
@@ -196,6 +196,8 @@
                 <button class="mini-pill" data-palcat="armor">ARMOR / SHIELD</button>
                 <button class="mini-pill" data-palcat="speed">SPEED / WING</button>
                 <button class="mini-pill" data-palcat="special">DRAGON / CORE</button>
+                <button class="mini-pill" data-palcat="english">ENG / A-Z</button>
+                <button class="mini-pill" data-palcat="symbols">SYM / ★</button>
               </div>
               <div class="glyph-palette-grid" id="glyphPaletteGrid"></div>
             </div>
@@ -739,15 +741,19 @@
         </div>
         <div class="result-telemetry-grid">
           <div class="telemetry-item">
-            <span class="telemetry-label">TURNS</span>
+            <span class="telemetry-label" data-i18n="result_turns">TURNS</span>
             <strong id="resultTurnCount">5 TURNS</strong>
           </div>
           <div class="telemetry-item">
-            <span class="telemetry-label">MAX DAMAGE</span>
+            <span class="telemetry-label" data-i18n="result_damage">MAX DAMAGE</span>
             <strong id="resultMaxDamage">0%</strong>
           </div>
           <div class="telemetry-item">
-            <span class="telemetry-label">ARENA STAGE</span>
+            <span class="telemetry-label" data-i18n="result_career_wins">TOTAL WINS</span>
+            <strong id="resultTotalWins">0 WINS</strong>
+          </div>
+          <div class="telemetry-item">
+            <span class="telemetry-label" data-i18n="result_stage">ARENA STAGE</span>
             <strong id="resultStageName">スタンダード木製机</strong>
           </div>
         </div>

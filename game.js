@@ -43,6 +43,22 @@ class SoundSystem {
     this.ctx = null;
     this.enabled = true;
     this.adMuted = false;
+    this.tabMuted = false;
+  }
+
+  isAudible() {
+    return this.enabled && !this.adMuted && !this.tabMuted;
+  }
+
+  setTabMuted(muted) {
+    this.tabMuted = !!muted;
+    if (this.ctx) {
+      if (this.tabMuted && this.ctx.state === 'running') {
+        this.ctx.suspend().catch(() => {});
+      } else if (!this.tabMuted && this.isAudible() && this.ctx.state === 'suspended') {
+        this.ctx.resume().catch(() => {});
+      }
+    }
   }
 
   playCancel() {
@@ -54,13 +70,13 @@ class SoundSystem {
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
       if (AudioCtx) this.ctx = new AudioCtx();
     }
-    if (this.ctx && this.ctx.state === 'suspended') {
-      this.ctx.resume();
+    if (this.ctx && this.ctx.state === 'suspended' && this.isAudible()) {
+      this.ctx.resume().catch(() => {});
     }
   }
 
   playClick() {
-    if (!this.enabled || this.adMuted) return;
+    if (!this.isAudible()) return;
     this.init();
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
@@ -78,7 +94,7 @@ class SoundSystem {
   }
 
   playEquip() {
-    if (!this.enabled || this.adMuted) return;
+    if (!this.isAudible()) return;
     this.init();
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
@@ -97,7 +113,7 @@ class SoundSystem {
   }
 
   playShoot(powerRatio = 0.5) {
-    if (!this.enabled || this.adMuted) return;
+    if (!this.isAudible()) return;
     this.init();
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
@@ -116,7 +132,7 @@ class SoundSystem {
   }
 
   playHit(intensity = 0.6, isMetallic = true) {
-    if (!this.enabled || this.adMuted) return;
+    if (!this.isAudible()) return;
     this.init();
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
@@ -150,7 +166,7 @@ class SoundSystem {
   }
 
   playSkill() {
-    if (!this.enabled || this.adMuted) return;
+    if (!this.isAudible()) return;
     this.init();
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
@@ -169,7 +185,7 @@ class SoundSystem {
   }
 
   playFall() {
-    if (!this.enabled || this.adMuted) return;
+    if (!this.isAudible()) return;
     this.init();
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
@@ -187,7 +203,7 @@ class SoundSystem {
   }
 
   playWin() {
-    if (!this.enabled || this.adMuted) return;
+    if (!this.isAudible()) return;
     this.init();
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
@@ -206,7 +222,7 @@ class SoundSystem {
     });
   }
   playBoost() {
-    if (!this.enabled || this.adMuted) return;
+    if (!this.isAudible()) return;
     this.init();
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
@@ -224,7 +240,7 @@ class SoundSystem {
   }
 
   playSpin() {
-    if (!this.enabled || this.adMuted) return;
+    if (!this.isAudible()) return;
     this.init();
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
@@ -243,7 +259,7 @@ class SoundSystem {
   }
 
   playRough() {
-    if (!this.enabled || this.adMuted) return;
+    if (!this.isAudible()) return;
     this.init();
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
@@ -605,6 +621,15 @@ const PALETTE_CATEGORIES = {
     '龍', '竜', '神', '魔', '鬼', '炎', '焔', '爆',
     '轟', '渦', '廻', '零', '卍', '♾', 'Ω', 'α',
     '鳳', '凰', '虎', '狼', '獅子', '獄', '天', '星'
+  ],
+  english: [
+    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
+    'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
+    'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '7', '8'
+  ],
+  symbols: [
+    '★', '⚔', '▲', '▼', '◆', '●', '■', '✕', '✦',
+    'Ω', 'Ψ', 'Σ', '∞', '†', '‡', '※', '⬡', '◇'
   ]
 };
 
@@ -2714,8 +2739,8 @@ function renderPaletteGrid() {
     btn.className = 'palette-char-btn';
     btn.textContent = ch;
     btn.title = currentBuild.glyphs.length >= MAX_GLYPHS
-      ? `『${ch}』を選択中の文字と置換`
-      : `『${ch}』を機体に密着追加`;
+      ? (isEn() ? `Replace selected character with '${ch}'` : `『${ch}』を選択中の文字と置換`)
+      : (isEn() ? `Add '${ch}' to machine` : `『${ch}』を機体に密着追加`);
     btn.addEventListener('click', () => {
       document.getElementById('glyphKeyboardInput').value = ch;
       updateLiveTypedCharPreview();
@@ -5701,6 +5726,16 @@ function showMatchResultModal(winner, u1, u2) {
     stageEl.textContent = stg.name;
   }
 
+  let totalWins = parseInt(safeGetStorage('keshigomu_neo_total_wins', '0'), 10) || 0;
+  if (isLocalWin) {
+    totalWins++;
+    safeSetStorage('keshigomu_neo_total_wins', totalWins.toString());
+  }
+  const winsEl = document.getElementById('resultTotalWins');
+  if (winsEl) {
+    winsEl.textContent = isEn() ? `${totalWins} WINS` : `${totalWins} 勝`;
+  }
+
   modal.classList.remove('hidden');
   if (typeof requestCrazyGamesBanner === 'function') requestCrazyGamesBanner();
 
@@ -6180,13 +6215,38 @@ function applyLanguage(lang) {
     'Add as Symmetric Mirror Pair (Requires 2 free slots)',
     '左右対称ペアで追加 (空き2文字必要)');
   setElementText('#panel-input .panel-group:nth-of-type(2) h3', 'TACTICAL GLYPH PALETTE', 'おすすめ文字パレット');
-  const palTabs = document.querySelectorAll('#paletteCategoryTabs .mini-pill');
-  if (palTabs.length >= 4) {
-    const pNames = isEn()
-      ? ['BLADE / SPIKE', 'ARMOR / SHIELD', 'SPEED / WING', 'DRAGON / SPECIAL']
-      : ['鋭角・刃物', '重装甲・盾', '高速・翼', '特効・属性'];
-    palTabs.forEach((el, i) => { if (pNames[i]) el.textContent = pNames[i]; });
+  const inputEl = document.getElementById('glyphKeyboardInput');
+  if (inputEl) {
+    inputEl.placeholder = isEn()
+      ? 'e.g. A, V, X, ★, 剣...'
+      : '例: 剣, 龍, A, V, ★...';
   }
+
+  const pNames = isEn()
+    ? {
+        attack: 'BLADE / SPIKE',
+        armor: 'ARMOR / SHIELD',
+        speed: 'SPEED / WING',
+        special: 'DRAGON / CORE',
+        english: 'ENG / A-Z',
+        symbols: 'SYM / ★'
+      }
+    : {
+        attack: '鋭角・刃物',
+        armor: '重装甲・盾',
+        speed: '高速・翼',
+        special: '特効・属性',
+        english: '英字 / A-Z',
+        symbols: '記号 / ★'
+      };
+  document.querySelectorAll('#paletteCategoryTabs .mini-pill').forEach(el => {
+    const cat = el.dataset.palcat;
+    if (pNames[cat]) el.textContent = pNames[cat];
+  });
+  setElementText('[data-i18n="result_career_wins"]', 'TOTAL WINS', '通算勝利数');
+  setElementText('[data-i18n="result_turns"]', 'TURNS', '決着手数');
+  setElementText('[data-i18n="result_damage"]', 'MAX DAMAGE', '最大ダメージ');
+  setElementText('[data-i18n="result_stage"]', 'ARENA STAGE', '対戦ステージ');
   setElementText('#panel-input .panel-group:nth-of-type(3) h3', 'DEFAULT MATERIAL & COLOR', '初期の材質・カラー');
   setElementText('#panel-input .panel-group:nth-of-type(3) .count-pill', '9 TYPES', '全9種');
   setElementText('#panel-input .tactical-select-row label', 'Font Style:', 'フォント書体:');
@@ -6494,9 +6554,22 @@ async function initCrazyGamesSDK() {
     if (window.CrazyGames && window.CrazyGames.SDK) {
       await window.CrazyGames.SDK.init();
       cgSdkReady = true;
-      if (window.CrazyGames.SDK.game && window.CrazyGames.SDK.game.settings) {
-        if (window.CrazyGames.SDK.game.settings.muteAudio) {
+      if (window.CrazyGames.SDK.game) {
+        if (window.CrazyGames.SDK.game.settings && window.CrazyGames.SDK.game.settings.muteAudio) {
           sfx.adMuted = true;
+          if (sfx.ctx && sfx.ctx.state === 'running') sfx.ctx.suspend().catch(() => {});
+        }
+        if (typeof window.CrazyGames.SDK.game.onSettingsChanged === 'function') {
+          window.CrazyGames.SDK.game.onSettingsChanged((settings) => {
+            if (settings && typeof settings.muteAudio === 'boolean') {
+              sfx.adMuted = settings.muteAudio;
+              if (sfx.adMuted && sfx.ctx && sfx.ctx.state === 'running') {
+                sfx.ctx.suspend().catch(() => {});
+              } else if (!sfx.adMuted && sfx.isAudible() && sfx.ctx && sfx.ctx.state === 'suspended') {
+                sfx.ctx.resume().catch(() => {});
+              }
+            }
+          });
         }
       }
     }
@@ -6504,6 +6577,23 @@ async function initCrazyGamesSDK() {
     cgSdkReady = false;
   }
 }
+
+// CrazyGames QA Compliance: Automatic audio muting on tab switch or window blur
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    sfx.setTabMuted(true);
+  } else {
+    sfx.setTabMuted(false);
+  }
+});
+window.addEventListener('blur', () => {
+  sfx.setTabMuted(true);
+});
+window.addEventListener('focus', () => {
+  if (!document.hidden) {
+    sfx.setTabMuted(false);
+  }
+});
 
 function requestCrazyGamesBanner() {
   if (cgSdkReady && window.CrazyGames?.SDK?.banner) {
