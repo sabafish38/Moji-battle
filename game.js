@@ -5727,8 +5727,10 @@ function hideMatchResultModal() {
 
 document.getElementById('resultToCraftBtn')?.addEventListener('click', () => {
   sfx.playClick();
-  hideMatchResultModal();
-  document.getElementById('tabCraftBtn')?.click();
+  requestCrazyGamesAd('midgame', () => {
+    hideMatchResultModal();
+    document.getElementById('tabCraftBtn')?.click();
+  });
 });
 
 
@@ -6704,34 +6706,32 @@ document.getElementById('resultAdRematchBtn')?.addEventListener('click', () => {
   });
 });
 
-// 3. Standard Rematch Button triggers non-intrusive Midgame Ad (with 60s cooldown)
+// 3. Standard Rematch Button: Instant Rematch without ad
 document.getElementById('resultRematchBtn')?.addEventListener('click', () => {
   sfx.playClick();
-  requestCrazyGamesAd('midgame', () => {
-    if (battleState.mode === 'p2p-online' && window.p2pState && window.p2pState.connected && window.p2pState.conn) {
-      if (window.p2pState.isHost) {
-        let nextStage = document.getElementById('sortieStageSelect')?.value || document.getElementById('battleStageSelect')?.value || 'standard';
-        if (nextStage === 'random') {
-          nextStage = getRandomStageId();
-        }
-        const nextOrder = (battleState.startingPlayer === 1) ? 2 : 1;
-        window.p2pState.conn.send({
-          type: 'P2P_REMATCH',
-          stage: nextStage,
-          startingPlayer: nextOrder
-        });
-        hideMatchResultModal();
-        startOnlineP2PBattle(nextStage, nextOrder);
-      } else {
-        // Guest requested rematch
-        window.p2pState.conn.send({ type: 'REQUEST_REMATCH' });
-        showBattleToast(isEn() ? 'Rematch requested! Waiting for Host...' : '再戦をリクエストしました。ホストの応答を待機中...');
+  if (battleState.mode === 'p2p-online' && window.p2pState && window.p2pState.connected && window.p2pState.conn) {
+    if (window.p2pState.isHost) {
+      let nextStage = document.getElementById('sortieStageSelect')?.value || document.getElementById('battleStageSelect')?.value || 'standard';
+      if (nextStage === 'random') {
+        nextStage = getRandomStageId();
       }
-      return;
+      const nextOrder = (battleState.startingPlayer === 1) ? 2 : 1;
+      window.p2pState.conn.send({
+        type: 'P2P_REMATCH',
+        stage: nextStage,
+        startingPlayer: nextOrder
+      });
+      hideMatchResultModal();
+      startOnlineP2PBattle(nextStage, nextOrder);
+    } else {
+      // Guest requested rematch
+      window.p2pState.conn.send({ type: 'REQUEST_REMATCH' });
+      showBattleToast(isEn() ? 'Rematch requested! Waiting for Host...' : '再戦をリクエストしました。ホストの応答を待機中...');
     }
-    hideMatchResultModal();
-    initBattleMatch();
-  });
+    return;
+  }
+  hideMatchResultModal();
+  initBattleMatch();
 });
 
 // 4. Rewarded Ad in Craft Studio: Unlock Legendary 5-Glyph Machine + Bonus
