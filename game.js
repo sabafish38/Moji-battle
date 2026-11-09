@@ -275,6 +275,59 @@ class SoundSystem {
     osc.start(now);
     osc.stop(now + 0.09);
   }
+
+  playBurst() {
+    if (!this.isAudible()) return;
+    this.init();
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+
+    // 1. Harsh metallic fracture transients (detuned sharp oscillators)
+    [260, 480, 720, 1150].forEach((freq, idx) => {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = idx % 2 === 0 ? 'sawtooth' : 'square';
+      osc.frequency.setValueAtTime(freq * (1.3 + idx * 0.2), now);
+      osc.frequency.exponentialRampToValueAtTime(55, now + 0.22 + idx * 0.04);
+      gain.gain.setValueAtTime(0.26, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.24 + idx * 0.04);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now + idx * 0.012);
+      osc.stop(now + 0.36);
+    });
+
+    // 2. Heavy explosive sub-bass impact rumble
+    const subOsc = this.ctx.createOscillator();
+    const subGain = this.ctx.createGain();
+    subOsc.type = 'triangle';
+    subOsc.frequency.setValueAtTime(160, now);
+    subOsc.frequency.exponentialRampToValueAtTime(28, now + 0.65);
+    subGain.gain.setValueAtTime(0.42, now);
+    subGain.gain.exponentialRampToValueAtTime(0.001, now + 0.70);
+    subOsc.connect(subGain);
+    subGain.connect(this.ctx.destination);
+    subOsc.start(now);
+    subOsc.stop(now + 0.72);
+
+    // 3. Crackling shatter noise burst
+    try {
+      const bufferSize = Math.floor(this.ctx.sampleRate * 0.35);
+      const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (this.ctx.sampleRate * 0.07));
+      }
+      const noise = this.ctx.createBufferSource();
+      noise.buffer = buffer;
+      const noiseGain = this.ctx.createGain();
+      noiseGain.gain.setValueAtTime(0.32, now);
+      noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+      noise.connect(noiseGain);
+      noiseGain.connect(this.ctx.destination);
+      noise.start(now);
+    } catch (e) {}
+  }
 }
 
 const sfx = new SoundSystem();
@@ -3486,6 +3539,9 @@ let battleState = {
   spinPads: [],
   frictionZones: [],
   particles: [],
+  burstDebris: [],
+  screenShake: 0,
+  flashAlpha: 0,
   undoHistory: []
 };
 
@@ -3910,6 +3966,9 @@ function startBattleRound(roundNum) {
   battleState.phase = 'aim';
   battleState.suddenDeathShrink = 0;
   battleState.particles = [];
+  battleState.burstDebris = [];
+  battleState.screenShake = 0;
+  battleState.flashAlpha = 0;
 
   const desk = getDeskBounds();
   setupStageGimmicks();
@@ -3980,6 +4039,7 @@ function startBattleRound(roundNum) {
       skillCooldown: 0,
       spinType: 'normal',
       fallen: false,
+      burst: false,
       boostCooldown: 0,
       lastBoostPadId: null,
       build: p1Build,
@@ -3999,6 +4059,7 @@ function startBattleRound(roundNum) {
       skillCooldown: 0,
       spinType: 'normal',
       fallen: false,
+      burst: false,
       boostCooldown: 0,
       lastBoostPadId: null,
       build: p2Build,
@@ -4081,9 +4142,13 @@ function undoBattleTurn() {
       u.skillStock = su.skillStock || 0;
       u.lastSkillThreshold = su.lastSkillThreshold || 0;
       u.fallen = false;
+      u.burst = false;
     }
   });
 
+  battleState.burstDebris = [];
+  battleState.screenShake = 0;
+  battleState.flashAlpha = 0;
   sfx.playClick();
   showBattleToast(isEn() ? 'UNDO // Rewound to start of your turn' : 'UNDO // 思考開始前の手番冒頭まで巻き戻しました');
   updateBattleHUD();
@@ -4354,10 +4419,260 @@ function executeCPUTurn() {
   }
 }
 
+
+// ============================================================================
+// BURST FINISHER SYSTEM (Damage% & Machine Geometry Structural Fracture)
+// ============================================================================
+
+function checkBurstCondition(defender, attacker, hit, impactMag) {
+  const dmg = defender.damagePct || 0;
+  // Below 40% damage: Structural integrity is solid, cannot burst
+  if (dmg < 40) return false;
+
+  const spec = defender.spec;
+  const glyphs = defender.build?.glyphs || [];
+  if (glyphs.length < 2) return false; // Single glyph cannot shatter into pieces
+
+  // 1. Machine Geometry & Structural Dispersion Calculation
+  // Calculates average dispersion distance of glyph joints from center of mass:
+  // Compact cluster machines have low dispersion (joints reinforced by adjacent glyphs).
+  // Long, spindly or high-aspect ratio machines have high dispersion (higher mechanical moment).
+  const numGlyphs = Math.max(1, spec.subBoxes.length);
+  const avgDist = spec.subBoxes.reduce((acc, b) => acc + Math.hypot(b.relX, b.relY), 0) / numGlyphs;
+  const dispersion = Math.min(2.1, Math.max(0.65, avgDist / 26.0));
+
+  // 2. Armor Rigidity (Higher Def & Weight reinforce weld bonds)
+  const rigidity = Math.max(0.55, (spec.def * 0.85 + spec.weight * 2.2) / 100);
+
+  // 3. Attacker Cutting / Shear Intensity (Attack stat + Blade Stroke Sharpness)
+  const atkBonus = 1.0 + (attacker.spec.atk - 50) * 0.012;
+  const sharpnessBonus = 1.0 + (hit.sharpnessSum || 0) * 0.16;
+
+  // 4. Physical Impact Force (Requires meaningful velocity, threshold ~4.2)
+  const impactStress = Math.max(0, (impactMag - 4.2) / 9.5);
+  if (impactStress <= 0.05) return false;
+
+  // 5. Exponential Damage Instability
+  const damageFactor = Math.pow((dmg - 35) / 92, 1.65);
+
+  const totalStress = (damageFactor * impactStress * atkBonus * sharpnessBonus * dispersion) / rigidity;
+
+  // Threshold:
+  // totalStress >= 1.25 -> Guaranteed Critical Fracture
+  // totalStress >= 0.70 -> Probabilistic Fracture (0% to 100%)
+  if (totalStress >= 1.25) return true;
+  if (totalStress >= 0.70) {
+    const chance = (totalStress - 0.70) / 0.55;
+    return Math.random() < chance;
+  }
+  return false;
+}
+
+function spawnBurstSparks(arr, x, y, impactAngle, count = 120) {
+  const sparkColors = ['#ffffff', '#fef08a', '#f59e0b', '#f97316', '#ef4444', '#00e5ff'];
+
+  // High-velocity spark streaks
+  for (let i = 0; i < count; i++) {
+    const a = impactAngle + (Math.random() - 0.5) * Math.PI * 1.85;
+    const speed = 7 + Math.random() * 24;
+    const color = sparkColors[Math.floor(Math.random() * sparkColors.length)];
+    arr.push({
+      isSpark: true,
+      x: x + (Math.random() - 0.5) * 14,
+      y: y + (Math.random() - 0.5) * 14,
+      vx: Math.cos(a) * speed,
+      vy: Math.sin(a) * speed,
+      drag: 0.90 + Math.random() * 0.05,
+      life: 1.0,
+      decay: 0.014 + Math.random() * 0.024,
+      size: 1.6 + Math.random() * 2.8,
+      color
+    });
+  }
+
+  // Expanding shockwave rings
+  arr.push({
+    isShockwave: true,
+    x,
+    y,
+    r: 6,
+    speed: 9.0,
+    maxR: 95,
+    lineWidth: 5.0,
+    life: 1.0,
+    decay: 0.035,
+    color: '#ffffff'
+  });
+  arr.push({
+    isShockwave: true,
+    x,
+    y,
+    r: 10,
+    speed: 13.0,
+    maxR: 135,
+    lineWidth: 3.5,
+    life: 1.0,
+    decay: 0.030,
+    color: '#f59e0b'
+  });
+
+  // Glowing core fireball fragments
+  for (let j = 0; j < 35; j++) {
+    const ca = Math.random() * Math.PI * 2;
+    const csp = 2.5 + Math.random() * 8.5;
+    arr.push({
+      x,
+      y,
+      vx: Math.cos(ca) * csp,
+      vy: Math.sin(ca) * csp,
+      life: 1.0,
+      decay: 0.03 + Math.random() * 0.04,
+      size: 4 + Math.random() * 6,
+      color: j % 2 === 0 ? '#ffedd5' : '#ea580c'
+    });
+  }
+}
+
+function triggerBurstMachine(victim, attacker, hit, impactMag, isRemote = false) {
+  if (victim.burst) return;
+  victim.burst = true;
+  victim.fallen = true; // Mark as fallen so standard round resolution picks up victory!
+
+  // 1. Shatter Machine into Individual Glyph Physics Debris
+  const scale = 0.90;
+  const vSpec = victim.spec;
+  const glyphs = victim.build?.glyphs || [];
+
+  glyphs.forEach(g => {
+    const relX = (g.x - vSpec.cx) * scale;
+    const relY = (g.y - vSpec.cy) * scale;
+    const cos = Math.cos(victim.angle);
+    const sin = Math.sin(victim.angle);
+    const worldX = victim.x + (relX * cos - relY * sin);
+    const worldY = victim.y + (relX * sin + relY * cos);
+
+    let burstAng = Math.atan2(worldY - hit.contactY, worldX - hit.contactX);
+    if (Math.hypot(worldX - hit.contactX, worldY - hit.contactY) < 5) {
+      burstAng = Math.random() * Math.PI * 2;
+    }
+    burstAng += (Math.random() - 0.5) * 0.7;
+    const burstSpeed = 7 + Math.random() * 11 + Math.min(6, impactMag * 0.35);
+
+    battleState.burstDebris.push({
+      x: worldX,
+      y: worldY,
+      vx: Math.cos(burstAng) * burstSpeed,
+      vy: Math.sin(burstAng) * burstSpeed,
+      angle: victim.angle + (g.angle * Math.PI / 180),
+      angVel: (Math.random() - 0.5) * 0.65,
+      char: g.char,
+      scale: (g.scale || 100) * scale,
+      mat: g.mat,
+      color: g.color,
+      depthColor: g.depthColor,
+      font: g.font || 'heavy',
+      life: 1.0,
+      floorFriction: 0.94
+    });
+  });
+
+  // 2. Spectacular Burst Sparks & Shockwave Blast
+  const impactAng = Math.atan2(victim.y - attacker.y, victim.x - attacker.x);
+  spawnBurstSparks(battleState.particles, hit.contactX, hit.contactY, impactAng, 120);
+
+  // 3. Screen Impact: Flash & Heavy Shake
+  battleState.screenShake = 24;
+  battleState.flashAlpha = 0.70;
+
+  // 4. Sound & Audio
+  sfx.playBurst();
+
+  // 5. Broadcast in P2P Online Mode
+  if (!isRemote && battleState.mode === 'p2p-online' && window.p2pState?.connected && window.p2pState.isHost && window.p2pState.conn) {
+    window.p2pState.conn.send({
+      type: 'BURST_EVENT',
+      victimId: victim.id,
+      contactX: hit.contactX,
+      contactY: hit.contactY,
+      impactMag
+    });
+  }
+
+  // 6. Center Banner & Toast
+  showBattleToast(isEn() ? 'CRITICAL BURST! Machine structure fractured!' : 'バースト発生！機体接合部が完全破断！');
+}
+
+function drawBurstDebris(ctx) {
+  if (!battleState.burstDebris || battleState.burstDebris.length === 0) return;
+
+  for (let i = battleState.burstDebris.length - 1; i >= 0; i--) {
+    const d = battleState.burstDebris[i];
+    d.x += d.vx;
+    d.y += d.vy;
+    d.angle += d.angVel;
+    d.vx *= d.floorFriction;
+    d.vy *= d.floorFriction;
+    d.angVel *= 0.95;
+    d.life -= 0.006;
+
+    if (d.life <= 0) {
+      battleState.burstDebris.splice(i, 1);
+      continue;
+    }
+
+    ctx.save();
+    ctx.translate(d.x, d.y);
+    ctx.rotate(d.angle);
+    ctx.globalAlpha = Math.max(0, Math.min(1, d.life * 1.6));
+
+    // Shadow
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+    ctx.beginPath();
+    ctx.ellipse(3, 4, 18 * (d.scale / 100), 18 * (d.scale / 100), 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    const fontObj = GLYPH_FONTS[d.font] || GLYPH_FONTS.heavy;
+    const fontSize = Math.round(36 * (d.scale / 100));
+    ctx.font = `${fontObj.weight} ${fontSize}px ${fontObj.cssFamily}`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    // 3D Depth
+    ctx.fillStyle = d.depthColor || '#1e293b';
+    for (let depth = 4; depth > 0; depth--) {
+      ctx.fillText(d.char, depth * 0.7, depth * 0.9);
+    }
+
+    // Main Face
+    ctx.fillStyle = d.color || '#38bdf8';
+    ctx.fillText(d.char, 0, 0);
+
+    // Fracture weld glow on edge
+    ctx.strokeStyle = '#fef08a';
+    ctx.lineWidth = 1.2;
+    ctx.strokeText(d.char, 0, 0);
+
+    ctx.restore();
+  }
+}
+
 function updateBattlePhysicsAndRender() {
   const w = gameCanvas.width;
   const h = gameCanvas.height;
   gameCtx.clearRect(0, 0, w, h);
+
+  let shakeX = 0, shakeY = 0;
+  if (battleState.screenShake > 0) {
+    shakeX = (Math.random() - 0.5) * battleState.screenShake;
+    shakeY = (Math.random() - 0.5) * battleState.screenShake;
+    battleState.screenShake *= 0.88;
+    if (battleState.screenShake < 0.5) battleState.screenShake = 0;
+  }
+
+  gameCtx.save();
+  if (shakeX !== 0 || shakeY !== 0) {
+    gameCtx.translate(shakeX, shakeY);
+  }
 
   const desk = getDeskBounds();
 
@@ -4878,6 +5193,17 @@ function updateBattlePhysicsAndRender() {
             addUnitDamage(u2, impactMag * 0.5);
           }
 
+          // Evaluate Critical Burst (Structural Shatter)
+          if (!u1.burst && !u2.burst) {
+            const attacker = (battleState.activePlayer === 1) ? u1 : u2;
+            const defender = (battleState.activePlayer === 1) ? u2 : u1;
+            if (checkBurstCondition(defender, attacker, hit, impactMag)) {
+              triggerBurstMachine(defender, attacker, hit, impactMag);
+            } else if (checkBurstCondition(attacker, defender, hit, impactMag * 0.7)) {
+              triggerBurstMachine(attacker, defender, hit, impactMag * 0.7);
+            }
+          }
+
           // Physical torque from exact character stroke contact point
           const torque1 = ((hit.contactX - u1.x) * (-impY) - (hit.contactY - u1.y) * (-impX)) * 0.00042;
           const torque2 = ((hit.contactX - u2.x) * impY - (hit.contactY - u2.y) * impX) * 0.00042;
@@ -4921,6 +5247,9 @@ function updateBattlePhysicsAndRender() {
       scale: 0.90
     });
   });
+
+  // Render flying/sliding burst debris
+  drawBurstDebris(gameCtx);
 
   // Interactive Tutorial Step 1 On-Canvas Drag Guide
   if (window.tutorialState && window.tutorialState.active && window.tutorialState.step === 1 && battleState.phase === 'aim' && !battleSlingshot.active) {
@@ -5018,22 +5347,62 @@ function updateBattlePhysicsAndRender() {
     }
   }
 
-  // Render Particles
+  // Render Particles & Sparks
   for (let i = battleState.particles.length - 1; i >= 0; i--) {
     const p = battleState.particles[i];
     p.x += p.vx;
     p.y += p.vy;
+    if (p.drag) {
+      p.vx *= p.drag;
+      p.vy *= p.drag;
+    }
     p.life -= p.decay;
     if (p.life <= 0) {
       battleState.particles.splice(i, 1);
       continue;
     }
-    gameCtx.fillStyle = p.color;
-    gameCtx.globalAlpha = p.life;
-    gameCtx.beginPath();
-    gameCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-    gameCtx.fill();
-    gameCtx.globalAlpha = 1;
+    if (p.isSpark) {
+      gameCtx.save();
+      gameCtx.strokeStyle = p.color;
+      gameCtx.lineWidth = p.size;
+      gameCtx.globalAlpha = Math.max(0, Math.min(1, p.life));
+      gameCtx.beginPath();
+      gameCtx.moveTo(p.x, p.y);
+      const trailLen = Math.min(26, Math.hypot(p.vx, p.vy) * 2.2);
+      const trailAng = Math.atan2(p.vy, p.vx);
+      gameCtx.lineTo(p.x - Math.cos(trailAng) * trailLen, p.y - Math.sin(trailAng) * trailLen);
+      gameCtx.stroke();
+      gameCtx.restore();
+    } else if (p.isShockwave) {
+      p.r += p.speed;
+      gameCtx.save();
+      gameCtx.strokeStyle = p.color;
+      gameCtx.lineWidth = Math.max(1, p.lineWidth * p.life);
+      gameCtx.globalAlpha = Math.max(0, Math.min(1, p.life));
+      gameCtx.beginPath();
+      gameCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      gameCtx.stroke();
+      gameCtx.restore();
+    } else {
+      gameCtx.fillStyle = p.color;
+      gameCtx.globalAlpha = p.life;
+      gameCtx.beginPath();
+      gameCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      gameCtx.fill();
+      gameCtx.globalAlpha = 1;
+    }
+  }
+
+  gameCtx.restore(); // Restore screen shake
+
+  // Screen Flash Overlay
+  if (battleState.flashAlpha > 0) {
+    gameCtx.save();
+    gameCtx.fillStyle = `rgba(255, 255, 255, ${battleState.flashAlpha})`;
+    gameCtx.fillRect(0, 0, w, h);
+    gameCtx.restore();
+    battleState.flashAlpha -= 0.045;
+    if (battleState.flashAlpha < 0) battleState.flashAlpha = 0;
   }
 }
 
@@ -5073,9 +5442,14 @@ function resolveRoundEnd() {
   const u2 = battleState.units[1];
 
   let winner = 1;
-  const isDoubleRingOut = (u1.fallen && u2.fallen);
+  const isBurstFinish = (u1.burst || u2.burst);
+  const isDoubleRingOut = (u1.fallen && u2.fallen && !isBurstFinish);
 
-  if (isDoubleRingOut) {
+  if (u1.burst && !u2.burst) {
+    winner = 2;
+  } else if (!u1.burst && u2.burst) {
+    winner = 1;
+  } else if (isDoubleRingOut) {
     // Both units fell: the player whose turn it was loses (self-destruct)!
     winner = (battleState.activePlayer === 1) ? 2 : 1;
   } else if (u1.fallen && !u2.fallen) {
@@ -5106,19 +5480,24 @@ function resolveRoundEnd() {
     const shooterLabel = (battleState.activePlayer === 1) ? '1P' : (isHumanP2 ? '2P' : 'CPU');
     const winnerLabel = (winner === 1) ? '1P' : (isHumanP2 ? '2P' : 'CPU');
 
+    const burstVictim = u1.burst ? u1 : u2;
     const championDesc = isEn()
-      ? (isDoubleRingOut
-          ? `Double Ring-Out! Active shooter (${shooterLabel}) self-destructed — ${winnerLabel} takes the match!`
-          : `${champName} dominates the desk arena!`)
-      : (isDoubleRingOut
-          ? `両機落下（共倒れ）！ 手番側（${shooterLabel}）の自滅判定により ${winnerLabel} の完全制覇！`
-          : `${champName} 完全制覇！`);
+      ? (isBurstFinish
+          ? `BURST FINISH! ${burstVictim.spec.name}'s chassis was completely shattered by critical impact!`
+          : (isDoubleRingOut
+              ? `Double Ring-Out! Active shooter (${shooterLabel}) self-destructed — ${winnerLabel} takes the match!`
+              : `${champName} dominates the desk arena!`))
+      : (isBurstFinish
+          ? `バースト粉砕決着！ 痛恨のクリティカル打撃により『${burstVictim.spec.name}』が完全空中分解！`
+          : (isDoubleRingOut
+              ? `両機落下（共倒れ）！ 手番側（${shooterLabel}）の自滅判定により ${winnerLabel} の完全制覇！`
+              : `${champName} 完全制覇！`));
 
     showCenterBanner(
-      didLocalWin ? 'VICTORY // CHAMPION' : 'DEFEAT // RIVAL WIN',
-      isEn() ? `${champName} WINS!` : `${champName} 優勝！`,
+      isBurstFinish ? (didLocalWin ? 'BURST FINISH // VICTORY' : 'BURST SHATTER // DEFEAT') : (didLocalWin ? 'VICTORY // CHAMPION' : 'DEFEAT // RIVAL WIN'),
+      isBurstFinish ? (isEn() ? 'CRITICAL SHATTER!' : '完全粉砕決着！') : (isEn() ? `${champName} WINS!` : `${champName} 優勝！`),
       championDesc,
-      1500
+      1800
     );
 
     setTimeout(() => {
@@ -5129,19 +5508,24 @@ function resolveRoundEnd() {
     const shooterLabel = (battleState.activePlayer === 1) ? '1P' : (isHumanP2 ? '2P' : 'CPU');
     const winnerLabel = (winner === 1) ? '1P' : (isHumanP2 ? '2P' : 'CPU');
 
+    const burstVictim = u1.burst ? u1 : u2;
     const roundDesc = isEn()
-      ? (isDoubleRingOut
-          ? `Double Ring-Out! ${shooterLabel} self-destructed — Point to ${winnerLabel}!`
-          : 'Knocked the opponent clean off the desk!')
-      : (isDoubleRingOut
-          ? `両機落下（共倒れ）！ 手番側（${shooterLabel}）の自滅判定で ${winnerLabel} にポイント！`
-          : '相手を机から弾き落とした！');
+      ? (isBurstFinish
+          ? `BURST FINISH! ${burstVictim.spec.name}'s chassis completely shattered under critical impact!`
+          : (isDoubleRingOut
+              ? `Double Ring-Out! ${shooterLabel} self-destructed — Point to ${winnerLabel}!`
+              : 'Knocked the opponent clean off the desk!'))
+      : (isBurstFinish
+          ? `バースト粉砕決着！ 衝撃打撃により『${burstVictim.spec.name}』の文字接合が完全崩壊！`
+          : (isDoubleRingOut
+              ? `両機落下（共倒れ）！ 手番側（${shooterLabel}）の自滅判定で ${winnerLabel} にポイント！`
+              : '相手を机から弾き落とした！'));
 
     showCenterBanner(
-      winner === 1 ? '1P ROUND POINT!' : (isHumanP2 ? '2P ROUND POINT!' : 'RIVAL ROUND POINT!'),
-      isEn() ? `NEXT: ROUND ${nextRound}` : `ROUND ${nextRound} へ`,
+      isBurstFinish ? 'BURST FINISH!' : (winner === 1 ? '1P ROUND POINT!' : (isHumanP2 ? '2P ROUND POINT!' : 'RIVAL ROUND POINT!')),
+      isBurstFinish ? (isEn() ? 'MACHINE CRUSHED!' : '完全粉砕KO！') : (isEn() ? `NEXT: ROUND ${nextRound}` : `ROUND ${nextRound} へ`),
       roundDesc,
-      1800
+      2000
     );
     setTimeout(() => {
       startBattleRound(nextRound);
@@ -5168,8 +5552,8 @@ function updateBattleTelemetryPanels(u1, u2) {
 
   const p1HpEl = document.getElementById('battleP1HpVal');
   if (p1HpEl) {
-    p1HpEl.textContent = `${u1.damagePct}%`;
-    p1HpEl.style.color = u1.damagePct >= 100 ? 'var(--apex-red)' : u1.damagePct >= 50 ? 'var(--apex-gold)' : '#ffffff';
+    p1HpEl.textContent = `${u1.damagePct}%${u1.damagePct >= 80 ? ' [BURST RISK]' : ''}`;
+    p1HpEl.style.color = u1.damagePct >= 100 ? 'var(--apex-red)' : u1.damagePct >= 80 ? '#f97316' : u1.damagePct >= 50 ? 'var(--apex-gold)' : '#ffffff';
   }
   const p1HpBar = document.getElementById('battleP1HpBar');
   if (p1HpBar) {
@@ -5221,8 +5605,8 @@ function updateBattleTelemetryPanels(u1, u2) {
 
   const p2HpEl = document.getElementById('battleP2HpVal');
   if (p2HpEl) {
-    p2HpEl.textContent = `${u2.damagePct}%`;
-    p2HpEl.style.color = u2.damagePct >= 100 ? 'var(--apex-red)' : u2.damagePct >= 50 ? 'var(--apex-gold)' : '#ffffff';
+    p2HpEl.textContent = `${u2.damagePct}%${u2.damagePct >= 80 ? ' [BURST RISK]' : ''}`;
+    p2HpEl.style.color = u2.damagePct >= 100 ? 'var(--apex-red)' : u2.damagePct >= 80 ? '#f97316' : u2.damagePct >= 50 ? 'var(--apex-gold)' : '#ffffff';
   }
   const p2HpBar = document.getElementById('battleP2HpBar');
   if (p2HpBar) {
@@ -5673,18 +6057,31 @@ function showMatchResultModal(winner, u1, u2) {
     card.classList.toggle('is-defeat', !isLocalWin);
   }
 
+  const isBurstFinish = (u1.burst || u2.burst);
   const tagEl = document.getElementById('resultHeaderTag');
   if (tagEl) {
-    tagEl.textContent = isEn()
-      ? (isLocalWin ? 'MATCH OVER // VICTORY' : 'MATCH OVER // DEFEAT')
-      : (isLocalWin ? '決着 // 勝利者決定' : '決着 // 敗北');
+    if (isBurstFinish) {
+      tagEl.textContent = isEn()
+        ? (isLocalWin ? 'BURST FINISH // VICTORY' : 'BURST SHATTER // DEFEAT')
+        : (isLocalWin ? 'バースト粉砕 // 完全制覇' : 'バースト粉砕 // 敗北');
+    } else {
+      tagEl.textContent = isEn()
+        ? (isLocalWin ? 'MATCH OVER // VICTORY' : 'MATCH OVER // DEFEAT')
+        : (isLocalWin ? '決着 // 勝利者決定' : '決着 // 敗北');
+    }
   }
 
   const titleEl = document.getElementById('resultMainTitle');
   if (titleEl) {
-    titleEl.textContent = isEn()
-      ? (isLocalWin ? 'VICTORY' : 'DEFEAT')
-      : (isLocalWin ? '完全勝利 (VICTORY)' : '敗北 (DEFEAT)');
+    if (isBurstFinish) {
+      titleEl.textContent = isEn()
+        ? (isLocalWin ? 'BURST VICTORY!' : 'BURST DEFEAT')
+        : (isLocalWin ? 'バースト完全勝利！' : 'バースト粉砕敗北');
+    } else {
+      titleEl.textContent = isEn()
+        ? (isLocalWin ? 'VICTORY' : 'DEFEAT')
+        : (isLocalWin ? '完全勝利 (VICTORY)' : '敗北 (DEFEAT)');
+    }
   }
 
   const badgeEl = document.getElementById('winnerBadge');
@@ -7000,6 +7397,12 @@ function setupP2PConnection(conn) {
       });
       hideMatchResultModal();
       startOnlineP2PBattle(nextStage, nextOrder);
+    } else if (data.type === 'BURST_EVENT') {
+      const victim = battleState.units.find(u => u.id === data.victimId);
+      const attacker = battleState.units.find(u => u.id !== data.victimId);
+      if (victim && attacker) {
+        triggerBurstMachine(victim, attacker, { contactX: data.contactX, contactY: data.contactY }, data.impactMag, true);
+      }
     } else if (data.type === 'P2P_REMATCH' && !window.p2pState.isHost) {
       hideMatchResultModal();
       startOnlineP2PBattle(data.stage || 'standard', data.startingPlayer || 1);
@@ -7029,6 +7432,7 @@ function setupP2PConnection(conn) {
             u.damagePct = su.damagePct;
             u.skillStock = su.skillStock;
             u.fallen = su.fallen;
+            u.burst = su.burst || false;
           }
         });
         battleState.turn = data.turn;
@@ -7099,7 +7503,8 @@ function onTurnAdvancedP2P() {
         angle: u.angle,
         damagePct: u.damagePct,
         skillStock: u.skillStock || 0,
-        fallen: u.fallen
+        fallen: u.fallen,
+        burst: u.burst || false
       }))
     });
   }
