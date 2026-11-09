@@ -3043,3 +3043,435 @@ kbd {
   opacity: 0.52;
   pointer-events: none;
 }
+
+
+/* =========================================================================
+   CRAZYGAMES EDITION: I18N, P2P BENTO MATCHMAKING, TUTORIAL & AD STYLES
+========================================================================== */
+
+.lang-switch-btn {
+  background: rgba(0, 229, 255, 0.14) !important;
+  border: 1px solid var(--apex-cyan) !important;
+  color: #ffffff !important;
+  font-weight: 900 !important;
+  font-size: 11px !important;
+  padding: 5px 10px !important;
+  letter-spacing: 0.06em;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.lang-switch-btn:hover {
+  background: rgba(0, 229, 255, 0.28) !important;
+  box-shadow: 0 0 12px var(--apex-cyan-glow);
+}
+
+.lang-switch-btn:active,
+.tutorial-nav-btn:active,
+.rewarded-ad-btn:active,
+.sortie-pill:active,
+.tutorial-btn:active {
+  transform: translateY(2px) !important;
+}
+
+.tutorial-nav-btn {
+  border-color: var(--apex-gold) !important;
+  color: var(--apex-gold) !important;
+  font-weight: 800 !important;
+}
+
+/* Rewarded Ad Buttons */
+.rewarded-ad-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 9px 12px;
+  background: linear-gradient(90deg, rgba(245, 158, 11, 0.22), rgba(234, 88, 12, 0.28));
+  border: 1px solid var(--apex-gold);
+  color: #fef08a;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+  transition: all 0.14s ease;
+  margin-bottom: 6px;
+}
+
+.rewarded-ad-btn:hover {
+  background: linear-gradient(90deg, rgba(245, 158, 11, 0.36), rgba(234, 88, 12, 0.44));
+  box-shadow: 0 0 14px rgba(245, 158, 11, 0.35);
+  color: #ffffff;
+}
+
+.rewarded-ad-btn.disabled {
+  opacity: 0.45;
+  pointer-events: none;
+  filter: grayscale(0.8);
+}
+
+.ad-tag {
+  background: var(--apex-gold);
+  color: #090d16;
+  font-size: 10px;
+  font-weight: 900;
+  padding: 2px 5px;
+  letter-spacing: 0.06em;
+}
+
+.rewarded-result-btn {
+  background: rgba(245, 158, 11, 0.22) !important;
+  border: 1px solid var(--apex-gold) !important;
+  color: #fef08a !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cg-banner-slot {
+  width: 100%;
+  min-height: 54px;
+  margin: 8px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.35);
+}
+
+/* Post-Sortie CPU & P2P Bento Matchmaking Modal */
+.sortie-card {
+  max-width: 920px !important;
+  width: 94vw !important;
+  padding: 22px 26px !important;
+}
+
+.sortie-bento-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 18px;
+  margin-top: 14px;
+}
+
+@media (max-width: 820px) {
+  .sortie-bento-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sortie-bento-col {
+  background: rgba(11, 16, 27, 0.92);
+  border: 1px solid var(--border-tech);
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: left;
+}
+
+.sortie-bento-col.cpu-bento-col {
+  border-top: 2px solid var(--apex-cyan);
+}
+
+.sortie-bento-col.p2p-bento-col {
+  border-top: 2px solid var(--apex-red);
+}
+
+.bento-badge {
+  display: inline-block;
+  align-self: flex-start;
+  font-size: 10px;
+  font-weight: 900;
+  padding: 3px 8px;
+  letter-spacing: 0.08em;
+}
+
+.bento-badge.ally {
+  background: rgba(0, 229, 255, 0.16);
+  color: var(--apex-cyan);
+  border: 1px solid rgba(0, 229, 255, 0.4);
+}
+
+.bento-badge.rival {
+  background: rgba(235, 45, 58, 0.18);
+  color: #ff7b86;
+  border: 1px solid rgba(235, 45, 58, 0.45);
+}
+
+.sortie-bento-col h3 {
+  font-size: 17px;
+  font-weight: 900;
+  color: #ffffff;
+  margin: 0;
+  letter-spacing: 0.03em;
+}
+
+.bento-desc {
+  font-size: 12px;
+  color: #94a3b8;
+  margin: 0;
+  line-height: 1.45;
+}
+
+.sortie-option-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sortie-option-group label {
+  font-size: 11px;
+  font-weight: 800;
+  color: #cbd5e1;
+  letter-spacing: 0.05em;
+}
+
+.sortie-pill-row {
+  display: flex;
+  gap: 6px;
+}
+
+.sortie-pill {
+  flex: 1;
+  padding: 8px 10px;
+  background: #0d1320;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #cbd5e1;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+  transition: all 0.12s ease;
+}
+
+.sortie-pill.active {
+  background: rgba(0, 229, 255, 0.2);
+  border-color: var(--apex-cyan);
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.25);
+}
+
+.sortie-cta-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 6px;
+}
+
+.sortie-local-pvp-btn {
+  width: 100%;
+  justify-content: center;
+  padding: 9px 14px !important;
+}
+
+/* P2P Room Matchmaking Cards */
+.p2p-sub-card {
+  background: rgba(6, 9, 15, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.p2p-sub-header strong {
+  font-size: 12px;
+  color: #f8fafc;
+  letter-spacing: 0.04em;
+}
+
+.p2p-host-controls,
+.p2p-join-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.p2p-room-code-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #090d16;
+  border: 1px solid var(--apex-cyan);
+  padding: 5px 10px;
+  flex: 1;
+}
+
+.p2p-room-code-display .code-label {
+  font-size: 10px;
+  color: #94a3b8;
+  font-weight: 800;
+}
+
+.p2p-room-code-display .room-code-text {
+  font-family: var(--font-family-mono);
+  font-size: 16px;
+  font-weight: 900;
+  color: var(--apex-gold);
+  letter-spacing: 0.14em;
+  margin-right: auto;
+}
+
+.p2p-code-input {
+  flex: 1;
+  text-transform: uppercase;
+  font-family: var(--font-family-mono);
+  letter-spacing: 0.12em;
+  font-size: 14px !important;
+  text-align: center;
+}
+
+.p2p-status-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: 12px;
+  color: #e2e8f0;
+  margin-top: auto;
+}
+
+.status-dot {
+  width: 9px;
+  height: 9px;
+  background: #64748b;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.status-dot.waiting {
+  background: var(--apex-gold);
+  box-shadow: 0 0 8px var(--apex-gold);
+}
+
+.status-dot.connected {
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981;
+}
+
+.status-dot.error {
+  background: var(--apex-red);
+}
+
+/* Interactive Non-Blocking Tutorial Coach Bar */
+.tutorial-overlay-bar {
+  position: fixed;
+  bottom: 62px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1200;
+  width: min(820px, 94vw);
+  background: rgba(8, 13, 24, 0.96);
+  border: 1px solid var(--apex-cyan);
+  box-shadow: 0 0 24px rgba(0, 229, 255, 0.28), 0 8px 24px rgba(0, 0, 0, 0.85);
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  pointer-events: auto;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.tutorial-step-badge {
+  background: var(--apex-cyan);
+  color: #060911;
+  font-size: 11px;
+  font-weight: 900;
+  padding: 4px 9px;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.tutorial-content-wrap {
+  flex: 1;
+  text-align: left;
+}
+
+.tutorial-title {
+  font-size: 14px;
+  font-weight: 900;
+  color: #ffffff;
+  margin-bottom: 2px;
+}
+
+.tutorial-desc {
+  font-size: 12px;
+  color: #cbd5e1;
+  line-height: 1.35;
+}
+
+.tutorial-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tutorial-btn {
+  padding: 7px 13px;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: #1e293b;
+  color: #f8fafc;
+}
+
+.tutorial-btn.primary {
+  background: var(--apex-cyan);
+  border-color: #ffffff;
+  color: #050811;
+}
+
+.tutorial-btn.secondary:hover {
+  border-color: var(--apex-red);
+  color: #ff7b86;
+}
+
+/* CrazyGames Ad Playback Overlay */
+.cg-ad-card {
+  background: #090e1a;
+  border: 1px solid var(--apex-gold);
+  padding: 28px 36px;
+  width: min(420px, 90vw);
+  text-align: left;
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.9);
+}
+
+.cg-ad-card h3 {
+  margin: 10px 0 6px;
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.cg-ad-card p {
+  margin: 0 0 14px;
+  color: #cbd5e1;
+  font-size: 13px;
+}
+
+.cg-ad-progress-track {
+  width: 100%;
+  height: 8px;
+  background: #050811;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  overflow: hidden;
+}
+
+.cg-ad-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--apex-gold), var(--apex-cyan));
+  transition: width 0.15s linear;
+}

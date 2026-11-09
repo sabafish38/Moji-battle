@@ -18,10 +18,20 @@
 // ============================================================================
 // 1. WEB AUDIO SYNTHESIZER (Procedural Sound Effects)
 // ============================================================================
+let currentLang = localStorage.getItem('keshigomu_neo_lang') || 'en';
+function isEn() {
+  return currentLang === 'en';
+}
+
 class SoundSystem {
   constructor() {
     this.ctx = null;
     this.enabled = true;
+    this.adMuted = false;
+  }
+
+  playCancel() {
+    this.playClick();
   }
 
   init() {
@@ -35,7 +45,7 @@ class SoundSystem {
   }
 
   playClick() {
-    if (!this.enabled) return;
+    if (!this.enabled || this.adMuted) return;
     this.init();
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
@@ -53,7 +63,7 @@ class SoundSystem {
   }
 
   playEquip() {
-    if (!this.enabled) return;
+    if (!this.enabled || this.adMuted) return;
     this.init();
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
@@ -72,7 +82,7 @@ class SoundSystem {
   }
 
   playShoot(powerRatio = 0.5) {
-    if (!this.enabled) return;
+    if (!this.enabled || this.adMuted) return;
     this.init();
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
@@ -91,7 +101,7 @@ class SoundSystem {
   }
 
   playHit(intensity = 0.6, isMetallic = true) {
-    if (!this.enabled) return;
+    if (!this.enabled || this.adMuted) return;
     this.init();
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
@@ -125,7 +135,7 @@ class SoundSystem {
   }
 
   playSkill() {
-    if (!this.enabled) return;
+    if (!this.enabled || this.adMuted) return;
     this.init();
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
@@ -144,7 +154,7 @@ class SoundSystem {
   }
 
   playFall() {
-    if (!this.enabled) return;
+    if (!this.enabled || this.adMuted) return;
     this.init();
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
@@ -162,7 +172,7 @@ class SoundSystem {
   }
 
   playWin() {
-    if (!this.enabled) return;
+    if (!this.enabled || this.adMuted) return;
     this.init();
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
@@ -181,7 +191,7 @@ class SoundSystem {
     });
   }
   playBoost() {
-    if (!this.enabled) return;
+    if (!this.enabled || this.adMuted) return;
     this.init();
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
@@ -199,7 +209,7 @@ class SoundSystem {
   }
 
   playSpin() {
-    if (!this.enabled) return;
+    if (!this.enabled || this.adMuted) return;
     this.init();
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
@@ -218,7 +228,7 @@ class SoundSystem {
   }
 
   playRough() {
-    if (!this.enabled) return;
+    if (!this.enabled || this.adMuted) return;
     this.init();
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
@@ -1248,11 +1258,11 @@ function calculateMachineSpec(build) {
       friction: 0.90,
       knockbackResist: 1.0,
       maxLaunchSpeed: 10,
-      buildType: '文字未配置 (出撃不可)',
+      buildType: isEn() ? 'UNDEPLOYABLE (0 GLYPHS)' : '未配置 (出撃不可)',
       activeSkill: {
         id: 'none',
-        title: '未装備',
-        desc: '文字を追加すると性能と必殺技が宿ります'
+        title: isEn() ? 'NONE' : 'なし',
+        desc: isEn() ? 'Add at least 1 character glyph to compute specs and active skill.' : '文字を追加すると性能と必殺技が算出されます'
       },
       isEmpty: true
     };
@@ -1395,24 +1405,24 @@ function calculateMachineSpec(build) {
 
   // Expressive build type classification based on the machine's dominant peak and weakness
   const statPairs = [
-    { key: 'atk', val: atk, label: '撃滅ブレード特化' },
-    { key: 'def', val: def, label: '重装鉄壁タンク' },
-    { key: 'spd', val: spd, label: '超音速ストライカー' },
-    { key: 'grip', val: grip, label: '高グリップ不動要塞' },
-    { key: 'spin', val: spin, label: '超回転トルネード型' }
+    { key: 'atk', val: atk, label: isEn() ? 'BLADE STRIKER' : '撃滅ブレード特化' },
+    { key: 'def', val: def, label: isEn() ? 'IRON TANK' : '重装鉄壁タンク' },
+    { key: 'spd', val: spd, label: isEn() ? 'SONIC SPEEDSTER' : '超音速ストライカー' },
+    { key: 'grip', val: grip, label: isEn() ? 'HIGH-GRIP FORTRESS' : '高グリップ不動要塞' },
+    { key: 'spin', val: spin, label: isEn() ? 'TORNADO SPINNER' : '超回転トルネード型' }
   ].sort((a, b) => b.val - a.val);
 
   let buildType = statPairs[0].label;
   if (statPairs[0].val - statPairs[4].val < 18) {
-    buildType = '万能バランス型';
+    buildType = isEn() ? 'ALL-ROUND BALANCER' : '万能バランス型';
   } else if (statPairs[0].key === 'atk' && statPairs[1].key === 'spd' && statPairs[1].val >= 65) {
-    buildType = '高速斬撃アタッカー';
+    buildType = isEn() ? 'BLITZ SLASHER' : '高速斬撃アタッカー';
   } else if (statPairs[0].key === 'atk' && statPairs[1].key === 'def' && statPairs[1].val >= 62) {
-    buildType = '重撃バスター型';
+    buildType = isEn() ? 'HEAVY BUSTER' : '重撃バスター型';
   } else if (statPairs[0].key === 'def' && statPairs[1].key === 'grip' && statPairs[1].val >= 62) {
-    buildType = '不沈アンカー要塞';
+    buildType = isEn() ? 'ANCHOR FORTRESS' : '不沈アンカー要塞';
   } else if (statPairs[0].key === 'spin' && statPairs[1].key === 'atk' && statPairs[1].val >= 62) {
-    buildType = '暴風シュリケン型';
+    buildType = isEn() ? 'STORM SHURIKEN' : '暴風シュリケン型';
   }
 
   // Physics constants directly driven by the spiky stats so every point difference is felt on the desk!
@@ -2300,7 +2310,7 @@ function updateAndDrawCraftWorkbench() {
     craftCtx.fillStyle = 'rgba(56, 189, 248, 0.88)';
     craftCtx.font = '800 11px system-ui, sans-serif';
     craftCtx.textAlign = 'center';
-    craftCtx.fillText('▲ FRONT // 机上射出正面', cx, 22);
+    craftCtx.fillText(isEn() ? '▲ FRONT // LAUNCH DIRECTION' : '▲ FRONT // 机上射出正面', cx, 22);
     craftCtx.restore();
 
     // Draw the user's character machine at EDIT_VIEW_SCALE (1.32x) so it fits cleanly inside the canvas
@@ -2316,10 +2326,10 @@ function updateAndDrawCraftWorkbench() {
       craftCtx.fillStyle = 'rgba(241, 245, 249, 0.85)';
       craftCtx.font = '800 13px system-ui, sans-serif';
       craftCtx.textAlign = 'center';
-      craftCtx.fillText('文字が配置されていません', cx, cy - 8);
+      craftCtx.fillText(isEn() ? 'NO GLYPHS PLACED (0 / 5)' : '文字が配置されていません', cx, cy - 8);
       craftCtx.font = '700 11.5px system-ui, sans-serif';
       craftCtx.fillStyle = '#00e5ff';
-      craftCtx.fillText('右上の「＋ 文字追加」から文字を配置してください', cx, cy + 14);
+      craftCtx.fillText(isEn() ? 'Click "+ ADD GLYPH" at top-right to add characters' : '右上の「＋ 文字追加」から文字を配置してください', cx, cy + 14);
       craftCtx.restore();
     }
   } else {
@@ -2668,11 +2678,13 @@ function updateLiveTypedCharPreview() {
   const skill = GLYPH_SKILLS[info.skillId] || GLYPH_SKILLS.slash;
 
   document.getElementById('previewCharBox').textContent = ch;
-  document.getElementById('previewCharTitle').textContent = `『${ch}』の解析スペック`;
-  document.getElementById('previewCharStats').textContent =
-    `重さ:${info.weight}g / 攻+${info.atk} 防+${info.def} 速+${info.spd} 転+${info.spin}`;
-  document.getElementById('previewCharSkill').textContent =
-    `必殺: ${skill.title}`;
+  document.getElementById('previewCharTitle').textContent = isEn() ? `GLYPH '${ch}' ANALYSIS` : `『${ch}』の解析スペック`;
+  document.getElementById('previewCharStats').textContent = isEn()
+    ? `Mass: ${info.weight}g / ATK+${info.atk} DEF+${info.def} SPD+${info.spd} SPIN+${info.spin}`
+    : `重さ:${info.weight}g / 攻+${info.atk} 防+${info.def} 速+${info.spd} 転+${info.spin}`;
+  document.getElementById('previewCharSkill').textContent = isEn()
+    ? `Skill: ${skill.title}`
+    : `必殺: ${skill.title}`;
 }
 
 function renderPaletteGrid() {
@@ -2712,12 +2724,12 @@ function renderPresetMachinesList() {
     card.innerHTML = `
       <div class="item-card-header">
         <span class="item-name">${preset.name}</span>
-        <span class="item-badge">${spec.weight}g / ${preset.glyphs.length}文字</span>
+        <span class="item-badge">${spec.weight}g / ${preset.glyphs.length} ${isEn() ? 'Glyphs' : '文字'}</span>
       </div>
       <div class="item-desc">${preset.desc}</div>
       <div class="item-stats-mini">
-        <span>構成: [${previewChars}]</span>
-        <span>攻${spec.atk} 防${spec.def} 速${spec.spd}</span>
+        <span>${isEn() ? 'Build' : '構成'}: [${previewChars}]</span>
+        <span>${isEn() ? `ATK ${spec.atk} DEF ${spec.def} SPD ${spec.spd}` : `攻${spec.atk} 防${spec.def} 速${spec.spd}`}</span>
       </div>
     `;
     card.addEventListener('click', () => {
@@ -2749,7 +2761,7 @@ function updateCraftUI(skipLists = false) {
   // Update Character Count Badges
   const countBadge = document.getElementById('inputPanelCountBadge');
   if (countBadge) {
-    countBadge.textContent = `${count} / ${MAX_GLYPHS} 文字`;
+    countBadge.textContent = isEn() ? `${count} / ${MAX_GLYPHS} GLYPHS` : `${count} / ${MAX_GLYPHS} 文字`;
   }
   const specCountEl = document.getElementById('specCharCountText');
   if (specCountEl) {
@@ -2783,13 +2795,19 @@ function updateCraftUI(skipLists = false) {
   const goToBattleBtn = document.getElementById('goToBattleFromSpecBtn');
   if (goToBattleBtn) {
     goToBattleBtn.classList.toggle('disabled', isEmpty);
-    goToBattleBtn.textContent = isEmpty ? '出撃不可 (文字0個)' : 'この機体でバトル出撃';
-    goToBattleBtn.title = isEmpty ? '文字が0個のため出撃できません' : 'この文字機体でバトル出撃';
+    goToBattleBtn.textContent = isEn()
+      ? (isEmpty ? 'CANNOT DEPLOY (0 GLYPHS)' : 'SORTIE TO BATTLE (VS CPU / P2P)')
+      : (isEmpty ? '出撃不可 (文字0個)' : 'この機体でバトル出撃');
+    goToBattleBtn.title = isEn()
+      ? (isEmpty ? 'Place at least 1 glyph to sortie' : 'Deploy this machine to battle')
+      : (isEmpty ? '文字が0個のため出撃できません' : 'この文字機体でバトル出撃');
   }
   const tabBattleBtn = document.getElementById('tabBattleBtn');
   if (tabBattleBtn) {
     tabBattleBtn.classList.toggle('disabled-tab', isEmpty);
-    tabBattleBtn.title = isEmpty ? '文字が0個のため出撃できません' : 'バトル出撃';
+    tabBattleBtn.title = isEn()
+      ? (isEmpty ? 'Place at least 1 glyph to sortie' : 'Battle Arena [2]')
+      : (isEmpty ? '文字が0個のため出撃できません' : 'バトル出撃');
   }
 
   // Fine-Tune Controls for Selected Glyph
@@ -2798,7 +2816,9 @@ function updateCraftUI(skipLists = false) {
   if (sel) {
     tuneBox?.classList.remove('no-selection');
     headerBox?.classList.remove('no-selection');
-    document.getElementById('selectedGlyphTitle').textContent = `選択中: 『${sel.char}』の変形・調整`;
+    document.getElementById('selectedGlyphTitle').textContent = isEn()
+      ? `SELECTED: '${sel.char}' TUNING`
+      : `選択中: 『${sel.char}』の変形・調整`;
     const editCharInput = document.getElementById('editSelectedCharInput');
     if (document.activeElement !== editCharInput) {
       editCharInput.value = sel.char;
@@ -2831,7 +2851,7 @@ function updateCraftUI(skipLists = false) {
   } else {
     tuneBox?.classList.add('no-selection');
     headerBox?.classList.add('no-selection');
-    document.getElementById('selectedGlyphTitle').textContent = '文字未配置 (右上の「＋」から追加)';
+    document.getElementById('selectedGlyphTitle').textContent = isEn() ? 'NO GLYPH (CLICK + TO ADD)' : '文字未配置 (右上の「＋」から追加)';
   }
 
   const nameInput = document.getElementById('customEraserNameInput');
@@ -2845,7 +2865,7 @@ function updateCraftUI(skipLists = false) {
     const slotBuild = savedSlots[idx];
     const charsPreview = slotBuild ? slotBuild.glyphs.slice(0, 5).map(g => g.char).join('') : '';
     btn.classList.toggle('active', idx === activeSlotIndex);
-    btn.textContent = `${idx + 1}号機: [${charsPreview}]`;
+    btn.textContent = isEn() ? `SLOT ${idx + 1}: [${charsPreview}]` : `${idx + 1}号機: [${charsPreview}]`;
   });
 
   if (skipLists) return;
@@ -3608,10 +3628,17 @@ function showCenterBanner(sub, main, desc, duration = 1500) {
 
 function createRivalBuild() {
   const mode = document.getElementById('battleModeSelect')?.value || 'cpu-normal';
+  if (mode === 'p2p-online' && window.p2pState && window.p2pState.remoteBuild) {
+    const rb = JSON.parse(JSON.stringify(window.p2pState.remoteBuild));
+    if (Array.isArray(rb.glyphs) && rb.glyphs.length > 0) {
+      enforceConnectedGlyphs(rb.glyphs, null, true);
+      return rb;
+    }
+  }
   if (mode === 'cpu-expert') {
     const expertBosses = [
       {
-        name: '超絶極光・滅神',
+        name: isEn() ? 'OMEGA NEMESIS // 滅神' : '超絶極光・滅神',
         weldChassis: true,
         glyphs: [
           { id: 'ex1', char: '滅', x: 0,   y: 0,   angle: 0,   scale: 135, mat: 'blade', color: '#ef4444', depthColor: '#450a0a' },
@@ -3622,7 +3649,7 @@ function createRivalBuild() {
         ]
       },
       {
-        name: '鋼鉄重塞・巨霊',
+        name: isEn() ? 'TITAN COLOSSUS // 巨霊' : '鋼鉄重塞・巨霊',
         weldChassis: true,
         glyphs: [
           { id: 'exb1', char: '巨', x: 0,   y: 0,   angle: 0,   scale: 135, mat: 'gold',  color: '#f59e0b', depthColor: '#451a03' },
@@ -3639,7 +3666,7 @@ function createRivalBuild() {
   if (mode === 'cpu-hard') {
     const bosses = [
       {
-        name: '覇王・剛',
+        name: isEn() ? 'OVERLORD GOU // 覇王' : '覇王・剛',
         weldChassis: true,
         glyphs: [
           { id: 'b1', char: '剛', x: 0,   y: 0,   angle: 0,   scale: 125, mat: 'gold',  color: '#f59e0b', depthColor: '#451a03' },
@@ -3833,9 +3860,22 @@ function startBattleRound(roundNum) {
   const desk = getDeskBounds();
   setupStageGimmicks();
 
-  const p1Build = JSON.parse(JSON.stringify(currentBuild));
-  enforceConnectedGlyphs(p1Build.glyphs, null, true);
-  const p2Build = createRivalBuild();
+  let p1Build, p2Build;
+  if (battleState.mode === 'p2p-online' && window.p2pState && window.p2pState.connected) {
+    if (window.p2pState.myPlayerNum === 1) {
+      p1Build = JSON.parse(JSON.stringify(currentBuild));
+      enforceConnectedGlyphs(p1Build.glyphs, null, true);
+      p2Build = createRivalBuild();
+    } else {
+      p1Build = createRivalBuild();
+      p2Build = JSON.parse(JSON.stringify(currentBuild));
+      enforceConnectedGlyphs(p2Build.glyphs, null, true);
+    }
+  } else {
+    p1Build = JSON.parse(JSON.stringify(currentBuild));
+    enforceConnectedGlyphs(p1Build.glyphs, null, true);
+    p2Build = createRivalBuild();
+  }
 
   const p1Spec = calculateMachineSpec(p1Build);
   const p2Spec = calculateMachineSpec(p2Build);
@@ -3912,15 +3952,26 @@ function startBattleRound(roundNum) {
     }
   ];
 
+  if (window._pendingRewardedSkillBonus && roundNum === 1) {
+    window._pendingRewardedSkillBonus = false;
+    battleState.units[0].skillStock = (battleState.units[0].skillStock || 0) + 1;
+  }
+
   saveBattleUndoSnapshot();
   updateBattleHUD();
-  const orderDesc = (battleState.activePlayer === 1)
-    ? '1P 先手で開始！引っ張って狙え！'
-    : (battleState.mode === 'pvp' ? '2P 先手で開始！' : 'CPU 先手で開始！相手の初手を警戒せよ！');
+  const isOnline = (battleState.mode === 'p2p-online');
+  const isHumanP2 = (battleState.mode === 'pvp' || isOnline);
+  const orderDesc = isEn()
+    ? ((battleState.activePlayer === 1)
+        ? '1P GOES FIRST! DRAG & RELEASE TO LAUNCH!'
+        : (isHumanP2 ? '2P GOES FIRST! GET READY!' : 'CPU GOES FIRST! WATCH OUT FOR INITIAL IMPACT!'))
+    : ((battleState.activePlayer === 1)
+        ? '1P 先手で開始！引っ張って狙え！'
+        : (isHumanP2 ? '2P 先手で開始！' : 'CPU 先手で開始！相手の初手を警戒せよ！'));
   showCenterBanner(`ROUND ${roundNum}`, 'FIGHT!!', orderDesc, 1400);
 
   // If CPU starts first (1P is second)
-  if (battleState.activePlayer === 2 && battleState.mode !== 'pvp') {
+  if (battleState.activePlayer === 2 && !isHumanP2) {
     cpuThinkTimeout = setTimeout(executeCPUTurn, 1600);
   }
 }
@@ -3949,7 +4000,7 @@ function saveBattleUndoSnapshot() {
 
 function undoBattleTurn() {
   if (battleState.undoHistory.length === 0) {
-    showBattleToast('これ以上戻せる手番がありません');
+    showBattleToast(isEn() ? 'No earlier turn to undo' : 'これ以上戻せる手番がありません');
     return;
   }
   clearTimeout(cpuThinkTimeout);
@@ -3980,7 +4031,7 @@ function undoBattleTurn() {
   });
 
   sfx.playClick();
-  showBattleToast('UNDO // 思考開始前の手番冒頭まで巻き戻しました');
+  showBattleToast(isEn() ? 'UNDO // Rewound to start of your turn' : 'UNDO // 思考開始前の手番冒頭まで巻き戻しました');
   updateBattleHUD();
 }
 
@@ -4002,7 +4053,7 @@ function addUnitDamage(unit, amount) {
 
   if (gained > 0) {
     sfx.playSkill();
-    showBattleToast(`${unit.id === 1 ? '1P' : 'CPU'} 必殺技チャージ +${gained}！ 蓄積ダメージ ${unit.damagePct}% (ストック: ${unit.skillStock})`);
+    showBattleToast(isEn() ? `${unit.id === 1 ? '1P' : '2P/CPU'} SKILL CHARGED +${gained}! Damage ${unit.damagePct}% (Stock: ${unit.skillStock})` : `${unit.id === 1 ? '1P' : 'CPU'} 必殺技チャージ +${gained}！ 蓄積ダメージ ${unit.damagePct}% (ストック: ${unit.skillStock})`);
   }
   updateBattleHUD();
 }
@@ -4061,7 +4112,7 @@ function activateUnitSkill(unit, targetUnits, particleArr) {
     spawnParticles(particleArr, unit.x, unit.y, '#f59e0b', 30, 10);
   }
 
-  showBattleToast(`${unit.id === 1 ? '1P' : 'CPU'} 必殺技発動: ${unit.spec.activeSkill.title} (残り ${unit.skillStock} 回)`);
+  showBattleToast(isEn() ? `${unit.id === 1 ? '1P' : '2P/CPU'} ULTIMATE SKILL: ${unit.spec.activeSkill.title} (${unit.skillStock} left)` : `${unit.id === 1 ? '1P' : 'CPU'} 必殺技発動: ${unit.spec.activeSkill.title} (残り ${unit.skillStock} 回)`);
   updateBattleHUD();
 }
 
@@ -4213,8 +4264,12 @@ function executeCPUTurn() {
   const jitterMag = (mode === 'cpu-expert') ? 0.012 : (mode === 'cpu-hard') ? 0.035 : 0.10;
   bestAngle += (Math.random() - 0.5) * jitterMag;
 
-  const spinLabels = { top: '前進', normal: '標準', back: '急停止' };
-  showBattleToast(`${cpu.spec.name} [${spinLabels[bestSpin] || '標準'}] 精密狙い撃ち!`);
+  const spinLabels = isEn()
+    ? { top: 'DRIVE', normal: 'NORMAL', back: 'BRAKE' }
+    : { top: '前進', normal: '標準', back: '急停止' };
+  showBattleToast(isEn()
+    ? `${cpu.spec.name} [${spinLabels[bestSpin] || 'NORMAL'}] locks on & fires!`
+    : `${cpu.spec.name} [${spinLabels[bestSpin] || '標準'}] 精密狙い撃ち!`);
   launchUnit(cpu, bestPower, bestAngle, bestSpin);
 
   // High-performance tactical skill trigger
@@ -4669,7 +4724,7 @@ function updateBattlePhysicsAndRender() {
           u.vx *= 0.10;
           u.vy *= 0.10;
           spawnParticles(battleState.particles, u.x, u.y, '#38bdf8', 10, 4);
-          showBattleToast('初手セーフティ発動！机端で踏みとどまった！');
+          showBattleToast(isEn() ? 'TURN 1 GUARD! Held on at the desk edge!' : '初手セーフティ発動！机端で踏みとどまった！');
         } else if (distCenter > desk.radius) {
           isRingOut = true;
         }
@@ -4683,7 +4738,7 @@ function updateBattlePhysicsAndRender() {
           else if (u.y > desk.bottom - margin) { u.y = desk.bottom - margin; u.vy *= 0.10; clamped = true; }
           if (clamped) {
             spawnParticles(battleState.particles, u.x, u.y, '#38bdf8', 10, 4);
-            showBattleToast('初手セーフティ発動！机端で踏みとどまった！');
+            showBattleToast(isEn() ? 'TURN 1 GUARD! Held on at the desk edge!' : '初手セーフティ発動！机端で踏みとどまった！');
           }
         } else {
           isRingOut = (u.x < desk.left || u.x > desk.right || u.y < desk.top || u.y > desk.bottom);
@@ -4812,6 +4867,71 @@ function updateBattlePhysicsAndRender() {
     });
   });
 
+  // Interactive Tutorial Step 1 On-Canvas Drag Guide
+  if (window.tutorialState && window.tutorialState.active && window.tutorialState.step === 1 && battleState.phase === 'aim' && !battleSlingshot.active) {
+    const u1 = battleState.units[0];
+    const u2 = battleState.units[1];
+    if (u1 && u2 && !u1.fallen) {
+      const tAnim = (Date.now() % 1800) / 1800;
+      const pullProgress = Math.min(1, tAnim * 1.35);
+      const toEnemyAng = Math.atan2(u2.y - u1.y, u2.x - u1.x);
+      const dragAng = toEnemyAng + Math.PI;
+      const dragDist = 30 + pullProgress * 68;
+      const handX = u1.x + Math.cos(dragAng) * dragDist;
+      const handY = u1.y + Math.sin(dragAng) * dragDist;
+
+      gameCtx.save();
+      // Dashed trajectory preview toward enemy
+      gameCtx.strokeStyle = 'rgba(0, 229, 255, 0.72)';
+      gameCtx.lineWidth = 3;
+      gameCtx.setLineDash([8, 6]);
+      gameCtx.beginPath();
+      gameCtx.moveTo(u1.x, u1.y);
+      gameCtx.lineTo(u1.x + Math.cos(toEnemyAng) * (dragDist * 1.4), u1.y + Math.sin(toEnemyAng) * (dragDist * 1.4));
+      gameCtx.stroke();
+
+      // Pullback line
+      gameCtx.strokeStyle = 'rgba(245, 158, 11, 0.85)';
+      gameCtx.lineWidth = 2.5;
+      gameCtx.setLineDash([4, 4]);
+      gameCtx.beginPath();
+      gameCtx.moveTo(u1.x, u1.y);
+      gameCtx.lineTo(handX, handY);
+      gameCtx.stroke();
+      gameCtx.setLineDash([]);
+
+      // Pulsing drag cursor ring
+      gameCtx.fillStyle = '#f59e0b';
+      gameCtx.beginPath();
+      gameCtx.arc(handX, handY, 8, 0, Math.PI * 2);
+      gameCtx.fill();
+      gameCtx.strokeStyle = '#ffffff';
+      gameCtx.lineWidth = 2;
+      gameCtx.stroke();
+
+      // Floating instruction tag
+      gameCtx.fillStyle = 'rgba(9, 13, 22, 0.92)';
+      gameCtx.strokeStyle = '#00e5ff';
+      gameCtx.lineWidth = 1.5;
+      const tagW = 210;
+      const tagH = 26;
+      const tagX = u1.x - tagW * 0.5;
+      const tagY = u1.y - 64;
+      gameCtx.fillRect(tagX, tagY, tagW, tagH);
+      gameCtx.strokeRect(tagX, tagY, tagW, tagH);
+
+      gameCtx.fillStyle = '#00e5ff';
+      gameCtx.font = '800 11px "Rajdhani", system-ui, sans-serif';
+      gameCtx.textAlign = 'center';
+      gameCtx.fillText(
+        isEn() ? 'DRAG BACK & RELEASE TO LAUNCH!' : '後ろに引っ張って離すと発射！',
+        u1.x,
+        tagY + 17
+      );
+      gameCtx.restore();
+    }
+  }
+
   // Draw Aiming Slingshot Vector
   if (battleState.phase === 'aim' && battleSlingshot.active) {
     const activeUnit = battleState.units[battleState.activePlayer - 1];
@@ -4872,7 +4992,7 @@ function advanceToNextTurn() {
     battleState.turn++;
     if (battleState.turn >= 7) {
       battleState.suddenDeathShrink = Math.min(130, (battleState.turn - 6) * 24);
-      showBattleToast('SUDDEN DEATH: エリア縮小 / 吹っ飛び倍率上昇');
+      showBattleToast(isEn() ? 'SUDDEN DEATH: Desk shrinking & knockback amplified!' : 'SUDDEN DEATH: エリア縮小 / 吹っ飛び倍率上昇');
       battleState.units.forEach(u => { addUnitDamage(u, 15); });
     }
     saveBattleUndoSnapshot();
@@ -4881,7 +5001,10 @@ function advanceToNextTurn() {
   battleState.phase = 'aim';
   updateBattleHUD();
 
-  if (battleState.activePlayer === 2 && battleState.mode !== 'pvp') {
+  if (typeof onTurnAdvancedP2P === 'function') {
+    onTurnAdvancedP2P();
+  }
+  if (battleState.activePlayer === 2 && battleState.mode !== 'pvp' && battleState.mode !== 'p2p-online') {
     const thinkDelay = battleState.mode === 'cpu-expert' ? 520 : 650;
     cpuThinkTimeout = setTimeout(executeCPUTurn, thinkDelay);
   }
@@ -4913,21 +5036,32 @@ function resolveRoundEnd() {
 
   updateBattleHUD();
 
+  const isOnline = (battleState.mode === 'p2p-online');
+  const isHumanP2 = (battleState.mode === 'pvp' || isOnline);
+  const myNum = (isOnline && window.p2pState) ? window.p2pState.myPlayerNum : 1;
+  const didLocalWin = isOnline ? (winner === myNum) : (winner === 1);
+
   if (battleState.p1Score >= 2 || battleState.p2Score >= 2) {
     battleState.phase = 'match_over';
     sfx.playWin();
-    const champName = winner === 1 ? u1.spec.name : u2.spec.name;
-    
-    const shooterLabel = (battleState.activePlayer === 1) ? '1P' : (battleState.mode === 'pvp' ? '2P' : 'CPU');
-    const winnerLabel = (winner === 1) ? '1P' : (battleState.mode === 'pvp' ? '2P' : 'CPU');
+    if (typeof cgGameplayStop === 'function') cgGameplayStop();
+    if (didLocalWin && typeof cgHappytime === 'function') cgHappytime();
 
-    const championDesc = isDoubleRingOut
-      ? `両機落下（共倒れ）！ 手番側（${shooterLabel}）の自滅判定により ${winnerLabel} の完全制覇！`
-      : `${champName} 完全制覇！`;
+    const champName = winner === 1 ? u1.spec.name : u2.spec.name;
+    const shooterLabel = (battleState.activePlayer === 1) ? '1P' : (isHumanP2 ? '2P' : 'CPU');
+    const winnerLabel = (winner === 1) ? '1P' : (isHumanP2 ? '2P' : 'CPU');
+
+    const championDesc = isEn()
+      ? (isDoubleRingOut
+          ? `Double Ring-Out! Active shooter (${shooterLabel}) self-destructed — ${winnerLabel} takes the match!`
+          : `${champName} dominates the desk arena!`)
+      : (isDoubleRingOut
+          ? `両機落下（共倒れ）！ 手番側（${shooterLabel}）の自滅判定により ${winnerLabel} の完全制覇！`
+          : `${champName} 完全制覇！`);
 
     showCenterBanner(
-      winner === 1 ? 'VICTORY // CHAMPION' : 'DEFEAT // RIVAL WIN',
-      `${champName} 優勝！`,
+      didLocalWin ? 'VICTORY // CHAMPION' : 'DEFEAT // RIVAL WIN',
+      isEn() ? `${champName} WINS!` : `${champName} 優勝！`,
       championDesc,
       1500
     );
@@ -4937,16 +5071,20 @@ function resolveRoundEnd() {
     }, 1600);
   } else {
     const nextRound = battleState.p1Score + battleState.p2Score + 1;
-    const shooterLabel = (battleState.activePlayer === 1) ? '1P' : (battleState.mode === 'pvp' ? '2P' : 'CPU');
-    const winnerLabel = (winner === 1) ? '1P' : (battleState.mode === 'pvp' ? '2P' : 'CPU');
+    const shooterLabel = (battleState.activePlayer === 1) ? '1P' : (isHumanP2 ? '2P' : 'CPU');
+    const winnerLabel = (winner === 1) ? '1P' : (isHumanP2 ? '2P' : 'CPU');
 
-    const roundDesc = isDoubleRingOut
-      ? `両機落下（共倒れ）！ 手番側（${shooterLabel}）の自滅判定で ${winnerLabel} にポイント！`
-      : '相手を机から弾き落とした！';
+    const roundDesc = isEn()
+      ? (isDoubleRingOut
+          ? `Double Ring-Out! ${shooterLabel} self-destructed — Point to ${winnerLabel}!`
+          : 'Knocked the opponent clean off the desk!')
+      : (isDoubleRingOut
+          ? `両機落下（共倒れ）！ 手番側（${shooterLabel}）の自滅判定で ${winnerLabel} にポイント！`
+          : '相手を机から弾き落とした！');
 
     showCenterBanner(
-      winner === 1 ? '1P ROUND POINT!' : 'RIVAL ROUND POINT!',
-      `ROUND ${nextRound} へ`,
+      winner === 1 ? '1P ROUND POINT!' : (isHumanP2 ? '2P ROUND POINT!' : 'RIVAL ROUND POINT!'),
+      isEn() ? `NEXT: ROUND ${nextRound}` : `ROUND ${nextRound} へ`,
       roundDesc,
       1800
     );
@@ -4986,12 +5124,16 @@ function updateBattleTelemetryPanels(u1, u2) {
   // 1P Spin Badge
   const p1SpinEl = document.getElementById('battleP1SpinBadge');
   if (p1SpinEl) {
-    const spinLabels = {
+    const spinLabels = isEn() ? {
+      top: 'DRIVE [TOP] (Aggressive Push)',
+      normal: 'NORMAL [STD] (Balanced Slide)',
+      back: 'BRAKE [BACK] (Quick Stop / Anti-Fall)'
+    } : {
       top: '前進 [DRIVE] (突進・押し込み)',
       normal: '標準 [NORMAL] (バランス直進)',
       back: 'ブレーキ [BACK] (急停止・自滅防止)'
     };
-    p1SpinEl.textContent = spinLabels[selectedSpinType] || '標準 [NORMAL]';
+    p1SpinEl.textContent = spinLabels[selectedSpinType] || spinLabels.normal;
   }
 
   // 1P Glyphs Chips
@@ -5052,28 +5194,40 @@ function updateBattleTelemetryPanels(u1, u2) {
     const hints = [];
     const diffWeight = u2.spec.weight - u1.spec.weight;
     if (diffWeight > 3.0) {
-      hints.push('超重量級機体。正面衝突は押し負けやすいため、外周への誘い込みや横突撃を狙いましょう。');
+      hints.push(isEn()
+        ? 'Heavyweight rival. Avoid head-on collisions; strike from the flank toward the desk edge.'
+        : '超重量級機体。正面衝突は押し負けやすいため、外周への誘い込みや横突撃を狙いましょう。');
     } else if (diffWeight < -3.0) {
-      hints.push('自機より軽量。強打を命中させれば大ノックバックで一気に場外落下を狙えます。');
+      hints.push(isEn()
+        ? 'Lighter than your machine! A direct full-power hit will send them flying off the desk.'
+        : '自機より軽量。強打を命中させれば大ノックバックで一気に場外落下を狙えます。');
     }
 
     if (u2.spec.atk >= 75) {
-      hints.push('高火力突進タイプ。相手の初動直撃を避け、ブレーキ(スピン3)でいなすのが有効です。');
+      hints.push(isEn()
+        ? 'High-ATK striker. Use BRAKE Spin [3] to stop safely near the edge and counter-attack.'
+        : '高火力突進タイプ。相手の初動直撃を避け、ブレーキ(スピン3)でいなすのが有効です。');
     } else if (u2.spec.def >= 75) {
-      hints.push('強固な装甲要塞。衝突ダメージでは削りにくいため、リングアウト勝利を優先しましょう。');
+      hints.push(isEn()
+        ? 'Armored fortress. Build up their Damage (%) first, then use DRIVE Spin [1] for a ring-out.'
+        : '強固な装甲要塞。衝突ダメージでは削りにくいため、リングアウト勝利を優先しましょう。');
     }
 
     if (battleState.stage === 'ice_glass') {
-      hints.push('超低摩擦ガラス面。衝突後の滑走距離が伸びるため自滅に注意してください。');
+      hints.push(isEn()
+        ? 'Low-friction Glass surface! Watch your momentum so you do not slide off after impact.'
+        : '超低摩擦ガラス面。衝突後の滑走距離が伸びるため自滅に注意してください。');
     } else if (battleState.stage === 'colosseum') {
-      hints.push('狭小円卓。中央付近を維持し、突進押し込み(スピン1)で場外へ弾き出せます。');
-    } else if (battleState.stage === 'stationery') {
-      hints.push('文房具障害物あり。角や消しゴムをクッション壁として反射ショットを活用できます。');
+      hints.push(isEn()
+        ? 'Circular Colosseum. Hold the center and push the rival outward with DRIVE Spin [1].'
+        : '狭小円卓。中央付近を維持し、突進押し込み(スピン1)で場外へ弾き出せます。');
     }
 
     tacticsEl.textContent = hints.length > 0
       ? hints.join(' ')
-      : 'バランス型機体。角度を付けて相手の側面に文字の突起をヒットさせましょう。';
+      : (isEn()
+          ? 'Balanced rival build. Aim sharp character corners at their side to maximize torque and knockback.'
+          : 'バランス型機体。角度を付けて相手の側面に文字の突起をヒットさせましょう。');
   }
 
   // Stage Info Desc
@@ -5114,20 +5268,54 @@ function updateBattleHUD() {
 
   const turnInd = document.getElementById('turnIndicator');
   const turnSub = document.getElementById('turnSubhint');
+  const isOnline = (battleState.mode === 'p2p-online');
+  const myNum = (isOnline && window.p2pState) ? window.p2pState.myPlayerNum : 1;
+
   if (battleState.phase === 'aim') {
-    if (battleState.activePlayer === 1) {
-      turnInd.textContent = `TURN ${battleState.turn}: 1P あなたの番！引っ張って弾こう`;
+    if (isOnline) {
+      const isMyTurn = (battleState.activePlayer === myNum);
+      if (isMyTurn) {
+        turnInd.textContent = isEn()
+          ? `TURN ${battleState.turn}: YOUR TURN (${myNum}P)! DRAG & RELEASE TO SHOOT`
+          : `TURN ${battleState.turn}: あなたの番 (${myNum}P)！引っ張って弾こう`;
+        turnInd.style.color = '#34d399';
+        turnSub.textContent = isEn()
+          ? 'Drag anywhere on the desk to aim, release to fire (Synced via P2P)'
+          : '机の上をドラッグして狙い、離すと発射します（P2P通信同期中）';
+      } else {
+        turnInd.textContent = isEn()
+          ? `TURN ${battleState.turn}: WAITING FOR OPPONENT (${battleState.activePlayer}P) TO SHOOT...`
+          : `TURN ${battleState.turn}: 通信相手 (${battleState.activePlayer}P) が狙っています...`;
+        turnInd.style.color = '#f87171';
+        turnSub.textContent = isEn()
+          ? 'Connected via P2P Live Match — Prepare for impact!'
+          : 'P2Pオンライン対戦中 — 相手のショットに備えましょう！';
+      }
+    } else if (battleState.activePlayer === 1) {
+      turnInd.textContent = isEn()
+        ? `TURN ${battleState.turn}: 1P YOUR TURN! DRAG & RELEASE TO LAUNCH`
+        : `TURN ${battleState.turn}: 1P あなたの番！引っ張って弾こう`;
       turnInd.style.color = '#34d399';
-      turnSub.textContent = '机の上をドラッグして狙い、指/マウスを離すと発射します';
+      turnSub.textContent = isEn()
+        ? 'Drag on the desk to aim angle & power, release to fire!'
+        : '机の上をドラッグして狙い、指/マウスを離すと発射します';
     } else {
-      turnInd.textContent = battleState.mode === 'pvp'
-        ? `TURN ${battleState.turn}: 2P の番！引っ張って弾こう`
-        : `TURN ${battleState.turn}: CPU ライバル機が狙っています...`;
+      turnInd.textContent = isEn()
+        ? (battleState.mode === 'pvp'
+            ? `TURN ${battleState.turn}: 2P'S TURN! DRAG & RELEASE TO LAUNCH`
+            : `TURN ${battleState.turn}: CPU RIVAL IS AIMING...`)
+        : (battleState.mode === 'pvp'
+            ? `TURN ${battleState.turn}: 2P の番！引っ張って弾こう`
+            : `TURN ${battleState.turn}: CPU ライバル機が狙っています...`);
       turnInd.style.color = '#f87171';
-      turnSub.textContent = '相手の文字パーツの角に注意！';
+      turnSub.textContent = isEn()
+        ? 'Watch out for sharp glyph corners and knockback!'
+        : '相手の文字パーツの角に注意！';
     }
   } else if (battleState.phase === 'moving') {
-    turnInd.textContent = '激突滑走中: [Space / 画面タップ] で必殺技発動！';
+    turnInd.textContent = isEn()
+      ? 'SLIDING CLASH: PRESS [SPACE / CLICK] TO UNLEASH ULTIMATE SKILL!'
+      : '激突滑走中: [Space / 画面タップ] で必殺技発動！';
     turnInd.style.color = '#38bdf8';
   }
 
@@ -5135,21 +5323,25 @@ function updateBattleHUD() {
   const p1StockEl = document.getElementById('p1SkillStock');
   if (p1StockEl) {
     const s1 = u1.skillStock || 0;
-    p1StockEl.textContent = `技ストック ${s1}`;
+    p1StockEl.textContent = isEn() ? `SKILL ${s1}` : `技ストック ${s1}`;
     p1StockEl.classList.toggle('has-stock', s1 > 0);
   }
   const p2StockEl = document.getElementById('p2SkillStock');
   if (p2StockEl) {
     const s2 = u2.skillStock || 0;
-    p2StockEl.textContent = `技ストック ${s2}`;
+    p2StockEl.textContent = isEn() ? `SKILL ${s2}` : `技ストック ${s2}`;
     p2StockEl.classList.toggle('has-stock', s2 > 0);
   }
 
   const skillBtn = document.getElementById('skillActionBtn');
   const activeUnit = battleState.units[battleState.activePlayer - 1];
-  const isHumanTurn = battleState.activePlayer === 1 || battleState.mode === 'pvp';
-  if (battleState.phase === 'moving' && isHumanTurn && activeUnit && (activeUnit.skillStock || 0) > 0) {
-    document.getElementById('skillBtnTitle').textContent = `${activeUnit.spec.activeSkill.title} (残り ${activeUnit.skillStock} 回)`;
+  const canControlActive = isOnline
+    ? (battleState.activePlayer === myNum)
+    : (battleState.activePlayer === 1 || battleState.mode === 'pvp');
+  if (battleState.phase === 'moving' && canControlActive && activeUnit && (activeUnit.skillStock || 0) > 0) {
+    document.getElementById('skillBtnTitle').textContent = isEn()
+      ? `${activeUnit.spec.activeSkill.title} (${activeUnit.skillStock} LEFT)`
+      : `${activeUnit.spec.activeSkill.title} (残り ${activeUnit.skillStock} 回)`;
     skillBtn.classList.remove('hidden');
   } else {
     skillBtn.classList.add('hidden');
@@ -5160,17 +5352,22 @@ function updateBattleHUD() {
 // Battle Canvas Slingshot Input
 gameCanvas.addEventListener('pointerdown', evt => {
   if (activeView !== 'battle') return;
+  const isOnline = (battleState.mode === 'p2p-online');
+  const myNum = (isOnline && window.p2pState) ? window.p2pState.myPlayerNum : 1;
+  const canControlActive = isOnline
+    ? (battleState.activePlayer === myNum)
+    : (battleState.activePlayer === 1 || battleState.mode === 'pvp');
+
   if (battleState.phase === 'moving') {
-    // Arbitrary timing activation via tap during slide!
     const activeUnit = battleState.units[battleState.activePlayer - 1];
-    const isHumanTurn = battleState.activePlayer === 1 || battleState.mode === 'pvp';
-    if (isHumanTurn && activeUnit && (activeUnit.skillStock || 0) > 0) {
+    if (canControlActive && activeUnit && (activeUnit.skillStock || 0) > 0) {
       activateUnitSkill(activeUnit, battleState.units, battleState.particles);
+      if (isOnline && typeof sendP2PSkill === 'function') sendP2PSkill();
       return;
     }
   }
   if (battleState.phase !== 'aim') return;
-  if (battleState.activePlayer === 2 && battleState.mode !== 'pvp') return;
+  if (!canControlActive) return;
   const pos = getCanvasPointerPos(gameCanvas, evt);
   battleSlingshot.active = true;
   battleSlingshot.startX = pos.x;
@@ -5201,6 +5398,12 @@ window.addEventListener('pointerup', () => {
       const powerRatio = dist / 150;
       const angle = Math.atan2(dy, dx);
       launchUnit(unit, powerRatio, angle, selectedSpinType);
+      if (battleState.mode === 'p2p-online' && typeof sendP2PShot === 'function') {
+        sendP2PShot(powerRatio, angle, selectedSpinType);
+      }
+      if (typeof onTutorialPlayerShot === 'function') {
+        onTutorialPlayerShot();
+      }
     }
   }
 });
@@ -5270,10 +5473,12 @@ document.getElementById('resetMatchBtn')?.addEventListener('click', () => {
 document.getElementById('battleModeSelect')?.addEventListener('change', initBattleMatch);
 document.getElementById('battleStageSelect')?.addEventListener('change', initBattleMatch);
 
-function switchMainView(targetView) {
+function switchMainView(targetView, skipMatchInit = false) {
   if (targetView === 'battle') {
     if (!currentBuild.glyphs || currentBuild.glyphs.length === 0) {
-      showBattleToast('文字が0個のため出撃できません。最低1文字以上配置してください');
+      showBattleToast(isEn()
+        ? 'Cannot sortie with 0 glyphs! Place at least 1 character first.'
+        : '文字が0個のため出撃できません。最低1文字以上配置してください');
       return;
     }
   }
@@ -5290,9 +5495,13 @@ function switchMainView(targetView) {
     tabCraft.classList.remove('active');
     tabBattle.classList.add('active');
     sfx.playEquip();
-    initBattleMatch();
+    if (typeof cgGameplayStart === 'function') cgGameplayStart();
+    if (!skipMatchInit) {
+      initBattleMatch();
+    }
   } else {
     clearTimeout(cpuThinkTimeout);
+    if (typeof cgGameplayStop === 'function') cgGameplayStop();
     battleSec.classList.remove('active');
     craftSec.classList.add('active');
     tabBattle.classList.remove('active');
@@ -5300,12 +5509,25 @@ function switchMainView(targetView) {
     sfx.playClick();
     resizeCraftCanvas();
     updateCraftUI();
+    if (typeof onTutorialEnteredCraft === 'function') onTutorialEnteredCraft();
   }
 }
 
 document.getElementById('tabCraftBtn')?.addEventListener('click', () => switchMainView('craft'));
 document.getElementById('tabBattleBtn')?.addEventListener('click', () => switchMainView('battle'));
-document.getElementById('goToBattleFromSpecBtn')?.addEventListener('click', () => switchMainView('battle'));
+document.getElementById('goToBattleFromSpecBtn')?.addEventListener('click', () => {
+  if (!currentBuild.glyphs || currentBuild.glyphs.length === 0) {
+    showBattleToast(isEn()
+      ? 'Cannot sortie with 0 glyphs! Place at least 1 character first.'
+      : '文字が0個のため出撃できません。最低1文字以上配置してください');
+    return;
+  }
+  if (typeof openSortieModal === 'function') {
+    openSortieModal();
+  } else {
+    switchMainView('battle');
+  }
+});
 document.getElementById('backToCraftBtn')?.addEventListener('click', () => switchMainView('craft'));
 
 document.getElementById('soundToggleBtn')?.addEventListener('click', () => {
@@ -5378,26 +5600,35 @@ function showMatchResultModal(winner, u1, u2) {
   if (!modal) return;
 
   const card = modal.querySelector('.result-card');
+  const isOnline = (battleState.mode === 'p2p-online');
+  const myNum = (isOnline && window.p2pState) ? window.p2pState.myPlayerNum : 1;
+  const isLocalWin = isOnline ? (winner === myNum) : (winner === 1);
   const isP1Win = (winner === 1);
 
   if (card) {
-    card.classList.toggle('is-defeat', !isP1Win);
+    card.classList.toggle('is-defeat', !isLocalWin);
   }
 
   const tagEl = document.getElementById('resultHeaderTag');
   if (tagEl) {
-    tagEl.textContent = isP1Win ? '決着 // 勝利者決定' : '決着 // 敗北';
+    tagEl.textContent = isEn()
+      ? (isLocalWin ? 'MATCH OVER // VICTORY' : 'MATCH OVER // DEFEAT')
+      : (isLocalWin ? '決着 // 勝利者決定' : '決着 // 敗北');
   }
 
   const titleEl = document.getElementById('resultMainTitle');
   if (titleEl) {
-    titleEl.textContent = isP1Win ? '完全勝利 (VICTORY)' : '敗北 (DEFEAT)';
+    titleEl.textContent = isEn()
+      ? (isLocalWin ? 'VICTORY' : 'DEFEAT')
+      : (isLocalWin ? '完全勝利 (VICTORY)' : '敗北 (DEFEAT)');
   }
 
   const badgeEl = document.getElementById('winnerBadge');
   if (badgeEl) {
-    badgeEl.textContent = isP1Win ? '1P プレイヤー勝利' : '相手機体の勝利';
-    badgeEl.style.color = isP1Win ? 'var(--apex-gold)' : 'var(--apex-pink)';
+    badgeEl.textContent = isEn()
+      ? (isP1Win ? '1P PLAYER VICTORY' : (battleState.mode === 'pvp' || isOnline ? '2P PLAYER VICTORY' : 'CPU RIVAL VICTORY'))
+      : (isP1Win ? '1P プレイヤー勝利' : '相手機体の勝利');
+    badgeEl.style.color = isLocalWin ? 'var(--apex-gold)' : 'var(--apex-pink)';
   }
 
   const nameEl = document.getElementById('resultWinnerName');
@@ -5407,12 +5638,16 @@ function showMatchResultModal(winner, u1, u2) {
 
   const scoreEl = document.getElementById('resultScoreLine');
   if (scoreEl) {
-    scoreEl.textContent = `最終スコア: ${battleState.p1Score} - ${battleState.p2Score}`;
+    scoreEl.textContent = isEn()
+      ? `FINAL SCORE: ${battleState.p1Score} - ${battleState.p2Score}`
+      : `最終スコア: ${battleState.p1Score} - ${battleState.p2Score}`;
   }
 
   const turnEl = document.getElementById('resultTurnCount');
   if (turnEl) {
-    turnEl.textContent = `${battleState.turn} 手決着`;
+    turnEl.textContent = isEn()
+      ? `${battleState.turn} TURNS`
+      : `${battleState.turn} 手決着`;
   }
 
   const dmgEl = document.getElementById('resultMaxDamage');
@@ -5448,12 +5683,7 @@ function hideMatchResultModal() {
   document.getElementById('matchResultModal')?.classList.add('hidden');
 }
 
-// Result Modal Action Buttons
-document.getElementById('resultRematchBtn')?.addEventListener('click', () => {
-  sfx.playClick();
-  hideMatchResultModal();
-  initBattleMatch();
-});
+// Result Modal Action Buttons (Rematch handled by CrazyGames Ad Controller below)
 
 document.getElementById('resultToCraftBtn')?.addEventListener('click', () => {
   sfx.playClick();
@@ -5503,19 +5733,18 @@ fullscreenToggleBtn?.addEventListener('click', toggleFullscreen);
 // Right-Click Context Menu Suppression & Aim Cancel
 gameCanvas.addEventListener('contextmenu', evt => {
   evt.preventDefault();
-  if (battleState.isDragging || battleState.isAiming) {
-    battleState.isDragging = false;
-    battleState.isAiming = false;
+  if (battleSlingshot.active) {
+    battleSlingshot.active = false;
     sfx.playCancel();
-    showBattleToast('照準をキャンセルしました');
+    showBattleToast(isEn() ? 'Aim cancelled' : '照準をキャンセルしました');
   }
 });
 
 // Mouse Wheel for Spin Selection in Battle
 window.addEventListener('wheel', evt => {
-  if (activeView === 'battle' && battleState.turn === 'p1' && battleState.p1.shotsRemaining > 0) {
+  if (activeView === 'battle' && battleState.phase === 'aim') {
     const spins = ['top', 'normal', 'back'];
-    let idx = spins.indexOf(battleState.spinEffect);
+    let idx = spins.indexOf(selectedSpinType);
     if (idx === -1) idx = 1;
     if (evt.deltaY > 0) {
       idx = Math.min(spins.length - 1, idx + 1);
@@ -5523,8 +5752,9 @@ window.addEventListener('wheel', evt => {
       idx = Math.max(0, idx - 1);
     }
     const nextSpin = spins[idx];
-    if (nextSpin !== battleState.spinEffect) {
-      setSpinEffect(nextSpin);
+    if (nextSpin !== selectedSpinType) {
+      selectSpinButton(nextSpin);
+      updateBattleHUD();
     }
   }
 }, { passive: true });
@@ -5677,3 +5907,1232 @@ window.addEventListener('keydown', evt => {
     }
   }
 });
+
+
+// ============================================================================
+// 13. CRAZYGAMES EDITION: FULL ENGLISH / JAPANESE LOCALIZATION ENGINE
+// ============================================================================
+
+const I18N_DATA = {
+  materials: {
+    eraser:   { en: 'Eraser Rubber',    ja: '消しゴム' },
+    rubber:   { en: 'Bouncy Elastomer', ja: '強化ゴム' },
+    wood:     { en: 'Natural Timber',   ja: '天然木材' },
+    glass:    { en: 'Crystal Glass',    ja: '強化ガラス' },
+    stone:    { en: 'Granite Rock',     ja: '花崗岩石' },
+    slime:    { en: 'Slime Gel',        ja: '粘着ゲル' },
+    titanium: { en: 'Titanium Alloy',   ja: 'チタン合金' },
+    blade:    { en: 'Blade Steel',      ja: 'ブレード鋼' },
+    gold:     { en: 'Solid Gold',       ja: '純金ゴールド' },
+    mecha:    { en: 'Titanium Alloy',   ja: 'チタン合金' },
+    neon:     { en: 'Crystal Glass',    ja: '強化ガラス' },
+    chrome:   { en: 'Crystal Glass',    ja: '強化ガラス' },
+    damascus: { en: 'Blade Steel',      ja: 'ブレード鋼' },
+    brass:    { en: 'Solid Gold',       ja: '純金ゴールド' }
+  },
+  skills: {
+    slash: {
+      enTitle: 'GLYPH SLASH // BLADE RUSH',
+      enDesc: 'Dash forward mid-slide with razor-sharp character edges, boosting impact force!',
+      jaTitle: '文字剣・一閃突破',
+      jaDesc: '滑走中に鋭い文字ブレードで前方へ高速斬り込み突進を放ち、衝突威力を大幅強化！'
+    },
+    buster: {
+      enTitle: 'KANJI BUSTER // SHOCKWAVE',
+      enDesc: 'Detonate a kinetic shockwave around your machine mid-slide, blasting rivals away!',
+      jaTitle: '漢字破砕・インパクト',
+      jaDesc: '滑走中に文字コアを爆発膨張させて周囲に超衝撃波を放ち、相手を強烈に弾き飛ばす！'
+    },
+    boost: {
+      enTitle: 'SONIC THRUST // JET BOOST',
+      enDesc: 'Ignite character thrusters mid-slide for a second burst of forward acceleration!',
+      jaTitle: '推進文字・ブースト',
+      jaDesc: '滑走中に文字スラスターを最大噴射し、進行方向へ鋭く再加速して相手を押し込む！'
+    },
+    vortex: {
+      enTitle: 'MAELSTROM // VORTEX SPIN',
+      enDesc: 'Unleash hyper-velocity rotation mid-slide, whipping nearby rivals into a cyclone!',
+      jaTitle: '渦巻文字・スピン',
+      jaDesc: '滑走中に超高速スピンを展開し、接触した相手を竜巻のように巻き込んで弾き飛ばす！'
+    },
+    anchor: {
+      enTitle: 'FORTRESS ANCHOR // FULL STOP',
+      enDesc: 'Drive heavy glyph anchors into the desk mid-slide to brake instantly and prevent ring-outs!',
+      jaTitle: '鉄壁文字・アンカー',
+      jaDesc: '滑走中に重装文字の楔を机に撃ち込んでピタッと急停止し、場外落下を完全に防ぐ！'
+    }
+  },
+  presets: {
+    preset_dragon_blade: {
+      enName: 'DRAGON BLADE // 剣龍号',
+      enDesc: 'Balanced 5-glyph striker fusing core [龍] with front [▲], dual [剣] blades, and rear [翼].',
+      jaName: '文字覇王・剣龍号',
+      jaDesc: '中央の『龍』に先端『▲』・左右の『剣』・後部『翼』が密着合体した5文字万能戦闘機'
+    },
+    preset_heavy_fortress: {
+      enName: 'IRON FORTRESS // 鉄壁王',
+      enDesc: 'Super-heavy 5-glyph tank welding golden [覇] core with [盾], dual [鎧] armor, and [鋼].',
+      jaName: '重装要塞・鉄壁王',
+      jaDesc: '黄金の『覇』を核に『盾』『鎧』『鋼』が隙間なく密着結束した超重量5文字要塞'
+    },
+    preset_sonic_valkyrie: {
+      enName: 'SONIC FLASH // 疾風閃号',
+      enDesc: 'High-velocity 5-glyph speedster combining sharp [V] & [閃] with dual [翼] wings and [噴] jet.',
+      jaName: '超音速・疾風閃号',
+      jaDesc: '鋭角『V』と『閃』に双『翼』と『噴』が密着結合した5文字ハイスピード機'
+    },
+    preset_crimson_nova: {
+      enName: 'CRIMSON BUSTER // 轟爆号',
+      enDesc: 'Hyper-offensive 5-glyph brawler built around [轟] with [突] spike, dual [牙] fangs, and [爆].',
+      jaName: '獄炎破壊・轟爆号',
+      jaDesc: '『轟』を中心に『突』『牙』『爆』が一体化した超攻撃型5文字バスター機'
+    },
+    preset_vortex_shuriken: {
+      enName: 'THUNDER SHURIKEN // 卍刃号',
+      enDesc: 'Tornado spin 5-glyph machine surrounding [渦] core with four symmetrical [刃] & [雷] blades.',
+      jaName: '雷神渦巻・卍刃号',
+      jaDesc: '『渦』の四方に『刃』と『雷』を密着配置した5文字トルネードスピン機'
+    }
+  },
+  stages: {
+    standard:   { enName: 'STAGE 01: Standard Wood Desk',    enDesc: 'Classic school desk arena. Pure physics, mass, and character geometry decide the winner.', jaName: 'STAGE 01: スタンダード木製机', jaDesc: '標準的な木製机。純粋な文字性能と体幹が試される王道ステージ。' },
+    stationery: { enName: 'STAGE 02: Ruler Ricochet Desk',   enDesc: 'Two acrylic rulers and flank boost pads enable bank shots and high-speed flanking.', jaName: 'STAGE 02: 定規文房具ギミック机', jaDesc: 'ハの字に置かれた2本のアクリル定規が壁面反射を生む。' },
+    pinball:    { enName: 'STAGE 03: Pinball Bumper Arena',  enDesc: 'High-restitution bumpers and a central turntable trigger explosive ricochet combos.', jaName: 'STAGE 03: ピンボールバンパー机', jaDesc: '高反発バンパーが複数配置され、跳弾と不意のノックバックが連鎖する。' },
+    bridge:     { enName: 'STAGE 04: Narrow Iron Bridge',    enDesc: 'Ultra-narrow carbon bridge with catapult boosters. Every collision risks an instant ring-out!', jaName: 'STAGE 04: 天王山・一本橋アリーナ', jaDesc: '幅が極端に狭い一本橋。わずかな押し出しで場外へ転落する超危険地帯。' },
+    colosseum:  { enName: 'STAGE 05: Round Steel Colosseum', enDesc: '360-degree circular steel arena with a rotating center vortex and no safe corners.', jaName: 'STAGE 05: 円形コロシアム机', jaDesc: '角のない円盤ステージ。360度全方位が崖っぷちの決闘場。' },
+    crossroad:  { enName: 'STAGE 06: Crossroad Boost Arena', enDesc: 'Corner blocks and 4-way inward boost pads funnel both machines into a central clash.', jaName: 'STAGE 06: 十字路クロスアリーナ', jaDesc: '4隅に大型ブロック障害物があり、中央の交差点での激突が勝負を決める。' },
+    islands:    { enName: 'STAGE 07: Twin Islands Highway',  enDesc: 'Dual high-speed boost lanes propel machines across the central clash vortex.', jaName: 'STAGE 07: ツイン浮島・超加速ハイウェイ', jaDesc: '中央ブリッジに双方向ハイパー加速板を配備。橋に飛び乗ることで相手陣へロケット突撃できる積極的戦闘ステージ。' },
+    gridlock:   { enName: 'STAGE 08: Pencil Barricade Maze', enDesc: 'Midfield pencil barricades and outer boost runways reward angled bank shots.', jaName: 'STAGE 08: 迷路ペンシルヘッジ', jaDesc: '鉛筆のバリケードが4箇所に林立。相手を障害物に叩きつけて大ダメージ。' },
+    ice_glass:  { enName: 'STAGE 09: Low-Friction Glass',    enDesc: 'Polished glass table with minimal friction! Use grip mats or Brake Spin [3] to stay on!', jaName: 'STAGE 09: 超低摩擦ガラステーブル', jaDesc: '磨き抜かれたガラステーブル。摩擦が極小で、ブレーキ不能の超高速滑走戦。' },
+    volcano:    { enName: 'STAGE 10: Shrinking Volcano',     enDesc: 'Molten survival desk that starts shrunken and collapses inward as turns progress.', jaName: 'STAGE 10: 崩落縮小ボルケーノ', jaDesc: '赤熱した崩落机。ターンごとに外周が急速に崩落していく過酷なサバイバル。' }
+  }
+};
+
+function setElementText(selector, enText, jaText) {
+  const el = document.querySelector(selector);
+  if (el) el.textContent = isEn() ? enText : jaText;
+}
+
+function setElementHTML(selector, enHTML, jaHTML) {
+  const el = document.querySelector(selector);
+  if (el) el.innerHTML = isEn() ? enHTML : jaHTML;
+}
+
+function applyLanguage(lang) {
+  currentLang = (lang === 'ja') ? 'ja' : 'en';
+  try {
+    localStorage.setItem('keshigomu_neo_lang', currentLang);
+  } catch (e) {}
+
+  document.documentElement.lang = currentLang;
+
+  const langBtn = document.getElementById('langToggleBtn');
+  if (langBtn) {
+    langBtn.textContent = isEn() ? 'EN / JP' : 'JP / EN';
+    langBtn.title = isEn() ? 'Switch Language to Japanese (日本語に切替)' : '英語に切替 (Switch to English)';
+  }
+
+  // 1. Update Data Structures (Materials, Skills, Presets, Stages)
+  for (const [k, m] of Object.entries(I18N_DATA.materials)) {
+    if (GLYPH_MATERIALS[k]) {
+      GLYPH_MATERIALS[k].name = isEn() ? m.en : m.ja;
+    }
+  }
+  for (const [k, s] of Object.entries(I18N_DATA.skills)) {
+    if (GLYPH_SKILLS[k]) {
+      GLYPH_SKILLS[k].title = isEn() ? s.enTitle : s.jaTitle;
+      GLYPH_SKILLS[k].desc = isEn() ? s.enDesc : s.jaDesc;
+    }
+  }
+  PRESET_MACHINES.forEach(p => {
+    const t = I18N_DATA.presets[p.id];
+    if (t) {
+      p.name = isEn() ? t.enName : t.jaName;
+      p.desc = isEn() ? t.enDesc : t.jaDesc;
+    }
+  });
+  for (const [k, st] of Object.entries(I18N_DATA.stages)) {
+    if (BATTLE_STAGES[k]) {
+      BATTLE_STAGES[k].name = isEn() ? st.enName : st.jaName;
+      BATTLE_STAGES[k].desc = isEn() ? st.enDesc : st.jaDesc;
+    }
+  }
+
+  // 2. Top Navigation Bar
+  setElementHTML('.brand-logo h1',
+    'GLYPH CLASH: NEO <span class="header-sub-tag">PHYSICS CRAFT & ARENA</span>',
+    '消しバトNeo <span class="header-sub-tag">BATTLE BUILD DOCK</span>');
+  setElementText('#tabCraftBtn', 'CRAFT STUDIO [1]', '機体設計室 [1]');
+  setElementText('#tabBattleBtn', 'BATTLE ARENA [2]', 'バトル出撃 [2]');
+  setElementText('#tutorialStartBtn span', 'TUTORIAL', 'チュートリアル');
+  setElementText('#openSortieModalBtn span', 'VS CPU / P2P', 'CPU / P2P対戦');
+  setElementText('#keyGuideToggleBtn span', 'CONTROLS', '操作ガイド');
+
+  // 3. Craft Left Sidebar (Tabs & Sub-Panel 1: Tune)
+  setElementText('#tabConfigBtn', 'PRESETS', '完成機体');
+  setElementText('#duplicateGlyphBtn', 'CLONE', '複製');
+  setElementText('#mirrorCopyGlyphBtn', 'MIRROR', '反転複製');
+  setElementText('#deleteGlyphBtn', 'DELETE', '削除');
+  setElementText('#selectedGlyphHeaderBox .panel-hint',
+    'Connect up to 5 glyphs by touching their edges, corners, or strokes.',
+    '文字同士を重ねたり、角や先端で自由に連結できます');
+  setElementText('.selected-char-edit-row label', 'Change Glyph:', '文字変更:');
+  setElementText('#flipSelectedXBtn', 'FLIP X', '左右反転');
+  setElementText('#flipSelectedYBtn', 'FLIP Y', '上下反転');
+
+  setElementText('#fineTuneBox h3', 'SIZE / ROTATION / POSITION', 'サイズ・回転・位置の調整');
+  const tuneLabels = document.querySelectorAll('#fineTuneBox .slider-row label');
+  if (tuneLabels.length >= 4) {
+    const tL = isEn()
+      ? ['Scale', 'Angle', 'Pos X', 'Pos Y']
+      : ['サイズ', '回転角度', '左右位置(X)', '前後位置(Y)'];
+    tuneLabels.forEach((el, i) => { if (tL[i]) el.textContent = tL[i]; });
+  }
+  setElementText('.quick-angle-btns button[data-rotset="0"]', 'FRONT 0°', '正面 0°');
+  setElementText('#centerGlyphXBtn', 'CENTER X', '中央寄せ');
+  setElementText('#layerUpBtn', 'FRONT', '前面へ');
+  setElementText('#layerDownBtn', 'BACK', '背面へ');
+
+  const matGroupHeaders = document.querySelectorAll('#panel-tune .panel-group .group-header-row');
+  if (matGroupHeaders.length >= 2) {
+    const h3 = matGroupHeaders[1].querySelector('h3');
+    const pill = matGroupHeaders[1].querySelector('.count-pill');
+    if (h3) h3.textContent = isEn() ? 'MATERIAL / FONT / COLOR' : '材質・書体・カラー設定';
+    if (pill) pill.textContent = isEn() ? 'TUNING' : '調整中';
+  }
+  setElementText('#panel-tune .tactical-select-row label', 'Glyph Font:', '選択文字の書体:');
+
+  // Material Buttons in Selected & Default Material Groups
+  const matBtnLabels = {
+    eraser:   { en: 'Eraser',    ja: '消しゴム' },
+    rubber:   { en: 'Rubber',    ja: '強化ゴム' },
+    wood:     { en: 'Timber',    ja: '天然木材' },
+    glass:    { en: 'Glass',     ja: '強化ガラス' },
+    stone:    { en: 'Granite',   ja: '花崗岩石' },
+    slime:    { en: 'Slime Gel', ja: '粘着ゲル' },
+    titanium: { en: 'Titanium',  ja: 'チタン合金' },
+    blade:    { en: 'Blade',     ja: 'ブレード鋼' },
+    gold:     { en: 'Solid Gold',ja: '純金ゴールド' },
+    mecha:    { en: 'Titanium',  ja: '重装メタル' },
+    chrome:   { en: 'Chrome',    ja: '鏡面クロム' },
+    damascus: { en: 'Damascus',  ja: '鍛造鋼鉄' },
+    brass:    { en: 'Brass',     ja: '真鍮ブロンズ' },
+    neon:     { en: 'Neon Glass',ja: 'サイバー発光' }
+  };
+  document.querySelectorAll('.material-selector-grid .mat-pill').forEach(btn => {
+    const m = matBtnLabels[btn.dataset.mat];
+    if (m) btn.textContent = isEn() ? m.en : m.ja;
+  });
+
+  const colorLabels = document.querySelectorAll('#panel-tune .color-picker-row label');
+  if (colorLabels.length >= 2) {
+    colorLabels[0].textContent = isEn() ? 'Surface Color' : '表面の色';
+    colorLabels[1].textContent = isEn() ? 'Extrusion Depth Color' : '厚み(側面)の色';
+  }
+
+  // Sub-Panel 2: Input & Palette
+  setElementText('#panel-input .highlight-group h3', 'ADD / INPUT CHARACTER GLYPH', '文字の追加・入力');
+  setElementText('#panel-input .highlight-group .panel-hint',
+    'Up to 5 characters weld together into a single physical machine.',
+    '最大5文字まで、すべての文字が互いに接するように合体します');
+  setElementText('#addTypedGlyphBtn', '+ ADD', '＋ 追加');
+  setElementText('#replaceTypedGlyphBtn', 'REPLACE', '選択文字を置換');
+  setElementText('#panel-input .checkbox-pill span',
+    'Add as Symmetric Mirror Pair (Requires 2 free slots)',
+    '左右対称ペアで追加 (空き2文字必要)');
+  setElementText('#panel-input .panel-group:nth-of-type(2) h3', 'TACTICAL GLYPH PALETTE', 'おすすめ文字パレット');
+  const palTabs = document.querySelectorAll('#paletteCategoryTabs .mini-pill');
+  if (palTabs.length >= 4) {
+    const pNames = isEn()
+      ? ['BLADE / SPIKE', 'ARMOR / SHIELD', 'SPEED / WING', 'DRAGON / SPECIAL']
+      : ['鋭角・刃物', '重装甲・盾', '高速・翼', '特効・属性'];
+    palTabs.forEach((el, i) => { if (pNames[i]) el.textContent = pNames[i]; });
+  }
+  setElementText('#panel-input .panel-group:nth-of-type(3) h3', 'DEFAULT MATERIAL & COLOR', '初期の材質・カラー');
+  setElementText('#panel-input .panel-group:nth-of-type(3) .count-pill', '9 TYPES', '全9種');
+  setElementText('#panel-input .tactical-select-row label', 'Font Style:', 'フォント書体:');
+
+  const fontTranslations = isEn() ? {
+    heavy: 'Heavy Gothic (MAX ARMOR)',
+    mecha: 'Blade Mincho (RAZOR EDGE)',
+    stencil: 'Rounded Pop (HIGH BOUNCE)',
+    brush: 'Warrior Brush (DYNAMIC TORQUE)',
+    cyber: 'Cyber Mono (PRECISION TECH)'
+  } : {
+    heavy: '極太角ゴシック (HEAVY GOTHIC)',
+    mecha: '鋭角ブレード明朝 (BLADE MINCHO)',
+    stencil: '弾力丸ゴシック (ROUND SLUGGER)',
+    brush: '豪快武神毛筆 (WARRIOR BRUSH)',
+    cyber: 'サイバー等幅コード (CYBER MONO)'
+  };
+  ['defaultFontSelect', 'selectedFontSelect'].forEach(selId => {
+    const selEl = document.getElementById(selId);
+    if (selEl) {
+      Array.from(selEl.options).forEach(opt => {
+        if (fontTranslations[opt.value]) opt.textContent = fontTranslations[opt.value];
+      });
+    }
+  });
+
+  // Sub-Panel 3: Config & Presets
+  setElementText('#panel-config .panel-group:nth-of-type(1) h3', 'MACHINE NAME', '機体の名前');
+  setElementText('#autoCenterAllBtn', 'CENTER COM', '重心整列');
+  setElementText('#panel-config .checkbox-pill span', 'Show Chassis Weld Lines', '文字間の接合コネクトラインを表示');
+  setElementText('#panel-config .panel-group:nth-of-type(2) h3', 'AUTO-BUILD FROM ANY WORD', '好きな言葉から自動合体');
+  setElementText('#panel-config .panel-group:nth-of-type(2) .panel-hint',
+    'Enter any word (1-5 chars) to automatically weld it into a combat formation!',
+    '好きな言葉（1〜5文字）を入れると、すべての文字が接するフォーメーションに自動合体します！');
+  setElementText('#buildFromWordBtn', 'AUTO WELD', '合体生成');
+  setElementText('#panel-config .panel-group:nth-of-type(3) h3', 'SAMPLE 5-GLYPH MACHINES', 'おすすめ完成機体');
+  setElementText('#panel-config .panel-group:nth-of-type(3) .count-pill', '5 BUILDS', '全5機');
+
+  // 4. Craft Center Workbench
+  setElementText('#wbModeEditBtn', 'BUILD & SNAP', '文字の配置・変形');
+  setElementText('#wbModeTestBtn', 'TEST RANGE [SPACE]', '試し撃ち (テスト)');
+  setElementText('#wbAddGlyphBtn', '+ ADD GLYPH', '＋ 文字追加');
+  setElementText('#undoCraftBtn', 'UNDO', '戻す');
+  setElementText('#redoCraftBtn', 'REDO', '進む');
+  setElementText('#randomBuildBtn', 'RANDOM 5-GLYPH', 'ランダム合体');
+  setElementText('#clearPartsBtn', 'CLEAR', '初期化');
+  setElementHTML('#boardAddGlyphBtn', '<span class="btn-icon">＋</span> ADD GLYPH', '<span class="btn-icon">＋</span> 文字追加');
+  setElementText('#workbenchHint',
+    'True character-stroke hitboxes & mass! Drag characters to connect and customize.',
+    '文字の突起やくぼみ・質量を精密判定。ドラッグで自由に連結・配置できます');
+  setElementText('#testRangeControls span',
+    'Drag & release on the board to test-fire your machine against dummy targets!',
+    'ドラッグして引っ張ると試し撃ちができます（障害物あり）');
+  setElementText('#resetTestDummyBtn', 'RESET DUMMIES', 'リセット');
+  setElementText('#testFireSkillBtn', '[SPACE] TEST SKILL', '[Space] 必殺技テスト');
+  setElementText('.saved-builds-bar .saved-label', 'SAVED SLOTS:', '保存スロット:');
+  setElementHTML('.pc-shortcuts-dock',
+    '<span class="dock-title">PC COMMANDS:</span><span class="dock-item"><kbd>Del</kbd> Delete</span><span class="dock-item"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> Nudge</span><span class="dock-item"><kbd>Q</kbd><kbd>E</kbd> Rotate 15°</span><span class="dock-item"><kbd>Ctrl+Z</kbd> Undo</span><span class="dock-item"><kbd>Space</kbd> Test Range</span><span class="dock-item"><kbd>Enter</kbd> Sortie</span>',
+    '<span class="dock-title">PC COMMANDS:</span><span class="dock-item"><kbd>Del</kbd> 削除</span><span class="dock-item"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 微移動</span><span class="dock-item"><kbd>Q</kbd><kbd>E</kbd> 15°回転</span><span class="dock-item"><kbd>Ctrl+Z</kbd> 取消</span><span class="dock-item"><kbd>Space</kbd> 試射テスト</span><span class="dock-item"><kbd>Enter</kbd> バトル出撃</span>');
+
+  // 5. Craft Right Sidebar (Spec Analyzer)
+  setElementText('.spec-card .spec-badge', 'MACHINE SPECS (MAX 5 GLYPHS)', '機体スペック (最大5文字)');
+  const specWeightSpans = document.querySelectorAll('.spec-weight-row span');
+  if (specWeightSpans.length >= 2) {
+    const wStrong = document.getElementById('specTotalWeight')?.outerHTML || '<strong id="specTotalWeight">24.5g</strong>';
+    const tStrong = document.getElementById('specBuildType')?.outerHTML || '<strong id="specBuildType">STRIKER</strong>';
+    specWeightSpans[0].innerHTML = isEn() ? `MASS: ${wStrong}` : `総重量: ${wStrong}`;
+    specWeightSpans[1].innerHTML = isEn() ? `CLASS: ${tStrong}` : `タイプ: ${tStrong}`;
+  }
+  const statLabels = document.querySelectorAll('.stat-bars-list .stat-item .stat-label-row span');
+  if (statLabels.length >= 5) {
+    const sNames = isEn()
+      ? ['ATTACK (IMPACT)', 'DEFENSE (ARMOR)', 'SPEED (LAUNCH)', 'BRAKE (GRIP)', 'SPIN (TORQUE)']
+      : ['攻撃力 (衝撃)', '防御力 (耐性)', 'スピード (速度)', 'ブレーキ (摩擦)', 'スピン (旋回)'];
+    statLabels.forEach((el, i) => { if (sNames[i]) el.textContent = sNames[i]; });
+  }
+  const eqH3 = document.querySelectorAll('.equipped-summary-box h3');
+  if (eqH3.length >= 2) {
+    eqH3[0].textContent = isEn() ? 'ULTIMATE SKILL [SPACE]' : '必殺技';
+    const cSpan = document.getElementById('specCharCountText')?.outerHTML || '<span id="specCharCountText">5</span>';
+    eqH3[1].innerHTML = isEn()
+      ? `GLYPH COMPOSITION (${cSpan}/5 CONNECTED)`
+      : `構成文字パーツ (${cSpan}/5・全文字接触OK)`;
+  }
+  setElementText('#rewardedCraftBoostBtn span[data-i18n="ad_unlock_legendary"]',
+    'UNLOCK LEGENDARY BUILD (+1 SKILL)',
+    '伝説の5文字機体を解放 (+技1)');
+
+  // 6. Battle View Top HUD & Selects
+  setElementText('#p1Card .player-badge', '1P (YOU)', '1P (あなた)');
+  setElementText('#p2Badge', '2P / RIVAL', '2P / CPU');
+  document.querySelectorAll('.stability-bar-wrap .bar-label').forEach(el => {
+    el.textContent = isEn() ? 'DAMAGE (%)' : '蓄積ダメージ(%)';
+  });
+
+  const modeSelectTranslations = isEn() ? {
+    'cpu-normal': 'vs CPU [NORMAL]',
+    'cpu-hard': 'vs CPU [HARD]',
+    'cpu-expert': 'vs CPU [EXPERT]',
+    'p2p-online': 'P2P ONLINE [ROOM MATCH]',
+    'pvp': 'LOCAL 2P [SAME PC]'
+  } : {
+    'cpu-normal': 'vs CPU [NORMAL]',
+    'cpu-hard': 'vs CPU [HARD]',
+    'cpu-expert': 'vs CPU [EXPERT // 最強鬼神]',
+    'p2p-online': 'P2P オンライン通信対戦',
+    'pvp': '2P ローカル対戦 [同PC]'
+  };
+  const modeSel = document.getElementById('battleModeSelect');
+  if (modeSel) {
+    Array.from(modeSel.options).forEach(opt => {
+      if (modeSelectTranslations[opt.value]) opt.textContent = modeSelectTranslations[opt.value];
+    });
+  }
+
+  const turnOrderTranslations = isEn() ? {
+    'p1-first': 'TURN: 1P FIRST',
+    'p2-first': 'TURN: 2P/CPU FIRST',
+    'random': 'TURN: RANDOM'
+  } : {
+    'p1-first': '手番: 1P先手',
+    'p2-first': '手番: 1P後手 (CPU先手)',
+    'random': '手番: ランダム'
+  };
+  const orderSel = document.getElementById('battleTurnOrderSelect');
+  if (orderSel) {
+    Array.from(orderSel.options).forEach(opt => {
+      if (turnOrderTranslations[opt.value]) opt.textContent = turnOrderTranslations[opt.value];
+    });
+  }
+
+  ['battleStageSelect', 'sortieStageSelect'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      Array.from(el.options).forEach(opt => {
+        const st = I18N_DATA.stages[opt.value];
+        if (st) opt.textContent = isEn() ? st.enName : st.jaName;
+      });
+    }
+  });
+
+  // 7. Battle Left & Right Telemetry Panels
+  setElementText('#battleP1Panel .panel-section-badge', '1P ALLY TELEMETRY', '1P 自機テレメトリ');
+  setElementText('#battleP2Panel .panel-section-badge', 'ENEMY RIVAL SCANNER', 'ENEMY 相手機体スキャン');
+
+  const p1SpecLabels = document.querySelectorAll('#battleP1Panel .telemetry-spec-item .spec-label');
+  if (p1SpecLabels.length >= 4) {
+    const l1 = isEn() ? ['MASS', 'ATK', 'DEF', 'SPD'] : ['総重量', '攻撃力', '防御力', '機動力'];
+    p1SpecLabels.forEach((el, i) => { if (l1[i]) el.textContent = l1[i]; });
+  }
+  const p2SpecLabels = document.querySelectorAll('#battleP2Panel .telemetry-spec-item .spec-label');
+  if (p2SpecLabels.length >= 4) {
+    const l2 = isEn() ? ['MASS', 'ATK', 'DEF', 'SPD'] : ['推定重量', '攻撃力', '防御力', '機動力'];
+    p2SpecLabels.forEach((el, i) => { if (l2[i]) el.textContent = l2[i]; });
+  }
+
+  document.querySelectorAll('.telemetry-stability-box .stability-header span').forEach(el => {
+    el.textContent = isEn() ? 'DAMAGE (%)' : '蓄積ダメージ(%)';
+  });
+
+  const p1BoxTitles = document.querySelectorAll('#battleP1Panel .telemetry-box .box-title');
+  if (p1BoxTitles.length >= 4) {
+    p1BoxTitles[0].textContent = isEn() ? 'GLYPH COMPOSITION' : '合体文字パーツ構成';
+    p1BoxTitles[1].textContent = isEn() ? 'ACTIVE SPIN MODE' : '選択中スピン特性';
+    p1BoxTitles[2].textContent = isEn() ? 'TACTICAL OVERDRIVE (AD BONUS)' : '戦術オーバードライブ (広告ボーナス)';
+    p1BoxTitles[3].textContent = isEn() ? 'PC CONTROLS' : 'PC操作ショートカット';
+  }
+  setElementText('#rewardedSkillBoostBtn span[data-i18n="ad_skill_boost"]', '+1 SKILL STOCK BOOST', '必殺技ストック +1');
+  setElementHTML('#battleP1Panel .telemetry-hint-list',
+    '<li><kbd>L-Drag</kbd> Aim & Shoot</li><li><kbd>R-Click</kbd> Cancel Aim</li><li><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> Spin Mode</li><li><kbd>Space</kbd> Ultimate Skill</li>',
+    '<li><kbd>左ドラッグ</kbd> 照準・発射</li><li><kbd>右クリック</kbd> 照準キャンセル</li><li><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> スピン切替</li><li><kbd>Space</kbd> 必殺技発動</li>');
+
+  const p2BoxTitles = document.querySelectorAll('#battleP2Panel .telemetry-box .box-title');
+  if (p2BoxTitles.length >= 3) {
+    p2BoxTitles[0].textContent = isEn() ? 'RIVAL GLYPH PARTS' : '相手の合体文字パーツ';
+    p2BoxTitles[1].textContent = isEn() ? 'TACTICAL ADVICE // WEAKNESS' : '戦術アドバイス // 弱点分析';
+    p2BoxTitles[2].textContent = isEn() ? 'ARENA STAGE INFO' : '環境・ステージ情報';
+  }
+
+  // 8. Battle Footer Controls
+  setElementText('.spin-selector-group .group-title', 'SPIN MODE:', 'スピン切替:');
+  const spinBtns = document.querySelectorAll('.spin-selector-group .spin-btn .spin-text');
+  if (spinBtns.length >= 3) {
+    spinBtns[0].innerHTML = isEn() ? '<strong>DRIVE (TOP)</strong><small>Push Forward</small>' : '<strong>前進 (DRIVE)</strong><small>突進・押し込み</small>';
+    spinBtns[1].innerHTML = isEn() ? '<strong>NORMAL (STD)</strong><small>Balanced</small>' : '<strong>標準 (NORMAL)</strong><small>ニュートラル</small>';
+    spinBtns[2].innerHTML = isEn() ? '<strong>BRAKE (BACK)</strong><small>Quick Stop</small>' : '<strong>ブレーキ (BACK)</strong><small>衝突時急停止</small>';
+  }
+  setElementHTML('.pc-battle-mouse-hint',
+    '<span class="hint-badge"><kbd>L-Drag</kbd> Shoot</span><span class="hint-badge"><kbd>R-Click</kbd> Cancel</span><span class="hint-badge"><kbd>Wheel</kbd> Spin</span><span class="hint-badge"><kbd>Space</kbd> Skill</span>',
+    '<span class="hint-badge"><kbd>左ドラッグ</kbd> ショット</span><span class="hint-badge"><kbd>右クリック</kbd> 狙い解除</span><span class="hint-badge"><kbd>ホイール</kbd> スピン</span><span class="hint-badge"><kbd>Space</kbd> 必殺技</span>');
+  setElementHTML('#undoBattleTurnBtn', '<kbd>Z</kbd> UNDO', '<kbd>Z</kbd> 1手戻す');
+  setElementHTML('#backToCraftBtn', '<kbd>Esc</kbd> CRAFT', '<kbd>Esc</kbd> 設計室へ');
+  setElementHTML('#resetMatchBtn', '<kbd>R</kbd> REMATCH', '<kbd>R</kbd> 最初から');
+
+  // 9. PC Guide Modal & Match Result Modal
+  setElementText('#pcKeyGuideModal .guide-header-row h2', 'PC CONTROLS GUIDE', 'PC操作ガイド');
+  setElementText('#closePcGuideBtn', 'CLOSE', '閉じる');
+  const resLabels = document.querySelectorAll('#matchResultModal .telemetry-item .telemetry-label');
+  if (resLabels.length >= 3) {
+    resLabels[0].textContent = isEn() ? 'TURNS' : '決着ターン';
+    resLabels[1].textContent = isEn() ? 'MAX DAMAGE' : '最大蓄積ダメージ';
+    resLabels[2].textContent = isEn() ? 'ARENA STAGE' : 'ステージ';
+  }
+  setElementText('#resultRematchBtn', 'REMATCH', 'もう一度戦う (再戦)');
+  setElementText('#resultAdRematchBtn span[data-i18n="btn_ad_rematch"]', 'REMATCH WITH +1 SKILL', '技ストック+1で有利に再戦');
+  setElementText('#resultToCraftBtn', 'RETURN TO CRAFT DOCK', '設計室へ戻る');
+
+  // 10. Sortie Matchmaking Modal (VS CPU & P2P Online)
+  setElementText('#sortieModalTitle', 'SELECT BATTLE MODE // DEPLOY', '出撃モード選択 // バトル開始');
+  setElementText('#closeSortieModalBtn', 'CLOSE', '閉じる');
+  setElementText('[data-i18n="sortie_cpu_badge"]', 'SINGLE PLAYER // VS COMPUTER AI', 'シングルプレイ // コンピューター対戦');
+  setElementText('[data-i18n="sortie_cpu_heading"]', 'CHALLENGE TACTICAL AI', '戦術AIライバルと激突');
+  setElementText('[data-i18n="sortie_cpu_desc"]',
+    'Battle against physics-calculating CPU bosses across 10 interactive desk arenas.',
+    '自作した5文字機体で、10種類の机ステージ＆強力CPUライバル機と激突します。');
+  setElementText('[data-i18n="sortie_label_difficulty"]', 'CPU DIFFICULTY:', 'CPUの強さ:');
+  setElementText('[data-i18n="diff_normal"]', 'NORMAL', 'NORMAL (標準)');
+  setElementText('[data-i18n="diff_hard"]', 'HARD', 'HARD (強敵)');
+  setElementText('[data-i18n="diff_expert"]', 'EXPERT', 'EXPERT (最強鬼神)');
+  setElementText('[data-i18n="sortie_label_turn"]', 'TURN ORDER:', '先手・後手の選択:');
+  setElementText('[data-i18n="order_p1"]', '1P FIRST', '1P 先手');
+  setElementText('[data-i18n="order_p2"]', 'CPU / 2P FIRST', 'CPU / 2P 先手');
+  setElementText('[data-i18n="order_random"]', 'RANDOM', 'ランダム');
+  setElementText('[data-i18n="sortie_label_stage"]', 'ARENA STAGE:', 'バトルステージ:');
+  setElementText('#startCpuBattleBtn', 'LAUNCH VS COMPUTER', 'コンピューター対戦へ出撃');
+  setElementText('#startLocalPvpBtn', 'LOCAL 2P PASS & PLAY (SAME PC)', '2P ローカル交互対戦 (同じPC)');
+
+  setElementText('[data-i18n="sortie_p2p_badge"]', 'ONLINE MULTIPLAYER // WEBRTC P2P', 'オンライン通信対戦 // WebRTC P2P');
+  setElementText('[data-i18n="sortie_p2p_heading"]', 'P2P ROOM MATCHMAKING', 'P2P ルームコード通信対戦');
+  setElementText('[data-i18n="sortie_p2p_desc"]',
+    'Connect directly browser-to-browser with a 5-letter Room Code. Custom 5-Glyph Machines sync automatically.',
+    '5文字のルームコードを共有してブラウザ間で直接オンライン対戦！お互いの自作5文字機体が自動同期されます。');
+  setElementText('[data-i18n="p2p_host_title"]', '1. CREATE ROOM (HOST - 1P)', '1. ルーム作成 (ホスト - 1P)');
+  setElementText('#p2pCreateRoomBtn', 'CREATE ROOM CODE', 'ルームコードを発行');
+  setElementText('#p2pCopyCodeBtn', 'COPY', 'コピー');
+  setElementText('[data-i18n="p2p_join_title"]', '2. JOIN ROOM (GUEST - 2P)', '2. ルーム参加 (ゲスト - 2P)');
+  const joinInput = document.getElementById('p2pJoinCodeInput');
+  if (joinInput) joinInput.placeholder = isEn() ? 'ENTER CODE' : 'コード入力';
+  setElementText('#p2pJoinRoomBtn', 'JOIN MATCH', 'ルームに参加');
+  if (!window.p2pState || !window.p2pState.peer) {
+    setElementText('#p2pStatusText',
+      "P2P Standby: Create a room or enter a friend's 5-letter code.",
+      'P2P待機中: ルームを作成するか、相手の5文字コードを入力してください。');
+  }
+  setElementText('#p2pDisconnectBtn', 'DISCONNECT P2P SESSION', 'P2P通信を切断');
+
+  // Refresh dynamic UIs
+  const p1GlyphsContainer = document.getElementById('battleP1GlyphsList');
+  if (p1GlyphsContainer) p1GlyphsContainer._cachedCount = 0;
+  const p2GlyphsContainer = document.getElementById('battleP2GlyphsList');
+  if (p2GlyphsContainer) p2GlyphsContainer._cachedName = '';
+
+  renderPresetMachinesList();
+  updateLiveTypedCharPreview();
+  updateCraftUI();
+  if (battleState.units && battleState.units.length >= 2) {
+    battleState.units.forEach(u => {
+      if (u && u.build) u.spec = calculateMachineSpec(u.build);
+    });
+    updateBattleHUD();
+  }
+  if (typeof updateTutorialUI === 'function') updateTutorialUI();
+}
+
+document.getElementById('langToggleBtn')?.addEventListener('click', () => {
+  sfx.playClick();
+  applyLanguage(isEn() ? 'ja' : 'en');
+});
+
+
+// ============================================================================
+// 14. CRAZYGAMES SDK v3 & AD MONETIZATION CONTROLLER (MIDGAME & REWARDED ADS)
+// ============================================================================
+
+let cgSdkReady = false;
+let cgIsPlayingAd = false;
+let cgLastMidgameTime = 0;
+
+async function initCrazyGamesSDK() {
+  try {
+    if (window.CrazyGames && window.CrazyGames.SDK) {
+      await window.CrazyGames.SDK.init();
+      cgSdkReady = true;
+      if (window.CrazyGames.SDK.game && window.CrazyGames.SDK.game.settings) {
+        if (window.CrazyGames.SDK.game.settings.muteAudio) {
+          sfx.adMuted = true;
+        }
+      }
+    }
+  } catch (e) {
+    cgSdkReady = false;
+  }
+}
+
+function cgGameplayStart() {
+  try {
+    if (cgSdkReady && window.CrazyGames?.SDK?.game) {
+      window.CrazyGames.SDK.game.gameplayStart();
+    }
+  } catch (e) {}
+}
+
+function cgGameplayStop() {
+  try {
+    if (cgSdkReady && window.CrazyGames?.SDK?.game) {
+      window.CrazyGames.SDK.game.gameplayStop();
+    }
+  } catch (e) {}
+}
+
+function cgHappytime() {
+  try {
+    if (cgSdkReady && window.CrazyGames?.SDK?.game) {
+      window.CrazyGames.SDK.game.happytime();
+    }
+  } catch (e) {}
+}
+
+function requestCrazyGamesAd(adType = 'midgame', onReward = null) {
+  if (cgIsPlayingAd) return;
+
+  const now = Date.now();
+  if (adType === 'midgame' && (now - cgLastMidgameTime < 60000)) {
+    if (typeof onReward === 'function') onReward(true);
+    return;
+  }
+
+  cgIsPlayingAd = true;
+  sfx.adMuted = true;
+  cgGameplayStop();
+
+  const finishAd = (rewardedSuccess) => {
+    cgIsPlayingAd = false;
+    sfx.adMuted = false;
+    document.getElementById('cgAdOverlay')?.classList.add('hidden');
+    if (adType === 'midgame') cgLastMidgameTime = Date.now();
+    if (activeView === 'battle' && battleState.phase !== 'match_over') {
+      cgGameplayStart();
+    }
+    if (typeof onReward === 'function') {
+      onReward(rewardedSuccess);
+    }
+  };
+
+  if (cgSdkReady && window.CrazyGames?.SDK?.ad) {
+    try {
+      window.CrazyGames.SDK.ad.requestAd(adType, {
+        adStarted: () => {
+          sfx.adMuted = true;
+        },
+        adFinished: () => {
+          finishAd(true);
+        },
+        adError: () => {
+          finishAd(adType === 'midgame');
+        }
+      });
+      return;
+    } catch (e) {}
+  }
+
+  const overlay = document.getElementById('cgAdOverlay');
+  const titleEl = document.getElementById('cgAdTitle');
+  const descEl = document.getElementById('cgAdCountdownText');
+  const fillEl = document.getElementById('cgAdProgressFill');
+
+  if (!overlay) {
+    finishAd(true);
+    return;
+  }
+
+  if (titleEl) {
+    titleEl.textContent = adType === 'rewarded'
+      ? (isEn() ? 'WATCHING REWARDED AD...' : 'リワード広告を再生中...')
+      : (isEn() ? 'SPONSORED AD BREAK' : '広告ブレイク');
+  }
+  if (descEl) {
+    descEl.textContent = isEn()
+      ? 'Game audio muted. Granting reward in 2s...'
+      : '広告再生中は音声が自動ミュートされます。まもなくボーナスが付与されます...';
+  }
+  if (fillEl) fillEl.style.width = '0%';
+  overlay.classList.remove('hidden');
+
+  const duration = 1600;
+  const start = Date.now();
+  const timer = setInterval(() => {
+    const elapsed = Date.now() - start;
+    const pct = Math.min(100, Math.round((elapsed / duration) * 100));
+    if (fillEl) fillEl.style.width = `${pct}%`;
+    if (elapsed >= duration) {
+      clearInterval(timer);
+      finishAd(true);
+    }
+  }, 50);
+}
+
+// 1. Rewarded Ad in Battle: +1 Skill Stock immediately
+document.getElementById('rewardedSkillBoostBtn')?.addEventListener('click', () => {
+  const u1 = battleState.units[0];
+  if (!u1) return;
+  requestCrazyGamesAd('rewarded', (success) => {
+    if (!success) return;
+    u1.skillStock = (u1.skillStock || 0) + 1;
+    sfx.playSkill();
+    updateBattleHUD();
+    showBattleToast(isEn()
+      ? 'REWARD GRANTED! +1 ULTIMATE SKILL STOCK!'
+      : '広告ボーナス獲得！ 必殺技ストック +1！');
+  });
+});
+
+// 2. Rewarded Ad in Result Modal: Rematch with +1 Skill Stock
+document.getElementById('resultAdRematchBtn')?.addEventListener('click', () => {
+  requestCrazyGamesAd('rewarded', (success) => {
+    if (!success) return;
+    window._pendingRewardedSkillBonus = true;
+    hideMatchResultModal();
+    initBattleMatch();
+    sfx.playSkill();
+    showBattleToast(isEn()
+      ? 'REWARDED REMATCH! Started with +1 Ultimate Skill Stock!'
+      : 'ボーナス再戦開始！ 最初から必殺技ストック+1を所持！');
+  });
+});
+
+// 3. Standard Rematch Button triggers non-intrusive Midgame Ad (with 60s cooldown)
+document.getElementById('resultRematchBtn')?.addEventListener('click', () => {
+  sfx.playClick();
+  requestCrazyGamesAd('midgame', () => {
+    hideMatchResultModal();
+    initBattleMatch();
+  });
+});
+
+// 4. Rewarded Ad in Craft Studio: Unlock Legendary 5-Glyph Machine + Bonus
+document.getElementById('rewardedCraftBoostBtn')?.addEventListener('click', () => {
+  requestCrazyGamesAd('rewarded', (success) => {
+    if (!success) return;
+    pushCraftUndo();
+    const legendaryBuild = {
+      name: isEn() ? 'OMEGA EMPEROR // 神龍極滅' : '神龍極滅・オメガ帝号',
+      weldChassis: true,
+      glyphs: [
+        { id: 'leg1', char: '神', x: 0,   y: 0,   angle: 0,   scale: 128, mat: 'gold',     color: '#f59e0b', depthColor: '#451a03', fontStyle: 'brush' },
+        { id: 'leg2', char: '龍', x: 0,   y: -34, angle: 0,   scale: 115, mat: 'blade',    color: '#ef4444', depthColor: '#450a0a', fontStyle: 'mecha' },
+        { id: 'leg3', char: '剣', x: -34, y: -2,  angle: -20, scale: 112, mat: 'titanium', color: '#00e5ff', depthColor: '#0f172a', fontStyle: 'heavy' },
+        { id: 'leg4', char: '剣', x: 34,  y: -2,  angle: 20,  scale: 112, mat: 'titanium', color: '#00e5ff', depthColor: '#0f172a', fontStyle: 'heavy', flipX: true },
+        { id: 'leg5', char: '覇', x: 0,   y: 34,  angle: 0,   scale: 114, mat: 'gold',     color: '#fde047', depthColor: '#451a03', fontStyle: 'heavy' }
+      ]
+    };
+    enforceConnectedGlyphs(legendaryBuild.glyphs, null, true);
+    currentBuild = legendaryBuild;
+    selectedGlyphId = currentBuild.glyphs[0].id;
+    window._pendingRewardedSkillBonus = true;
+    saveStateToStorage();
+    updateCraftUI();
+    sfx.playWin();
+  });
+});
+
+
+// ============================================================================
+// 15. POST-SORTIE MATCHMAKING DECK & WEBRTC P2P ONLINE MULTIPLAYER (PeerJS)
+// ============================================================================
+
+window.p2pState = {
+  peer: null,
+  conn: null,
+  roomCode: '',
+  isHost: true,
+  myPlayerNum: 1,
+  connected: false,
+  remoteBuild: null
+};
+
+let selectedSortieDiff = 'cpu-expert';
+let selectedSortieOrder = 'p1-first';
+const sortieModal = document.getElementById('sortieMatchmakingModal');
+
+// Wire up Sortie Difficulty Pill Buttons
+document.querySelectorAll('#sortieCpuDiffGroup .sortie-pill').forEach(btn => {
+  btn.addEventListener('click', () => {
+    selectedSortieDiff = btn.dataset.diff || 'cpu-expert';
+    document.querySelectorAll('#sortieCpuDiffGroup .sortie-pill').forEach(b => {
+      b.classList.toggle('active', b === btn);
+    });
+    sfx.playClick();
+  });
+});
+
+// Wire up Sortie Turn Order Pill Buttons
+document.querySelectorAll('#sortieTurnOrderGroup .sortie-pill').forEach(btn => {
+  btn.addEventListener('click', () => {
+    selectedSortieOrder = btn.dataset.order || 'p1-first';
+    document.querySelectorAll('#sortieTurnOrderGroup .sortie-pill').forEach(b => {
+      b.classList.toggle('active', b === btn);
+    });
+    sfx.playClick();
+  });
+});
+
+function openSortieModal() {
+  if (!sortieModal) return;
+  const curMode = document.getElementById('battleModeSelect')?.value || 'cpu-expert';
+  if (curMode.startsWith('cpu-')) {
+    selectedSortieDiff = curMode;
+    document.querySelectorAll('#sortieCpuDiffGroup .sortie-pill').forEach(b => {
+      b.classList.toggle('active', b.dataset.diff === selectedSortieDiff);
+    });
+  }
+  const curOrder = document.getElementById('battleTurnOrderSelect')?.value || 'p1-first';
+  selectedSortieOrder = curOrder;
+  document.querySelectorAll('#sortieTurnOrderGroup .sortie-pill').forEach(b => {
+    b.classList.toggle('active', b.dataset.order === selectedSortieOrder);
+  });
+
+  const curStage = document.getElementById('battleStageSelect')?.value || 'standard';
+  const stageEl = document.getElementById('sortieStageSelect');
+  if (stageEl) stageEl.value = curStage;
+
+  sortieModal.classList.remove('hidden');
+  sfx.playClick();
+}
+
+function closeSortieModal() {
+  sortieModal?.classList.add('hidden');
+}
+
+document.getElementById('openSortieModalBtn')?.addEventListener('click', openSortieModal);
+document.getElementById('closeSortieModalBtn')?.addEventListener('click', closeSortieModal);
+document.getElementById('sortieModalBackdrop')?.addEventListener('click', closeSortieModal);
+
+// Launch VS CPU Battle from Sortie Modal
+document.getElementById('startCpuBattleBtn')?.addEventListener('click', () => {
+  const stage = document.getElementById('sortieStageSelect')?.value || 'standard';
+
+  const modeSel = document.getElementById('battleModeSelect');
+  if (modeSel) modeSel.value = selectedSortieDiff;
+  const orderSel = document.getElementById('battleTurnOrderSelect');
+  if (orderSel) orderSel.value = selectedSortieOrder;
+  const stageSel = document.getElementById('battleStageSelect');
+  if (stageSel) stageSel.value = stage;
+
+  closeSortieModal();
+  switchMainView('battle');
+});
+
+// Launch Local 2P Pass & Play from Sortie Modal
+document.getElementById('startLocalPvpBtn')?.addEventListener('click', () => {
+  const stage = document.getElementById('sortieStageSelect')?.value || 'standard';
+
+  const modeSel = document.getElementById('battleModeSelect');
+  if (modeSel) modeSel.value = 'pvp';
+  const orderSel = document.getElementById('battleTurnOrderSelect');
+  if (orderSel) orderSel.value = selectedSortieOrder;
+  const stageSel = document.getElementById('battleStageSelect');
+  if (stageSel) stageSel.value = stage;
+
+  closeSortieModal();
+  switchMainView('battle');
+});
+
+// If player selects 'p2p-online' from Battle Top Bar dropdown, open Sortie Modal
+document.getElementById('battleModeSelect')?.addEventListener('change', evt => {
+  if (evt.target.value === 'p2p-online' && !window.p2pState.connected) {
+    openSortieModal();
+  }
+});
+
+function setP2PStatus(msg, isConnected = false) {
+  const dot = document.getElementById('p2pStatusDot');
+  const txt = document.getElementById('p2pStatusText');
+  const discBtn = document.getElementById('p2pDisconnectBtn');
+  if (txt) txt.textContent = msg;
+  if (dot) {
+    dot.classList.toggle('connected', isConnected);
+  }
+  if (discBtn) {
+    discBtn.classList.toggle('hidden', !window.p2pState.peer);
+  }
+}
+
+function disconnectP2P() {
+  try {
+    if (window.p2pState.conn) window.p2pState.conn.close();
+    if (window.p2pState.peer) window.p2pState.peer.destroy();
+  } catch (e) {}
+  window.p2pState.conn = null;
+  window.p2pState.peer = null;
+  window.p2pState.connected = false;
+  window.p2pState.remoteBuild = null;
+  const codeDisp = document.getElementById('p2pRoomCodeText');
+  if (codeDisp) codeDisp.textContent = '-----';
+  document.getElementById('p2pHostCodeBox')?.classList.add('hidden');
+  setP2PStatus(isEn() ? 'Status: Disconnected' : '通信状態: 未接続', false);
+}
+
+document.getElementById('p2pDisconnectBtn')?.addEventListener('click', () => {
+  sfx.playClick();
+  disconnectP2P();
+});
+
+function generateRoomCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = '';
+  for (let i = 0; i < 5; i++) {
+    code += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return code;
+}
+
+function setupP2PConnection(conn) {
+  window.p2pState.conn = conn;
+
+  conn.on('open', () => {
+    window.p2pState.connected = true;
+    sfx.playWin();
+    setP2PStatus(
+      isEn()
+        ? `Connected! You are ${window.p2pState.myPlayerNum}P — Launching P2P Match!`
+        : `P2P接続完了！ あなたは ${window.p2pState.myPlayerNum}P です。対戦を開始します！`,
+      true
+    );
+
+    if (!window.p2pState.isHost) {
+      conn.send({
+        type: 'HELLO_GUEST',
+        build: currentBuild
+      });
+    }
+  });
+
+  conn.on('data', data => {
+    if (!data || !data.type) return;
+
+    if (data.type === 'HELLO_GUEST' && window.p2pState.isHost) {
+      window.p2pState.remoteBuild = data.build;
+      const stage = document.getElementById('sortieStageSelect')?.value || 'standard';
+      conn.send({
+        type: 'START_MATCH',
+        hostBuild: currentBuild,
+        stage,
+        startingPlayer: 1
+      });
+      startOnlineP2PBattle(stage, 1);
+    } else if (data.type === 'START_MATCH' && !window.p2pState.isHost) {
+      window.p2pState.remoteBuild = data.hostBuild;
+      startOnlineP2PBattle(data.stage || 'standard', data.startingPlayer || 1);
+    } else if (data.type === 'SHOT') {
+      const shooterIdx = (battleState.activePlayer || 1) - 1;
+      const unit = battleState.units[shooterIdx];
+      if (unit && battleState.phase === 'aim') {
+        launchUnit(unit, data.powerRatio, data.angle, data.spinType);
+      }
+    } else if (data.type === 'SKILL') {
+      const shooterIdx = (battleState.activePlayer || 1) - 1;
+      const unit = battleState.units[shooterIdx];
+      if (unit && battleState.phase === 'moving') {
+        activateUnitSkill(unit, battleState.units, battleState.particles);
+      }
+    } else if (data.type === 'TURN_SYNC' && !window.p2pState.isHost) {
+      if (Array.isArray(data.units) && battleState.units.length >= 2) {
+        data.units.forEach((su, idx) => {
+          const u = battleState.units[idx];
+          if (u) {
+            u.x = su.x;
+            u.y = su.y;
+            u.vx = 0;
+            u.vy = 0;
+            u.angle = su.angle;
+            u.angVel = 0;
+            u.damagePct = su.damagePct;
+            u.skillStock = su.skillStock;
+            u.fallen = su.fallen;
+          }
+        });
+        battleState.turn = data.turn;
+        battleState.activePlayer = data.activePlayer;
+        battleState.p1Score = data.p1Score;
+        battleState.p2Score = data.p2Score;
+        battleState.phase = 'aim';
+        updateBattleHUD();
+      }
+    }
+  });
+
+  conn.on('close', () => {
+    window.p2pState.connected = false;
+    setP2PStatus(isEn() ? 'Opponent disconnected.' : '通信相手が切断しました', false);
+    showBattleToast(isEn() ? 'P2P Opponent disconnected.' : '通信相手との接続が切断されました');
+  });
+}
+
+function startOnlineP2PBattle(stageId, startingPlayer) {
+  closeSortieModal();
+  const modeSel = document.getElementById('battleModeSelect');
+  if (modeSel) modeSel.value = 'p2p-online';
+  const stageSel = document.getElementById('battleStageSelect');
+  if (stageSel) stageSel.value = stageId;
+  const orderSel = document.getElementById('battleTurnOrderSelect');
+  if (orderSel) orderSel.value = startingPlayer === 2 ? 'p2-first' : 'p1-first';
+
+  switchMainView('battle', true);
+  initBattleMatch();
+}
+
+function sendP2PShot(powerRatio, angle, spinType) {
+  if (window.p2pState.connected && window.p2pState.conn) {
+    window.p2pState.conn.send({
+      type: 'SHOT',
+      powerRatio,
+      angle,
+      spinType
+    });
+  }
+}
+
+function sendP2PSkill() {
+  if (window.p2pState.connected && window.p2pState.conn) {
+    window.p2pState.conn.send({
+      type: 'SKILL'
+    });
+  }
+}
+
+function onTurnAdvancedP2P() {
+  if (battleState.mode === 'p2p-online' && window.p2pState.connected && window.p2pState.isHost && window.p2pState.conn) {
+    window.p2pState.conn.send({
+      type: 'TURN_SYNC',
+      turn: battleState.turn,
+      activePlayer: battleState.activePlayer,
+      p1Score: battleState.p1Score,
+      p2Score: battleState.p2Score,
+      units: battleState.units.map(u => ({
+        x: u.x,
+        y: u.y,
+        angle: u.angle,
+        damagePct: u.damagePct,
+        skillStock: u.skillStock || 0,
+        fallen: u.fallen
+      }))
+    });
+  }
+}
+
+// Host Room Button
+document.getElementById('p2pCreateRoomBtn')?.addEventListener('click', () => {
+  if (typeof Peer === 'undefined') {
+    setP2PStatus(isEn() ? 'PeerJS library not loaded (Check network).' : 'PeerJS通信ライブラリを読み込めませんでした', false);
+    return;
+  }
+  disconnectP2P();
+  sfx.playClick();
+
+  const code = generateRoomCode();
+  window.p2pState.roomCode = code;
+  window.p2pState.isHost = true;
+  window.p2pState.myPlayerNum = 1;
+
+  const peerId = `glyphclash-neo-${code}`;
+  setP2PStatus(isEn() ? `Creating Room [${code}]...` : `ルーム [${code}] を作成中...`, false);
+
+  try {
+    const peer = new Peer(peerId);
+    window.p2pState.peer = peer;
+
+    peer.on('open', () => {
+      const codeEl = document.getElementById('p2pRoomCodeText');
+      if (codeEl) codeEl.textContent = code;
+      document.getElementById('p2pHostCodeBox')?.classList.remove('hidden');
+      setP2PStatus(
+        isEn()
+          ? `Room [${code}] Ready! Share this 5-letter code with your rival.`
+          : `ルーム [${code}] 待機中！相手にこの5文字コードを伝えてください`,
+        false
+      );
+    });
+
+    peer.on('connection', conn => {
+      setupP2PConnection(conn);
+    });
+
+    peer.on('error', err => {
+      setP2PStatus(isEn() ? `P2P Error: ${err.type || 'Connection failed'}` : `通信エラー: ${err.type || '接続失敗'}`, false);
+    });
+  } catch (e) {
+    setP2PStatus(isEn() ? 'Could not initialize WebRTC Peer.' : 'WebRTC通信の初期化に失敗しました', false);
+  }
+});
+
+// Copy Room Code Button
+document.getElementById('p2pCopyCodeBtn')?.addEventListener('click', () => {
+  if (!window.p2pState.roomCode) return;
+  navigator.clipboard?.writeText(window.p2pState.roomCode).catch(() => {});
+  sfx.playClick();
+  const copyBtn = document.getElementById('p2pCopyCodeBtn');
+  if (copyBtn) {
+    copyBtn.textContent = isEn() ? 'COPIED!' : 'コピー完了!';
+    setTimeout(() => {
+      copyBtn.textContent = isEn() ? 'COPY' : 'コピー';
+    }, 1500);
+  }
+});
+
+// Join Room Button
+document.getElementById('p2pJoinRoomBtn')?.addEventListener('click', () => {
+  if (typeof Peer === 'undefined') {
+    setP2PStatus(isEn() ? 'PeerJS library not loaded (Check network).' : 'PeerJS通信ライブラリを読み込めませんでした', false);
+    return;
+  }
+  const inputEl = document.getElementById('p2pJoinCodeInput');
+  const rawCode = (inputEl?.value || '').trim().toUpperCase();
+  if (rawCode.length < 4) {
+    setP2PStatus(isEn() ? 'Enter a valid 5-character Room Code first!' : '5文字のルームコードを入力してください', false);
+    return;
+  }
+
+  disconnectP2P();
+  sfx.playClick();
+
+  window.p2pState.roomCode = rawCode;
+  window.p2pState.isHost = false;
+  window.p2pState.myPlayerNum = 2;
+
+  setP2PStatus(isEn() ? `Connecting to Room [${rawCode}]...` : `ルーム [${rawCode}] に接続中...`, false);
+
+  try {
+    const peer = new Peer();
+    window.p2pState.peer = peer;
+
+    peer.on('open', () => {
+      const conn = peer.connect(`glyphclash-neo-${rawCode}`, { reliable: true });
+      setupP2PConnection(conn);
+    });
+
+    peer.on('error', err => {
+      setP2PStatus(isEn() ? `Could not find Room [${rawCode}] (${err.type})` : `ルーム [${rawCode}] が見つかりません`, false);
+    });
+  } catch (e) {
+    setP2PStatus(isEn() ? 'Connection failed.' : '接続に失敗しました', false);
+  }
+});
+
+
+// ============================================================================
+// 16. ZERO-BARRIER INSTANT PLAY & 3-STEP INTERACTIVE TUTORIAL
+// ============================================================================
+
+window.tutorialState = {
+  active: false,
+  step: 1
+};
+
+const TUTORIAL_STEPS = {
+  1: {
+    enBadge: 'STEP 1 / 3',
+    jaBadge: 'STEP 1 / 3',
+    enTitle: 'DRAG & RELEASE TO SMASH!',
+    jaTitle: '引っ張って弾き飛ばせ！',
+    enDesc: 'Drag anywhere on the desk to aim your 5-Glyph Machine, then release to knock the rival off the desk!',
+    jaDesc: '机の上をドラッグして狙いを定め、離すと発射！相手機体を机の外へ弾き落とせば勝利です！',
+    enNext: 'NEXT TIP →',
+    jaNext: '次へ →'
+  },
+  2: {
+    enBadge: 'STEP 2 / 3',
+    jaBadge: 'STEP 2 / 3',
+    enTitle: 'SPIN MODES & ULTIMATE SKILL (+1 FREE STOCK!)',
+    jaTitle: 'スピン切替＆必殺スキル発動！（お試しストック+1付与）',
+    enDesc: 'Switch Spin [1-3] for Drive or Brake. While sliding, press [SPACE] or click the Skill button to unleash your Ultimate Skill!',
+    jaDesc: '下部ボタン[1〜3]で前進/ブレーキ回転を選択。滑走中に[Space]または画面クリックで必殺技が炸裂します！',
+    enNext: 'TRY CRAFTING →',
+    jaNext: 'クラフトへ →'
+  },
+  3: {
+    enBadge: 'STEP 3 / 3',
+    jaBadge: 'STEP 3 / 3',
+    enTitle: 'WELD UP TO 5 GLYPHS IN CRAFT STUDIO!',
+    jaTitle: '最大5文字を自由合体クラフト！',
+    enDesc: 'Combine Kanji, Letters & Symbols with 9 Materials (Eraser, Blade, Gold, Glass). Every character shape has true physical collision!',
+    jaDesc: '漢字・英字・記号を最大5文字まで密着合体！文字の実際のトゲや重心がそのまま物理衝突判定になります！',
+    enNext: 'FINISH TUTORIAL',
+    jaNext: 'チュートリアル完了'
+  }
+};
+
+function updateTutorialUI() {
+  const bar = document.getElementById('tutorialOverlayBar');
+  if (!bar) return;
+  if (!window.tutorialState.active) {
+    bar.classList.add('hidden');
+    return;
+  }
+  bar.classList.remove('hidden');
+  const s = TUTORIAL_STEPS[window.tutorialState.step] || TUTORIAL_STEPS[1];
+  const badgeEl = document.getElementById('tutorialStepBadge');
+  const titleEl = document.getElementById('tutorialTitle');
+  const descEl = document.getElementById('tutorialDesc');
+  const nextBtn = document.getElementById('tutorialNextBtn');
+  const skipBtn = document.getElementById('tutorialSkipBtn');
+
+  if (badgeEl) badgeEl.textContent = isEn() ? s.enBadge : s.jaBadge;
+  if (titleEl) titleEl.textContent = isEn() ? s.enTitle : s.jaTitle;
+  if (descEl) descEl.textContent = isEn() ? s.enDesc : s.jaDesc;
+  if (nextBtn) nextBtn.textContent = isEn() ? s.enNext : s.jaNext;
+  if (skipBtn) skipBtn.textContent = isEn() ? 'SKIP [X]' : 'スキップ [X]';
+}
+
+function startInteractiveTutorial() {
+  window.tutorialState.active = true;
+  window.tutorialState.step = 1;
+  closeSortieModal();
+  if (activeView !== 'battle') {
+    switchMainView('battle');
+  }
+  updateTutorialUI();
+}
+
+function stopInteractiveTutorial() {
+  window.tutorialState.active = false;
+  try {
+    localStorage.setItem('keshigomu_neo_tutorial_done', '1');
+  } catch (e) {}
+  updateTutorialUI();
+}
+
+function onTutorialPlayerShot() {
+  if (!window.tutorialState.active) return;
+  if (window.tutorialState.step === 1) {
+    window.tutorialState.step = 2;
+    const u1 = battleState.units[0];
+    if (u1 && (u1.skillStock || 0) < 1) {
+      u1.skillStock = 1;
+      updateBattleHUD();
+    }
+    updateTutorialUI();
+  }
+}
+
+function onTutorialEnteredCraft() {
+  if (!window.tutorialState.active) return;
+  if (window.tutorialState.step < 3) {
+    window.tutorialState.step = 3;
+    updateTutorialUI();
+  }
+}
+
+document.getElementById('tutorialStartBtn')?.addEventListener('click', () => {
+  sfx.playClick();
+  startInteractiveTutorial();
+});
+
+document.getElementById('tutorialNextBtn')?.addEventListener('click', () => {
+  sfx.playClick();
+  if (window.tutorialState.step === 1) {
+    window.tutorialState.step = 2;
+    const u1 = battleState.units[0];
+    if (u1 && (u1.skillStock || 0) < 1) {
+      u1.skillStock = 1;
+      updateBattleHUD();
+    }
+    updateTutorialUI();
+  } else if (window.tutorialState.step === 2) {
+    window.tutorialState.step = 3;
+    switchMainView('craft');
+    updateTutorialUI();
+  } else {
+    stopInteractiveTutorial();
+  }
+});
+
+document.getElementById('tutorialSkipBtn')?.addEventListener('click', () => {
+  sfx.playClick();
+  stopInteractiveTutorial();
+});
+
+// Initialize Language, CrazyGames SDK, and Zero-Barrier Instant Play on Startup
+(function bootstrapCrazyGamesEdition() {
+  applyLanguage(currentLang);
+  initCrazyGamesSDK();
+
+  // Zero-barrier instant play: launch directly into playable Arena with lightweight tutorial coach bar!
+  const tutDone = localStorage.getItem('keshigomu_neo_tutorial_done');
+  if (!tutDone) {
+    startInteractiveTutorial();
+  }
+})();
