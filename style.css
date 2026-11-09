@@ -1998,8 +1998,11 @@ button:active {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
-  flex-shrink: 0;
+  justify-content: center;
+  gap: 4px;
+  flex: 1;
+  max-width: 500px;
+  text-align: center;
 }
 
 .battle-quick-settings {

@@ -3651,7 +3651,7 @@ function showCenterBanner(sub, main, desc, duration = 1500) {
 }
 
 function createRivalBuild() {
-  const mode = document.getElementById('battleModeSelect')?.value || 'cpu-normal';
+  const mode = battleState.mode || 'cpu-expert';
   if (mode === 'p2p-online' && window.p2pState && window.p2pState.remoteBuild) {
     const rb = JSON.parse(JSON.stringify(window.p2pState.remoteBuild));
     if (Array.isArray(rb.glyphs) && rb.glyphs.length > 0) {
@@ -3855,8 +3855,8 @@ function initBattleMatch() {
   hideMatchResultModal();
   clearTimeout(cpuThinkTimeout);
   resizeBattleCanvas();
-  battleState.mode = document.getElementById('battleModeSelect')?.value || 'cpu-normal';
-  let selectedStage = document.getElementById('battleStageSelect')?.value || 'standard';
+  if (!battleState.mode) battleState.mode = selectedSortieDiff || 'cpu-expert';
+  let selectedStage = battleState.rawStage || document.getElementById('sortieStageSelect')?.value || 'standard';
   if (selectedStage === 'random') {
     selectedStage = getRandomStageId();
   }
@@ -3871,8 +3871,8 @@ function startBattleRound(roundNum) {
   clearTimeout(cpuThinkTimeout);
   battleState.turn = 1;
 
-  // Determine starting player from Turn Order selector
-  const orderSetting = document.getElementById('battleTurnOrderSelect')?.value || 'p1-first';
+  // Determine starting player from battleState.turnOrder
+  const orderSetting = battleState.turnOrder || selectedSortieOrder || 'p1-first';
   let startingPlayer = 1;
   if (orderSetting === 'p2-first') {
     startingPlayer = 2;
@@ -5508,8 +5508,7 @@ document.getElementById('resetMatchBtn')?.addEventListener('click', () => {
   initBattleMatch();
 });
 
-document.getElementById('battleModeSelect')?.addEventListener('change', initBattleMatch);
-document.getElementById('battleStageSelect')?.addEventListener('change', initBattleMatch);
+// Mode & Stage settings are now managed via Sortie Modal & battleState
 
 function switchMainView(targetView, skipMatchInit = false) {
   if (targetView === 'battle') {
@@ -5530,8 +5529,8 @@ function switchMainView(targetView, skipMatchInit = false) {
   if (targetView === 'battle') {
     craftSec.classList.remove('active');
     battleSec.classList.add('active');
-    tabCraft.classList.remove('active');
-    tabBattle.classList.add('active');
+    if (tabCraft) tabCraft.classList.remove('active');
+    if (tabBattle) tabBattle.classList.add('active');
     sfx.playEquip();
     if (typeof cgGameplayStart === 'function') cgGameplayStart();
     if (!skipMatchInit) {
@@ -5542,8 +5541,8 @@ function switchMainView(targetView, skipMatchInit = false) {
     if (typeof cgGameplayStop === 'function') cgGameplayStop();
     battleSec.classList.remove('active');
     craftSec.classList.add('active');
-    tabBattle.classList.remove('active');
-    tabCraft.classList.add('active');
+    if (tabBattle) tabBattle.classList.remove('active');
+    if (tabCraft) tabCraft.classList.add('active');
     sfx.playClick();
     resizeCraftCanvas();
     updateCraftUI();
@@ -5729,7 +5728,7 @@ document.getElementById('resultToCraftBtn')?.addEventListener('click', () => {
   sfx.playClick();
   requestCrazyGamesAd('midgame', () => {
     hideMatchResultModal();
-    document.getElementById('tabCraftBtn')?.click();
+    switchMainView('craft');
   });
 });
 
@@ -5828,13 +5827,7 @@ window.addEventListener('keydown', evt => {
 
   // Hotkeys during Craft View
   if (activeView === 'craft') {
-    // Navigation tabs hotkeys
-    if (!isEditing && evt.key === '1' && !evt.ctrlKey && !evt.altKey) {
-      document.getElementById('tabCraftBtn')?.click();
-    }
-    if (!isEditing && evt.key === '2' && !evt.ctrlKey && !evt.altKey) {
-      document.getElementById('tabBattleBtn')?.click();
-    }
+    // Navigation tabs hotkeys removed (clean game loop: Sortie Modal -> Arena -> Esc/Result to Craft)
 
     // Space: Toggle Test Mode
     if (!isEditing && evt.code === 'Space') {
@@ -6287,43 +6280,7 @@ function applyLanguage(lang) {
     el.textContent = isEn() ? 'DAMAGE (%)' : '蓄積ダメージ(%)';
   });
 
-  const modeSelectTranslations = isEn() ? {
-    'cpu-normal': 'vs CPU [NORMAL]',
-    'cpu-hard': 'vs CPU [HARD]',
-    'cpu-expert': 'vs CPU [EXPERT]',
-    'p2p-online': 'P2P ONLINE [ROOM MATCH]',
-    'pvp': 'LOCAL 2P [SAME PC]'
-  } : {
-    'cpu-normal': 'vs CPU [NORMAL]',
-    'cpu-hard': 'vs CPU [HARD]',
-    'cpu-expert': 'vs CPU [EXPERT // 最強鬼神]',
-    'p2p-online': 'P2P オンライン通信対戦',
-    'pvp': '2P ローカル対戦 [同PC]'
-  };
-  const modeSel = document.getElementById('battleModeSelect');
-  if (modeSel) {
-    Array.from(modeSel.options).forEach(opt => {
-      if (modeSelectTranslations[opt.value]) opt.textContent = modeSelectTranslations[opt.value];
-    });
-  }
-
-  const turnOrderTranslations = isEn() ? {
-    'p1-first': 'TURN: 1P FIRST',
-    'p2-first': 'TURN: 2P/CPU FIRST',
-    'random': 'TURN: RANDOM'
-  } : {
-    'p1-first': '手番: 1P先手',
-    'p2-first': '手番: 1P後手 (CPU先手)',
-    'random': '手番: ランダム'
-  };
-  const orderSel = document.getElementById('battleTurnOrderSelect');
-  if (orderSel) {
-    Array.from(orderSel.options).forEach(opt => {
-      if (turnOrderTranslations[opt.value]) opt.textContent = turnOrderTranslations[opt.value];
-    });
-  }
-
-  ['battleStageSelect', 'sortieStageSelect'].forEach(id => {
+  ['sortieStageSelect'].forEach(id => {
     const el = document.getElementById(id);
     if (el) {
       Array.from(el.options).forEach(opt => {
@@ -6711,7 +6668,7 @@ document.getElementById('resultRematchBtn')?.addEventListener('click', () => {
   sfx.playClick();
   if (battleState.mode === 'p2p-online' && window.p2pState && window.p2pState.connected && window.p2pState.conn) {
     if (window.p2pState.isHost) {
-      let nextStage = document.getElementById('sortieStageSelect')?.value || document.getElementById('battleStageSelect')?.value || 'standard';
+      let nextStage = battleState.rawStage || document.getElementById('sortieStageSelect')?.value || 'standard';
       if (nextStage === 'random') {
         nextStage = getRandomStageId();
       }
@@ -6803,20 +6760,20 @@ document.querySelectorAll('#sortieTurnOrderGroup .sortie-pill').forEach(btn => {
 
 function openSortieModal() {
   if (!sortieModal) return;
-  const curMode = document.getElementById('battleModeSelect')?.value || 'cpu-expert';
+  const curMode = battleState.mode || 'cpu-expert';
   if (curMode.startsWith('cpu-')) {
     selectedSortieDiff = curMode;
     document.querySelectorAll('#sortieCpuDiffGroup .sortie-pill').forEach(b => {
       b.classList.toggle('active', b.dataset.diff === selectedSortieDiff);
     });
   }
-  const curOrder = document.getElementById('battleTurnOrderSelect')?.value || 'p1-first';
+  const curOrder = battleState.turnOrder || 'p1-first';
   selectedSortieOrder = curOrder;
   document.querySelectorAll('#sortieTurnOrderGroup .sortie-pill').forEach(b => {
     b.classList.toggle('active', b.dataset.order === selectedSortieOrder);
   });
 
-  const curStage = document.getElementById('battleStageSelect')?.value || 'standard';
+  const curStage = battleState.rawStage || 'standard';
   const stageEl = document.getElementById('sortieStageSelect');
   if (stageEl) stageEl.value = curStage;
 
@@ -6835,13 +6792,9 @@ document.getElementById('sortieModalBackdrop')?.addEventListener('click', closeS
 // Launch VS CPU Battle from Sortie Modal
 document.getElementById('startCpuBattleBtn')?.addEventListener('click', () => {
   const stage = document.getElementById('sortieStageSelect')?.value || 'standard';
-
-  const modeSel = document.getElementById('battleModeSelect');
-  if (modeSel) modeSel.value = selectedSortieDiff;
-  const orderSel = document.getElementById('battleTurnOrderSelect');
-  if (orderSel) orderSel.value = selectedSortieOrder;
-  const stageSel = document.getElementById('battleStageSelect');
-  if (stageSel) stageSel.value = stage;
+  battleState.mode = selectedSortieDiff;
+  battleState.turnOrder = selectedSortieOrder;
+  battleState.rawStage = stage;
 
   closeSortieModal();
   switchMainView('battle');
@@ -6850,24 +6803,15 @@ document.getElementById('startCpuBattleBtn')?.addEventListener('click', () => {
 // Launch Local 2P Pass & Play from Sortie Modal
 document.getElementById('startLocalPvpBtn')?.addEventListener('click', () => {
   const stage = document.getElementById('sortieStageSelect')?.value || 'standard';
-
-  const modeSel = document.getElementById('battleModeSelect');
-  if (modeSel) modeSel.value = 'pvp';
-  const orderSel = document.getElementById('battleTurnOrderSelect');
-  if (orderSel) orderSel.value = selectedSortieOrder;
-  const stageSel = document.getElementById('battleStageSelect');
-  if (stageSel) stageSel.value = stage;
+  battleState.mode = 'pvp';
+  battleState.turnOrder = selectedSortieOrder;
+  battleState.rawStage = stage;
 
   closeSortieModal();
   switchMainView('battle');
 });
 
-// If player selects 'p2p-online' from Battle Top Bar dropdown, open Sortie Modal
-document.getElementById('battleModeSelect')?.addEventListener('change', evt => {
-  if (evt.target.value === 'p2p-online' && !window.p2pState.connected) {
-    openSortieModal();
-  }
-});
+// (battleModeSelect dropdown removed)
 
 function setP2PStatus(msg, isConnected = false) {
   const dot = document.getElementById('p2pStatusDot');
@@ -6937,7 +6881,7 @@ function setupP2PConnection(conn) {
 
     if (data.type === 'HELLO_GUEST' && window.p2pState.isHost) {
       window.p2pState.remoteBuild = data.build;
-      let stage = document.getElementById('sortieStageSelect')?.value || document.getElementById('battleStageSelect')?.value || 'standard';
+      let stage = battleState.rawStage || document.getElementById('sortieStageSelect')?.value || 'standard';
       if (stage === 'random') {
         stage = getRandomStageId();
       }
@@ -6952,7 +6896,7 @@ function setupP2PConnection(conn) {
       window.p2pState.remoteBuild = data.hostBuild;
       startOnlineP2PBattle(data.stage || 'standard', data.startingPlayer || 1);
     } else if (data.type === 'REQUEST_REMATCH' && window.p2pState.isHost) {
-      let nextStage = document.getElementById('sortieStageSelect')?.value || document.getElementById('battleStageSelect')?.value || 'standard';
+      let nextStage = battleState.rawStage || document.getElementById('sortieStageSelect')?.value || 'standard';
       if (nextStage === 'random') {
         nextStage = getRandomStageId();
       }
@@ -7011,8 +6955,6 @@ function setupP2PConnection(conn) {
     showBattleToast(isEn() ? 'P2P Opponent disconnected. Switched to vs CPU.' : '通信相手が切断されました。CPU対戦に切り替えます');
     if (battleState.mode === 'p2p-online') {
       battleState.mode = 'cpu-normal';
-      const mSel = document.getElementById('battleModeSelect');
-      if (mSel) mSel.value = 'cpu-normal';
       updateBattleHUD();
       if (battleState.activePlayer === 2 && battleState.phase === 'aim') {
         cpuThinkTimeout = setTimeout(executeCPUTurn, 1000);
@@ -7023,12 +6965,10 @@ function setupP2PConnection(conn) {
 
 function startOnlineP2PBattle(stageId, startingPlayer) {
   closeSortieModal();
-  const modeSel = document.getElementById('battleModeSelect');
-  if (modeSel) modeSel.value = 'p2p-online';
-  const stageSel = document.getElementById('battleStageSelect');
-  if (stageSel) stageSel.value = stageId;
-  const orderSel = document.getElementById('battleTurnOrderSelect');
-  if (orderSel) orderSel.value = startingPlayer === 2 ? 'p2-first' : 'p1-first';
+  battleState.mode = 'p2p-online';
+  battleState.rawStage = stageId;
+  battleState.stage = stageId;
+  battleState.turnOrder = startingPlayer === 2 ? 'p2-first' : 'p1-first';
 
   switchMainView('battle', true);
   initBattleMatch();
