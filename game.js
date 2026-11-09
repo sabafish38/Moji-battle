@@ -1440,10 +1440,10 @@ function calculateMachineSpec(build) {
     buildType = isEn() ? 'STORM SHURIKEN' : '暴風シュリケン型';
   }
 
-  // Physics constants directly driven by the spiky stats (Tuned for silky-smooth, fluid, responsive motion)
-  const friction = 0.983 - (grip - 45) * 0.00028;
-  const maxLaunchSpeed = 20.5 + (spd - 45) * 0.165;
-  const restitution = (weightSumForRest > 0 ? weightedRestitution / weightSumForRest : 0.95) + (atk - 50) * 0.0036;
+  // Physics constants: Balanced for tactile eraser friction + responsive launch
+  const friction = 0.970 - (grip - 45) * 0.00036;
+  const maxLaunchSpeed = 16.5 + (spd - 45) * 0.135;
+  const restitution = (weightSumForRest > 0 ? weightedRestitution / weightSumForRest : 0.88) + (atk - 50) * 0.0034;
   const knockbackResist = 1 + (totalWeight - 18) * 0.028 + (def - 50) * 0.0075;
 
   return {
@@ -1462,9 +1462,9 @@ function calculateMachineSpec(build) {
     comY,
     boundingRadius: Math.min(96, Math.max(20, maxRadius)),
     subBoxes,
-    friction: Math.min(0.990, Math.max(0.962, friction)),
-    maxLaunchSpeed: Math.min(29.0, Math.max(15.0, maxLaunchSpeed)),
-    restitution: Math.min(1.18, Math.max(0.82, restitution)),
+    friction: Math.min(0.980, Math.max(0.942, friction)),
+    maxLaunchSpeed: Math.min(24.5, Math.max(12.5, maxLaunchSpeed)),
+    restitution: Math.min(1.12, Math.max(0.74, restitution)),
     knockbackResist: Math.max(0.62, knockbackResist)
   };
 }
@@ -2358,16 +2358,16 @@ function updateAndDrawCraftWorkbench() {
 
     const allUnits = [testPlayerUnit, ...testDummies];
 
-    // Update physics (Synchronized with silky-smooth arena physics)
+    // Update physics (Synchronized with balanced arena physics)
     allUnits.forEach(u => {
       u.x += u.vx;
       u.y += u.vy;
       u.angle += u.angVel;
-      u.vx *= Math.max(0.965, u.spec.friction);
-      u.vy *= Math.max(0.965, u.spec.friction);
-      u.angVel *= 0.972;
+      u.vx *= u.spec.friction;
+      u.vy *= u.spec.friction;
+      u.angVel *= 0.952;
 
-      if (Math.hypot(u.vx, u.vy) < 0.035) {
+      if (Math.hypot(u.vx, u.vy) < 0.06) {
         u.vx = 0;
         u.vy = 0;
         u.angVel = 0;
@@ -4146,13 +4146,12 @@ function activateUnitSkill(unit, targetUnits, particleArr) {
 }
 
 function launchUnit(unit, powerRatio, angle, spinType) {
-  // Turn damper eliminated to guarantee crisp, instant, responsive launch from turn 1!
-  const launchSpd = Math.max(4.5, powerRatio * unit.spec.maxLaunchSpeed);
+  // Balanced responsive launch speed
+  const launchSpd = Math.max(3.2, powerRatio * unit.spec.maxLaunchSpeed);
   unit.vx = Math.cos(angle) * launchSpd;
   unit.vy = Math.sin(angle) * launchSpd;
   unit.spinType = spinType || 'normal';
-  // Expressive initial rotational impetus for silky organic sliding feel
-  unit.angVel = (spinType === 'top' ? 0.06 : spinType === 'back' ? -0.06 : (Math.random() - 0.5) * 0.02);
+  unit.angVel = (spinType === 'top' ? 0.04 : spinType === 'back' ? -0.04 : 0);
   unit.skillReady = true;
   unit.skillUsedThisTurn = false;
 
@@ -4576,15 +4575,14 @@ function updateBattlePhysicsAndRender() {
 
       const stg = BATTLE_STAGES[battleState.stage] || BATTLE_STAGES.standard;
       const stageFrictionMul = stg.frictionMul !== undefined ? stg.frictionMul : 1.0;
-      const spinFrictionMod = u.spinType === 'top' ? 1.004 : u.spinType === 'back' ? 0.984 : 1.0;
-      const rawFriction = Math.min(0.989, u.spec.friction * spinFrictionMod);
+      const spinFrictionMod = u.spinType === 'top' ? 1.004 : u.spinType === 'back' ? 0.985 : 1.0;
+      const rawFriction = Math.min(0.982, u.spec.friction * spinFrictionMod);
       const decel = (1 - rawFriction) * stageFrictionMul;
-      // Silky-smooth glide curve: higher retention at high-speed with gentle natural glide
-      const effFriction = Math.max(0.92, Math.min(0.992, 1 - decel));
+      // Balanced tactical deceleration: smooth slide with tactile grip
+      const effFriction = Math.max(0.88, Math.min(0.984, 1 - decel));
       u.vx *= effFriction;
       u.vy *= effFriction;
-      // Smooth lingering spin rotation (enhanced from 0.93 to 0.972 for fluid organic rotation)
-      u.angVel *= (0.972 + (1 - stageFrictionMul) * 0.015);
+      u.angVel *= (0.952 + (1 - stageFrictionMul) * 0.02);
 
       // Gimmick 1: High-Friction Zones (Balanced tactical deceleration, mass/grip respecting)
       battleState.frictionZones.forEach(fz => {
@@ -4672,7 +4670,7 @@ function updateBattlePhysicsAndRender() {
         }
       });
 
-      if (Math.hypot(u.vx, u.vy) < 0.035) {
+      if (Math.hypot(u.vx, u.vy) < 0.06) {
         u.vx = 0;
         u.vy = 0;
         u.angVel = 0;
