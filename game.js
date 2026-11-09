@@ -6951,6 +6951,14 @@ async function initCrazyGamesSDK() {
       await window.CrazyGames.SDK.init();
       cgSdkReady = true;
       if (window.CrazyGames.SDK.game) {
+        try {
+          if (typeof window.CrazyGames.SDK.game.loadingStart === 'function') {
+            window.CrazyGames.SDK.game.loadingStart();
+          }
+          if (typeof window.CrazyGames.SDK.game.loadingStop === 'function') {
+            window.CrazyGames.SDK.game.loadingStop();
+          }
+        } catch (le) {}
         if (window.CrazyGames.SDK.game.settings && window.CrazyGames.SDK.game.settings.muteAudio) {
           sfx.adMuted = true;
           if (sfx.ctx && sfx.ctx.state === 'running') sfx.ctx.suspend().catch(() => {});
