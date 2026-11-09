@@ -7050,11 +7050,14 @@ function cgHappytime() {
 function requestCrazyGamesAd(adType = 'midgame', onReward = null) {
   if (cgIsPlayingAd) return;
 
+  // Let CrazyGames SDK handle its own platform ad frequency capping.
+  // In offline/mock mode without SDK, prevent back-to-back mock overlay spam.
   const now = Date.now();
-  if (adType === 'midgame' && (now - cgLastMidgameTime < 60000)) {
+  if (!cgSdkReady && adType === 'midgame' && (now - cgLastMidgameTime < 45000)) {
     if (typeof onReward === 'function') onReward(true);
     return;
   }
+  if (adType === 'midgame') cgLastMidgameTime = now;
 
   cgIsPlayingAd = true;
   sfx.adMuted = true;
