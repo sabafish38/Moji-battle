@@ -18,7 +18,22 @@
 // ============================================================================
 // 1. WEB AUDIO SYNTHESIZER (Procedural Sound Effects)
 // ============================================================================
-let currentLang = localStorage.getItem('keshigomu_neo_lang') || 'en';
+function safeGetStorage(key, fallback = null) {
+  try {
+    const val = localStorage.getItem(key);
+    return val !== null ? val : fallback;
+  } catch (e) {
+    return fallback;
+  }
+}
+
+function safeSetStorage(key, val) {
+  try {
+    localStorage.setItem(key, val);
+  } catch (e) {}
+}
+
+let currentLang = safeGetStorage('keshigomu_neo_lang', 'en');
 function isEn() {
   return currentLang === 'en';
 }
@@ -4534,7 +4549,7 @@ function updateBattlePhysicsAndRender() {
   });
 
   // Physics Step during 'moving'
-  if (battleState.phase === 'moving') {
+  if (battleState.phase === 'moving' && !cgIsPlayingAd) {
     let anyMoving = false;
 
     battleState.units.forEach(u => {
@@ -5351,7 +5366,7 @@ function updateBattleHUD() {
 
 // Battle Canvas Slingshot Input
 gameCanvas.addEventListener('pointerdown', evt => {
-  if (activeView !== 'battle') return;
+  if (activeView !== 'battle' || cgIsPlayingAd) return;
   const isOnline = (battleState.mode === 'p2p-online');
   const myNum = (isOnline && window.p2pState) ? window.p2pState.myPlayerNum : 1;
   const canControlActive = isOnline
@@ -5663,6 +5678,7 @@ function showMatchResultModal(winner, u1, u2) {
   }
 
   modal.classList.remove('hidden');
+  if (typeof requestCrazyGamesBanner === 'function') requestCrazyGamesBanner();
 
   // Spawn celebratory confetti/particles
   for (let i = 0; i < 40; i++) {
@@ -5681,6 +5697,7 @@ function showMatchResultModal(winner, u1, u2) {
 
 function hideMatchResultModal() {
   document.getElementById('matchResultModal')?.classList.add('hidden');
+  if (typeof clearCrazyGamesBanner === 'function') clearCrazyGamesBanner();
 }
 
 // Result Modal Action Buttons (Rematch handled by CrazyGames Ad Controller below)
@@ -5761,6 +5778,7 @@ window.addEventListener('wheel', evt => {
 
 // Comprehensive Global PC Keydown Dispatcher
 window.addEventListener('keydown', evt => {
+  if (cgIsPlayingAd) return;
   const activeEl = document.activeElement;
   const isEditing = activeEl && (
     ['INPUT', 'TEXTAREA', 'SELECT'].includes(activeEl.tagName) ||
@@ -6021,7 +6039,7 @@ function setElementHTML(selector, enHTML, jaHTML) {
 function applyLanguage(lang) {
   currentLang = (lang === 'ja') ? 'ja' : 'en';
   try {
-    localStorage.setItem('keshigomu_neo_lang', currentLang);
+    safeSetStorage('keshigomu_neo_lang', currentLang);
   } catch (e) {}
 
   document.documentElement.lang = currentLang;
@@ -6345,6 +6363,66 @@ function applyLanguage(lang) {
   // 9. PC Guide Modal & Match Result Modal
   setElementText('#pcKeyGuideModal .guide-header-row h2', 'PC CONTROLS GUIDE', 'PC操作ガイド');
   setElementText('#closePcGuideBtn', 'CLOSE', '閉じる');
+
+  setElementHTML('#pcKeyGuideModal .guide-grid', isEn() ? `
+    <div class="guide-col">
+      <h3>CRAFT STUDIO</h3>
+      <ul class="guide-list">
+        <li><kbd>Left-Drag</kbd> Move & Snap glyph parts freely</li>
+        <li><kbd>Mouse Wheel</kbd> Scale selected glyph</li>
+        <li><kbd>Delete</kbd> / <kbd>Backspace</kbd> Remove selected glyph</li>
+        <li><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> / Arrows Fine-tune nudge</li>
+        <li><kbd>Q</kbd> / <kbd>E</kbd> Rotate 15° (Left / Right)</li>
+        <li><kbd>Ctrl+Z</kbd> / <kbd>Ctrl+Y</kbd> Undo / Redo</li>
+        <li><kbd>Space</kbd> Toggle Test Range mode</li>
+        <li><kbd>Enter</kbd> Launch Sortie to Battle</li>
+      </ul>
+    </div>
+    <div class="guide-col">
+      <h3>BATTLE ARENA</h3>
+      <ul class="guide-list">
+        <li><kbd>Left-Drag</kbd> Pull back to aim angle & power, release to launch</li>
+        <li><kbd>Right-Click</kbd> Cancel aiming</li>
+        <li><kbd>Mouse Wheel</kbd> Cycle spin mode (Drive / Normal / Brake)</li>
+        <li><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> Direct spin selection</li>
+        <li><kbd>Space</kbd> Unleash Ultimate Skill mid-slide</li>
+        <li><kbd>Z</kbd> Undo turn to start of player round</li>
+        <li><kbd>R</kbd> Rematch from Round 1</li>
+        <li><kbd>Esc</kbd> Return to Craft Studio</li>
+      </ul>
+    </div>
+  ` : `
+    <div class="guide-col">
+      <h3>機体設計室 (CRAFT STUDIO)</h3>
+      <ul class="guide-list">
+        <li><kbd>マウス左ドラッグ</kbd> 文字パーツの配置・自由移動</li>
+        <li><kbd>マウスホイール</kbd> 選択文字の拡大・縮小</li>
+        <li><kbd>Delete</kbd> / <kbd>Backspace</kbd> 選択中の文字を削除</li>
+        <li><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> / 矢印キー 文字の精密な微移動</li>
+        <li><kbd>Q</kbd> / <kbd>E</kbd> 15度回転 (左 / 右)</li>
+        <li><kbd>Ctrl+Z</kbd> / <kbd>Ctrl+Y</kbd> 元に戻す / やり直す</li>
+        <li><kbd>Space</kbd> 試し撃ちテストモード切替</li>
+        <li><kbd>Enter</kbd> バトル出撃</li>
+      </ul>
+    </div>
+    <div class="guide-col">
+      <h3>バトルアリーナ (BATTLE ARENA)</h3>
+      <ul class="guide-list">
+        <li><kbd>マウス左ドラッグ</kbd> 引っ張って角度と威力を照準、離して発射</li>
+        <li><kbd>マウス右クリック</kbd> 照準中のショットキャンセル</li>
+        <li><kbd>マウスホイール</kbd> スピン（前進/標準/ブレーキ）切替</li>
+        <li><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> スピン回転のダイレクト選択</li>
+        <li><kbd>Space</kbd> 必殺技発動 (滑走中)</li>
+        <li><kbd>Z</kbd> 1手戻す (UNDO)</li>
+        <li><kbd>R</kbd> ラウンドの最初からやり直し</li>
+        <li><kbd>Esc</kbd> 設計室へ戻る</li>
+      </ul>
+    </div>
+  `);
+
+  setElementText('.guide-footer-tip',
+    'Experience high-precision physics combat engineered for PC keyboard & mouse.',
+    'PCのキーボードとマウスで本格的な物理対戦をお楽しみいただけます。');
   const resLabels = document.querySelectorAll('#matchResultModal .telemetry-item .telemetry-label');
   if (resLabels.length >= 3) {
     resLabels[0].textContent = isEn() ? 'TURNS' : '決着ターン';
@@ -6442,6 +6520,30 @@ async function initCrazyGamesSDK() {
   }
 }
 
+function requestCrazyGamesBanner() {
+  if (cgSdkReady && window.CrazyGames?.SDK?.banner) {
+    try {
+      window.CrazyGames.SDK.banner.requestResponsiveBanner('crazygames-banner-container');
+    } catch (e) {
+      try {
+        window.CrazyGames.SDK.banner.requestBanner({
+          id: 'crazygames-banner-container',
+          width: 728,
+          height: 90
+        });
+      } catch (e2) {}
+    }
+  }
+}
+
+function clearCrazyGamesBanner() {
+  if (cgSdkReady && window.CrazyGames?.SDK?.banner) {
+    try {
+      window.CrazyGames.SDK.banner.clearAllBanners();
+    } catch (e) {}
+  }
+}
+
 function cgGameplayStart() {
   try {
     if (cgSdkReady && window.CrazyGames?.SDK?.game) {
@@ -6478,6 +6580,7 @@ function requestCrazyGamesAd(adType = 'midgame', onReward = null) {
   cgIsPlayingAd = true;
   sfx.adMuted = true;
   cgGameplayStop();
+  clearTimeout(cpuThinkTimeout);
 
   const finishAd = (rewardedSuccess) => {
     cgIsPlayingAd = false;
@@ -6486,6 +6589,9 @@ function requestCrazyGamesAd(adType = 'midgame', onReward = null) {
     if (adType === 'midgame') cgLastMidgameTime = Date.now();
     if (activeView === 'battle' && battleState.phase !== 'match_over') {
       cgGameplayStart();
+      if (battleState.activePlayer === 2 && battleState.mode !== 'pvp' && battleState.mode !== 'p2p-online' && battleState.phase === 'aim') {
+        cpuThinkTimeout = setTimeout(executeCPUTurn, 600);
+      }
     }
     if (typeof onReward === 'function') {
       onReward(rewardedSuccess);
@@ -6838,7 +6944,16 @@ function setupP2PConnection(conn) {
   conn.on('close', () => {
     window.p2pState.connected = false;
     setP2PStatus(isEn() ? 'Opponent disconnected.' : '通信相手が切断しました', false);
-    showBattleToast(isEn() ? 'P2P Opponent disconnected.' : '通信相手との接続が切断されました');
+    showBattleToast(isEn() ? 'P2P Opponent disconnected. Switched to vs CPU.' : '通信相手が切断されました。CPU対戦に切り替えます');
+    if (battleState.mode === 'p2p-online') {
+      battleState.mode = 'cpu-normal';
+      const mSel = document.getElementById('battleModeSelect');
+      if (mSel) mSel.value = 'cpu-normal';
+      updateBattleHUD();
+      if (battleState.activePlayer === 2 && battleState.phase === 'aim') {
+        cpuThinkTimeout = setTimeout(executeCPUTurn, 1000);
+      }
+    }
   });
 }
 
@@ -7070,7 +7185,7 @@ function startInteractiveTutorial() {
 function stopInteractiveTutorial() {
   window.tutorialState.active = false;
   try {
-    localStorage.setItem('keshigomu_neo_tutorial_done', '1');
+    safeSetStorage('keshigomu_neo_tutorial_done', '1');
   } catch (e) {}
   updateTutorialUI();
 }
@@ -7131,7 +7246,7 @@ document.getElementById('tutorialSkipBtn')?.addEventListener('click', () => {
   initCrazyGamesSDK();
 
   // Zero-barrier instant play: launch directly into playable Arena with lightweight tutorial coach bar!
-  const tutDone = localStorage.getItem('keshigomu_neo_tutorial_done');
+  const tutDone = safeGetStorage('keshigomu_neo_tutorial_done', null);
   if (!tutDone) {
     startInteractiveTutorial();
   }
