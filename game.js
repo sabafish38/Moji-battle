@@ -3938,7 +3938,7 @@ function initBattleMatch() {
   clearTimeout(cpuThinkTimeout);
   resizeBattleCanvas();
   if (!battleState.mode) battleState.mode = selectedSortieDiff || 'cpu-expert';
-  let selectedStage = battleState.rawStage || document.getElementById('sortieStageSelect')?.value || 'standard';
+  let selectedStage = battleState.rawStage || selectedSortieStage || document.getElementById('sortieStageSelect')?.value || 'random';
   if (selectedStage === 'random') {
     selectedStage = getRandomStageId();
   }
@@ -7220,14 +7220,36 @@ window.p2pState = {
   remoteBuild: null
 };
 
-let selectedSortieDiff = 'cpu-expert';
-let selectedSortieOrder = 'p1-first';
+// Persist Sortie (Pre-battle) Preferences across Sessions via LocalStorage
+let selectedSortieDiff = safeGetStorage('keshigomu_neo_sortie_diff', 'cpu-expert');
+let selectedSortieOrder = safeGetStorage('keshigomu_neo_sortie_order', 'p1-first');
+let selectedSortieStage = safeGetStorage('keshigomu_neo_sortie_stage', 'random');
+
+battleState.mode = selectedSortieDiff;
+battleState.turnOrder = selectedSortieOrder;
+battleState.rawStage = selectedSortieStage;
+
 const sortieModal = document.getElementById('sortieMatchmakingModal');
 
-// Wire up Sortie Difficulty Pill Buttons
+function syncSortieUIWithStorage() {
+  document.querySelectorAll('#sortieCpuDiffGroup .sortie-pill').forEach(b => {
+    b.classList.toggle('active', b.dataset.diff === selectedSortieDiff);
+  });
+  document.querySelectorAll('#sortieTurnOrderGroup .sortie-pill').forEach(b => {
+    b.classList.toggle('active', b.dataset.order === selectedSortieOrder);
+  });
+  const stageEl = document.getElementById('sortieStageSelect');
+  if (stageEl && selectedSortieStage) {
+    stageEl.value = selectedSortieStage;
+  }
+}
+
+// Wire up Sortie Difficulty Pill Buttons with immediate persistence
 document.querySelectorAll('#sortieCpuDiffGroup .sortie-pill').forEach(btn => {
   btn.addEventListener('click', () => {
     selectedSortieDiff = btn.dataset.diff || 'cpu-expert';
+    safeSetStorage('keshigomu_neo_sortie_diff', selectedSortieDiff);
+    battleState.mode = selectedSortieDiff;
     document.querySelectorAll('#sortieCpuDiffGroup .sortie-pill').forEach(b => {
       b.classList.toggle('active', b === btn);
     });
@@ -7235,10 +7257,12 @@ document.querySelectorAll('#sortieCpuDiffGroup .sortie-pill').forEach(btn => {
   });
 });
 
-// Wire up Sortie Turn Order Pill Buttons
+// Wire up Sortie Turn Order Pill Buttons with immediate persistence
 document.querySelectorAll('#sortieTurnOrderGroup .sortie-pill').forEach(btn => {
   btn.addEventListener('click', () => {
     selectedSortieOrder = btn.dataset.order || 'p1-first';
+    safeSetStorage('keshigomu_neo_sortie_order', selectedSortieOrder);
+    battleState.turnOrder = selectedSortieOrder;
     document.querySelectorAll('#sortieTurnOrderGroup .sortie-pill').forEach(b => {
       b.classList.toggle('active', b === btn);
     });
@@ -7246,25 +7270,19 @@ document.querySelectorAll('#sortieTurnOrderGroup .sortie-pill').forEach(btn => {
   });
 });
 
+// Wire up Sortie Arena Stage Dropdown with immediate persistence
+document.getElementById('sortieStageSelect')?.addEventListener('change', (e) => {
+  selectedSortieStage = e.target.value || 'random';
+  safeSetStorage('keshigomu_neo_sortie_stage', selectedSortieStage);
+  battleState.rawStage = selectedSortieStage;
+});
+
+// Initialize UI to match stored preferences on startup
+syncSortieUIWithStorage();
+
 function openSortieModal() {
   if (!sortieModal) return;
-  const curMode = battleState.mode || 'cpu-expert';
-  if (curMode.startsWith('cpu-')) {
-    selectedSortieDiff = curMode;
-    document.querySelectorAll('#sortieCpuDiffGroup .sortie-pill').forEach(b => {
-      b.classList.toggle('active', b.dataset.diff === selectedSortieDiff);
-    });
-  }
-  const curOrder = battleState.turnOrder || 'p1-first';
-  selectedSortieOrder = curOrder;
-  document.querySelectorAll('#sortieTurnOrderGroup .sortie-pill').forEach(b => {
-    b.classList.toggle('active', b.dataset.order === selectedSortieOrder);
-  });
-
-  const curStage = battleState.rawStage || 'standard';
-  const stageEl = document.getElementById('sortieStageSelect');
-  if (stageEl) stageEl.value = curStage;
-
+  syncSortieUIWithStorage();
   sortieModal.classList.remove('hidden');
   sfx.playClick();
 }
@@ -7279,7 +7297,11 @@ document.getElementById('sortieModalBackdrop')?.addEventListener('click', closeS
 
 // Launch VS CPU Battle from Sortie Modal
 document.getElementById('startCpuBattleBtn')?.addEventListener('click', () => {
-  const stage = document.getElementById('sortieStageSelect')?.value || 'standard';
+  const stage = document.getElementById('sortieStageSelect')?.value || selectedSortieStage || 'random';
+  selectedSortieStage = stage;
+  safeSetStorage('keshigomu_neo_sortie_stage', stage);
+  safeSetStorage('keshigomu_neo_sortie_diff', selectedSortieDiff);
+  safeSetStorage('keshigomu_neo_sortie_order', selectedSortieOrder);
   battleState.mode = selectedSortieDiff;
   battleState.turnOrder = selectedSortieOrder;
   battleState.rawStage = stage;
@@ -7290,7 +7312,10 @@ document.getElementById('startCpuBattleBtn')?.addEventListener('click', () => {
 
 // Launch Local 2P Pass & Play from Sortie Modal
 document.getElementById('startLocalPvpBtn')?.addEventListener('click', () => {
-  const stage = document.getElementById('sortieStageSelect')?.value || 'standard';
+  const stage = document.getElementById('sortieStageSelect')?.value || selectedSortieStage || 'random';
+  selectedSortieStage = stage;
+  safeSetStorage('keshigomu_neo_sortie_stage', stage);
+  safeSetStorage('keshigomu_neo_sortie_order', selectedSortieOrder);
   battleState.mode = 'pvp';
   battleState.turnOrder = selectedSortieOrder;
   battleState.rawStage = stage;
@@ -7744,6 +7769,7 @@ document.getElementById('tutorialSkipBtn')?.addEventListener('click', () => {
 (function bootstrapCrazyGamesEdition() {
   applyLanguage(currentLang);
   initCrazyGamesSDK();
+  syncSortieUIWithStorage();
 
   // Zero-barrier instant play: launch directly into playable Arena with lightweight tutorial coach bar!
   const tutDone = safeGetStorage('keshigomu_neo_tutorial_done', null);
