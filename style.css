@@ -136,6 +136,37 @@ button:active {
   position: relative;
 }
 
+@media (max-width: 1240px) {
+  .header-sub-tag {
+    display: none !important;
+  }
+  .nav-action-btn {
+    padding: 0 8px !important;
+    font-size: 11px !important;
+    gap: 4px !important;
+  }
+}
+
+@media (max-width: 990px) {
+  .top-nav {
+    padding: 0 10px !important;
+  }
+  .brand-logo h1 {
+    font-size: 14px !important;
+  }
+  .main-tabs .nav-tab {
+    padding: 0 10px !important;
+    font-size: 11px !important;
+  }
+  .nav-right {
+    gap: 4px !important;
+  }
+  .nav-action-btn {
+    padding: 0 6px !important;
+    font-size: 10px !important;
+  }
+}
+
 /* Red Tactical Sweep Line */
 .top-nav::after {
   content: "";
@@ -1266,6 +1297,7 @@ button:active {
   background: #06090f;
   position: relative;
   overflow: hidden;
+  contain: paint;
 }
 
 /* Toolbar */
@@ -2529,6 +2561,80 @@ button:active {
   display: none !important;
 }
 
+.nav-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  background: rgba(18, 24, 35, 0.85);
+  border: 1px solid var(--border-tech);
+  color: #cbd5e1;
+  font-family: var(--font-family-sans);
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  cursor: pointer;
+  transform: skewX(-10deg);
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+  user-select: none;
+  box-sizing: border-box;
+  touch-action: manipulation;
+}
+
+.nav-action-btn > * {
+  transform: skewX(10deg);
+  display: inline-flex;
+  align-items: center;
+}
+
+.nav-action-btn kbd {
+  background: #1e293b;
+  color: #38bdf8;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  padding: 2px 5px;
+  font-size: 10px;
+  font-family: var(--font-family-mono);
+  border-radius: 3px;
+  line-height: 1;
+}
+
+.nav-action-btn:hover {
+  background: rgba(30, 41, 59, 0.95);
+  border-color: var(--apex-cyan);
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.25);
+}
+
+.nav-action-btn:active {
+  transform: skewX(-10deg) translateY(2px);
+}
+
+.tutorial-nav-btn {
+  background: rgba(245, 158, 11, 0.14) !important;
+  border-color: var(--apex-gold) !important;
+  color: var(--apex-gold) !important;
+}
+
+.tutorial-nav-btn:hover {
+  background: rgba(245, 158, 11, 0.28) !important;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.45) !important;
+}
+
+.sortie-nav-btn {
+  background: rgba(235, 45, 58, 0.14) !important;
+  border-color: var(--apex-red) !important;
+  color: #ffffff !important;
+}
+
+.sortie-nav-btn:hover {
+  background: rgba(235, 45, 58, 0.28) !important;
+  box-shadow: 0 0 12px var(--apex-red-glow) !important;
+}
+
 .icon-btn {
   display: inline-flex;
   align-items: center;
@@ -2540,6 +2646,26 @@ button:active {
   color: #cbd5e1;
   cursor: pointer;
   transform: skewX(-10deg);
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.icon-btn > * {
+  transform: skewX(10deg);
+}
+
+.icon-btn:hover {
+  background: rgba(30, 41, 59, 0.95);
+  border-color: var(--apex-cyan);
+  color: #ffffff;
+  box-shadow: 0 0 8px rgba(0, 229, 255, 0.25);
+}
+
+.icon-btn:active {
+  transform: skewX(-10deg) translateY(2px);
 }
 
 .part-slot-tag {
@@ -2809,38 +2935,56 @@ kbd {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 12px;
   background: rgba(8, 12, 18, 0.95);
   border-top: 1px solid var(--border-tech);
-  padding: 6px 16px;
+  padding: 6px 12px;
   flex-shrink: 0;
-  font-size: 12px;
+  font-size: 11px;
   color: #94a3b8;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
   user-select: none;
   z-index: 10;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  white-space: nowrap;
+}
+
+.pc-shortcuts-dock::-webkit-scrollbar {
+  display: none;
 }
 
 .pc-shortcuts-dock .dock-title {
   font-family: var(--font-family-mono);
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 900;
   color: var(--apex-cyan);
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
+  flex-shrink: 0;
 }
 
 .pc-shortcuts-dock .dock-item {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 12px;
+  gap: 4px;
+  font-size: 11px;
   color: #cbd5e1;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .pc-shortcuts-dock .dock-item kbd {
   background: #1e293b;
-  border-color: rgba(255, 255, 255, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.35);
   color: #38bdf8;
+  font-size: 10px;
+  padding: 2px 5px;
+  line-height: 1;
+  border-radius: 3px;
 }
 
 /* Battle Footer PC Mouse Hint Badges */
